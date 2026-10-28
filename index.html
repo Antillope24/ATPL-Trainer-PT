@@ -31,7 +31,8 @@ h3{font-size:1.15rem;font-weight:600}
 .muted{color:var(--muted)}
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line);padding-block:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .bar{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:12px;min-height:54px;flex-wrap:wrap}
-.bar h1{flex:1;min-width:0}
+.bar h1{flex:1;min-width:0;white-space:nowrap}
+@media (max-width:560px){.bar h1 small{display:none}.bar{gap:8px}nav button{padding:8px 9px}}
 .bar h1 small{font-family:var(--mono);font-weight:500;font-size:.7rem;color:var(--muted);margin-left:8px}
 nav{display:flex;gap:4px}
 nav button{background:none;border:0;padding:8px 12px;border-radius:8px;font-weight:600;color:var(--muted)}
@@ -101,6 +102,7 @@ main{flex:1;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-le
 .rate .r0{border-color:var(--bad);color:var(--bad)}
 .rate .r1{border-color:var(--warn);color:var(--warn)}
 .rate .r2{border-color:var(--good);color:var(--good)}
+.rate .suggest{box-shadow:0 0 0 3px var(--accent-soft);border-width:2px}
 .answer{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:6px}
 .answer .a{font-weight:600;color:var(--good);white-space:pre-line}
 table{border-collapse:collapse;width:100%;font-size:.9rem}
@@ -134,6 +136,7 @@ const h = (tag, attrs={}, ...kids) => {
     if (k === 'class') el.className = v;
     else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
     else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('aria-')) el.setAttribute(k, String(v));
     else if (v === false || v == null) {}
     else el.setAttribute(k, v === true ? '' : v);
   }
@@ -142,7 +145,7 @@ const h = (tag, attrs={}, ...kids) => {
 };
 
 const I18N = {
-de: {lang:'Deutsch', subjects:'Fächer', stats:'Statistik', questions:'Fragen', loading:'Fragen werden geladen …', loadfail:'Die Fragen konnten nicht geladen werden. Bitte Seite neu laden.',
+de: { boxes:'Karteikasten', dueCards:'Fällige', newCards:'Neue', markedCards:'Markierte', learnedCards:'Gelernte', allCards:'Alle', learnedHint:'Gelernt heißt: mindestens 3 mal hintereinander „Gut“ (Kasten 3 oder höher). „Nochmal“ oder ein Fehler im Test setzt die Karte auf Kasten 0 zurück. Kasten 0 bis 5, Wiederholung nach 0, 1, 3, 7, 14 und 30 Tagen.', mark:'☆ markieren', marked1:'★ markiert', modeReveal:'Aufdecken', modeAnswer:'Antworten', check:'Prüfen', suggest:'Vorschlag', lang:'Deutsch', subjects:'Fächer', stats:'Statistik', questions:'Fragen', loading:'Fragen werden geladen …', loadfail:'Die Fragen konnten nicht geladen werden. Bitte Seite neu laden.',
  synced:'Fortschritt wird in deinem Konto gespeichert', local:'Fortschritt nur in diesem Browser gespeichert', savefail:'Kein Schreibrecht im Konto. Fortschritt wird nur in diesem Browser gespeichert.',
  qfrom:'{n} Fragen aus {t} Progress Tests', due:'fällig', lasttest:'Letzter Test', back:'← Fächer', learned:'gelernt', of:'von',
  cardsall:'Karteikarten ganzes Fach', cardshint:'Fällige Karten zuerst, dann neue. Mehr als 40 pro Durchgang gibt es nicht.', pts:'Progress Tests', mc:'Multiple Choice',
@@ -151,8 +154,8 @@ de: {lang:'Deutsch', subjects:'Fächer', stats:'Statistik', questions:'Fragen', 
  openq:'{n} Fragen sind noch offen. Trotzdem abgeben?', submitq:'Test jetzt abgeben?', yes:'Ja, abgeben', backtest:'Zurück zum Test', submit:'Test abgeben', cancel:'Abbrechen',
  result:'Ergebnis', pass:'Bestanden', fail:'Nicht bestanden', right:'Richtig', ofq:'von {n} Fragen', dur:'Dauer', passmark:'Bestehensgrenze 75 %', newtest:'Neuer Test aus {t}', backsub:'Zurück zum Fach', review:'Alle Fragen im Rückblick', q:'Frage {n}', ok:'richtig', wrong:'falsch', img:'Abbildung: ', missed:' (richtig, nicht gewählt)',
  nothing:'Nichts fällig. Alle Karten in diesem Bereich sind in Bearbeitung und noch nicht wieder dran.', whole:'Ganzes Fach', done:'Durchgang beendet', good:'Gut', hard:'Schwer', again:'Nochmal', nextrun:'Nächster Durchgang', endrun:'Durchgang beenden', cardof:'Karte {i} von {n}', box:'Kasten {b}', new:'neu', reveal:'Antwort aufdecken', answer:'Antwort', today:'heute wieder', stays:'Kasten bleibt', learnedS:'gelernt', inDays:'in {d} {u}', day:'Tag', days:'Tagen',
- statsTitle:'Statistik', statsSub:'{l} von {t} Karten gelernt (Kasten 5)', subject:'Fach', inwork:'In Arbeit', tests:'Tests', avg:'Ø Ergebnis', best:'Bestes', lasttests:'Letzte Tests', date:'Datum', notests:'Noch kein Test abgelegt. Öffne ein Fach und starte einen Test aus einem PT.', passed:'bestanden', failed:'nicht bestanden', pt:'PT'},
-en: {lang:'English', subjects:'Subjects', stats:'Statistics', questions:'questions', loading:'Loading questions …', loadfail:'The questions could not be loaded. Please reload the page.',
+ statsTitle:'Statistik', statsSub:'{l} von {t} Karten gelernt (Kasten 3 oder höher)', subject:'Fach', inwork:'In Arbeit', tests:'Tests', avg:'Ø Ergebnis', best:'Bestes', lasttests:'Letzte Tests', date:'Datum', notests:'Noch kein Test abgelegt. Öffne ein Fach und starte einen Test aus einem PT.', passed:'bestanden', failed:'nicht bestanden', pt:'PT'},
+en: { boxes:'Flashcard boxes', dueCards:'Due', newCards:'New', markedCards:'Marked', learnedCards:'Learned', allCards:'All', learnedHint:'Learned means at least 3 consecutive "Good" ratings (box 3 or higher). "Again" or a wrong answer in a test sends the card back to box 0. Boxes 0 to 5, review after 0, 1, 3, 7, 14 and 30 days.', mark:'☆ mark', marked1:'★ marked', modeReveal:'Reveal', modeAnswer:'Answer', check:'Check', suggest:'Suggested', lang:'English', subjects:'Subjects', stats:'Statistics', questions:'questions', loading:'Loading questions …', loadfail:'The questions could not be loaded. Please reload the page.',
  synced:'Progress is saved to your account', local:'Progress is saved in this browser only', savefail:'No write access to the account. Progress is saved in this browser only.',
  qfrom:'{n} questions from {t} progress tests', due:'due', lasttest:'Last test', back:'← Subjects', learned:'learned', of:'of',
  cardsall:'Flashcards whole subject', cardshint:'Due cards first, then new ones. No more than 40 per round.', pts:'Progress tests', mc:'multiple choice',
@@ -161,8 +164,8 @@ en: {lang:'English', subjects:'Subjects', stats:'Statistics', questions:'questio
  openq:'{n} questions are still open. Submit anyway?', submitq:'Submit the test now?', yes:'Yes, submit', backtest:'Back to test', submit:'Submit test', cancel:'Cancel',
  result:'Result', pass:'Passed', fail:'Failed', right:'Correct', ofq:'of {n} questions', dur:'Time', passmark:'Pass mark 75 %', newtest:'New test from {t}', backsub:'Back to subject', review:'Review all questions', q:'Question {n}', ok:'correct', wrong:'wrong', img:'Figure: ', missed:' (correct, not chosen)',
  nothing:'Nothing due. All cards in this area are in progress and not up yet.', whole:'Whole subject', done:'Round finished', good:'Good', hard:'Hard', again:'Again', nextrun:'Next round', endrun:'End round', cardof:'Card {i} of {n}', box:'Box {b}', new:'new', reveal:'Reveal answer', answer:'Answer', today:'again today', stays:'box stays', learnedS:'learned', inDays:'in {d} {u}', day:'day', days:'days',
- statsTitle:'Statistics', statsSub:'{l} of {t} cards learned (box 5)', subject:'Subject', inwork:'In progress', tests:'Tests', avg:'Avg. result', best:'Best', lasttests:'Recent tests', date:'Date', notests:'No test taken yet. Open a subject and start a test from a PT.', passed:'passed', failed:'failed', pt:'PT'},
-fr: {lang:'Français', subjects:'Matières', stats:'Statistiques', questions:'questions', loading:'Chargement des questions …', loadfail:'Impossible de charger les questions. Rechargez la page.',
+ statsTitle:'Statistics', statsSub:'{l} of {t} cards learned (box 3 or higher)', subject:'Subject', inwork:'In progress', tests:'Tests', avg:'Avg. result', best:'Best', lasttests:'Recent tests', date:'Date', notests:'No test taken yet. Open a subject and start a test from a PT.', passed:'passed', failed:'failed', pt:'PT'},
+fr: { boxes:'Boîtes de cartes', dueCards:'À revoir', newCards:'Nouvelles', markedCards:'Marquées', learnedCards:'Acquises', allCards:'Toutes', learnedHint:'Acquise signifie au moins 3 fois « Bien » de suite (boîte 3 ou plus). « Encore » ou une erreur au test renvoie la carte en boîte 0. Boîtes 0 à 5, révision après 0, 1, 3, 7, 14 et 30 jours.', mark:'☆ marquer', marked1:'★ marquée', modeReveal:'Révéler', modeAnswer:'Répondre', check:'Vérifier', suggest:'Suggestion', lang:'Français', subjects:'Matières', stats:'Statistiques', questions:'questions', loading:'Chargement des questions …', loadfail:'Impossible de charger les questions. Rechargez la page.',
  synced:'Progression enregistrée dans votre compte', local:'Progression enregistrée uniquement dans ce navigateur', savefail:'Pas de droit d’écriture dans le compte. Progression enregistrée uniquement dans ce navigateur.',
  qfrom:'{n} questions issues de {t} progress tests', due:'à revoir', lasttest:'Dernier test', back:'← Matières', learned:'acquises', of:'sur',
  cardsall:'Cartes de toute la matière', cardshint:'Les cartes à revoir d’abord, puis les nouvelles. 40 au maximum par série.', pts:'Progress tests', mc:'choix multiple',
@@ -171,8 +174,8 @@ fr: {lang:'Français', subjects:'Matières', stats:'Statistiques', questions:'qu
  openq:'{n} questions restent sans réponse. Rendre quand même ?', submitq:'Rendre le test maintenant ?', yes:'Oui, rendre', backtest:'Retour au test', submit:'Rendre le test', cancel:'Annuler',
  result:'Résultat', pass:'Réussi', fail:'Échoué', right:'Bonnes réponses', ofq:'sur {n} questions', dur:'Durée', passmark:'Seuil de réussite 75 %', newtest:'Nouveau test de {t}', backsub:'Retour à la matière', review:'Toutes les questions', q:'Question {n}', ok:'juste', wrong:'faux', img:'Figure : ', missed:' (juste, non choisie)',
  nothing:'Rien à revoir. Toutes les cartes de cette zone sont en cours et pas encore dues.', whole:'Toute la matière', done:'Série terminée', good:'Bien', hard:'Difficile', again:'Encore', nextrun:'Série suivante', endrun:'Terminer la série', cardof:'Carte {i} sur {n}', box:'Boîte {b}', new:'nouvelle', reveal:'Voir la réponse', answer:'Réponse', today:'à nouveau aujourd’hui', stays:'boîte inchangée', learnedS:'acquise', inDays:'dans {d} {u}', day:'jour', days:'jours',
- statsTitle:'Statistiques', statsSub:'{l} cartes sur {t} acquises (boîte 5)', subject:'Matière', inwork:'En cours', tests:'Tests', avg:'Moyenne', best:'Meilleur', lasttests:'Derniers tests', date:'Date', notests:'Aucun test passé. Ouvrez une matière et lancez un test depuis un PT.', passed:'réussi', failed:'échoué', pt:'PT'},
-ksh: {lang:'Kölsch', subjects:'Fächer', stats:'Zahle', questions:'Froore', loading:'Froore wääde jelade …', loadfail:'De Froore kunnte nit jelade wääde. Maach de Sigg ens neu op.',
+ statsTitle:'Statistiques', statsSub:'{l} cartes sur {t} acquises (boîte 3 ou plus)', subject:'Matière', inwork:'En cours', tests:'Tests', avg:'Moyenne', best:'Meilleur', lasttests:'Derniers tests', date:'Date', notests:'Aucun test passé. Ouvrez une matière et lancez un test depuis un PT.', passed:'réussi', failed:'échoué', pt:'PT'},
+ksh: { boxes:'Kaatekaste', dueCards:'Dran', newCards:'Neu', markedCards:'Markeet', learnedCards:'Jelernt', allCards:'All', learnedHint:'Jelernt heiß: wenichstens 3 mol hingerenander „Joot“ (Kaste 3 oder höher). „Nochens“ oder ene Fähler em Tess schick de Kaat zoröck en Kaste 0. Kaste 0 bes 5, widder dran noh 0, 1, 3, 7, 14 un 30 Dääch.', mark:'☆ markeere', marked1:'★ markeet', modeReveal:'Opdecke', modeAnswer:'Antwoote', check:'Nohluure', suggest:'Vörschlag', lang:'Kölsch', subjects:'Fächer', stats:'Zahle', questions:'Froore', loading:'Froore wääde jelade …', loadfail:'De Froore kunnte nit jelade wääde. Maach de Sigg ens neu op.',
  synced:'Dinge Fortschrett weed en dingem Konto jespeichert', local:'Dinge Fortschrett bliev nur he em Browser', savefail:'Kei Schriefrääch em Konto. Dinge Fortschrett bliev nur he em Browser.',
  qfrom:'{n} Froore us {t} Progress Tests', due:'dran', lasttest:'Letzte Tess', back:'← Fächer', learned:'jelernt', of:'vun',
  cardsall:'Kaate för et janze Fach', cardshint:'Eets dat, wat dran es, dann et Neue. Mih wie 40 pro Rund jitt et nit.', pts:'Progress Tests', mc:'Multiple Choice',
@@ -181,7 +184,7 @@ ksh: {lang:'Kölsch', subjects:'Fächer', stats:'Zahle', questions:'Froore', loa
  openq:'{n} Froore sin noch op. Trotzdäm avjevve?', submitq:'Dä Tess jetz avjevve?', yes:'Jo, avjevve', backtest:'Zoröck zom Tess', submit:'Tess avjevve', cancel:'Loss et',
  result:'Erjebnis', pass:'Bestande', fail:'Nit bestande', right:'Richtich', ofq:'vun {n} Froore', dur:'Duur', passmark:'Bestande ab 75 %', newtest:'Neue Tess us {t}', backsub:'Zoröck zom Fach', review:'All Froore noch ens', q:'Froch {n}', ok:'richtich', wrong:'falsch', img:'Bildche: ', missed:' (richtich, ävver nit jewählt)',
  nothing:'Nix dran. All Kaate he sin en Arbeit un noch nit widder fällich.', whole:'Janze Fach', done:'Rund eröm', good:'Joot', hard:'Schwer', again:'Nochens', nextrun:'Nächste Rund', endrun:'Rund beende', cardof:'Kaat {i} vun {n}', box:'Kaste {b}', new:'neu', reveal:'Antwoot zeije', answer:'Antwoot', today:'hück widder', stays:'Kaste bliev', learnedS:'jelernt', inDays:'en {d} {u}', day:'Daach', days:'Dääch',
- statsTitle:'Zahle', statsSub:'{l} vun {t} Kaate jelernt (Kaste 5)', subject:'Fach', inwork:'En Arbeit', tests:'Tesse', avg:'Ø Erjebnis', best:'Bess', lasttests:'Letzte Tesse', date:'Datum', notests:'Noch keine Tess jemaat. Maach e Fach op un fang ene Tess us enem PT aan.', passed:'bestande', failed:'nit bestande', pt:'PT'}
+ statsTitle:'Zahle', statsSub:'{l} vun {t} Kaate jelernt (Kaste 3 oder höher)', subject:'Fach', inwork:'En Arbeit', tests:'Tesse', avg:'Ø Erjebnis', best:'Bess', lasttests:'Letzte Tesse', date:'Datum', notests:'Noch keine Tess jemaat. Maach e Fach op un fang ene Tess us enem PT aan.', passed:'bestande', failed:'nit bestande', pt:'PT'}
 };
 let LANG = 'de';
 try { LANG = localStorage.getItem('atpl-lang') || (navigator.language.startsWith('fr') ? 'fr' : navigator.language.startsWith('de') ? 'de' : 'en'); } catch (e) {}
@@ -199,6 +202,7 @@ function renderNav() {
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
 const MAXBOX = 5;
+const LEARNED = 3; // ab diesem Kasten gilt eine Karte als gelernt
 const TEST_N = 45;
 const PASS = 75;
 const DAY = 86400000;
@@ -245,7 +249,7 @@ const store = {
     try { localStorage.setItem('atpl-' + doc, JSON.stringify(body)); } catch (e) {}
     if (!this.online) return;
     clearTimeout(this.pending.get(doc));
-    this.pending.set(doc, setTimeout(() => this.flush(doc, body), 800));
+    this.pending.set(doc, setTimeout(() => this.flush(doc, body), 300));
   },
   async flush(doc, body) {
     try { await this.db.collection('data/users/' + this.uid).doc(doc).set(body); }
@@ -263,7 +267,7 @@ function renderSync() {
 /* ---------- Karteikasten ---------- */
 function entry(code, key) { return store.fc[code][key]; }
 function rate(code, key, grade) { // 0 nochmal, 1 schwer, 2 gut
-  const e = store.fc[code][key] || [0, 0, 0, 0];
+  const e = store.fc[code][key] || [0, 0, 0, 0, 0];
   let box = e[0];
   if (grade === 0) { box = 0; e[3]++; }
   else if (grade === 1) { box = Math.max(1, box); e[2]++; }
@@ -275,17 +279,25 @@ function markWrong(code, key) {
   const e = store.fc[code][key] || [0, 0, 0, 0];
   e[0] = 0; e[1] = Date.now(); e[3]++; store.fc[code][key] = e; store.save(code);
 }
+function isMarked(code, key) { const e = entry(code, key); return !!(e && e[4]); }
+function toggleMark(code, key) {
+  const e = store.fc[code][key] || [0, 0, 0, 0, 0];
+  while (e.length < 5) e.push(0);
+  e[4] = e[4] ? 0 : 1; store.fc[code][key] = e; store.save(code);
+}
 function qkey(tid, n) { return tid + '#' + n; }
 function cardStats(code, questions) {
-  let learned = 0, started = 0, due = 0; const now = Date.now();
+  let learned = 0, started = 0, due = 0, marked = 0; const now = Date.now();
   for (const q of questions) {
     const e = entry(code, q.key);
     if (!e) continue;
+    if (e[4]) marked++;
+    if (e[0] === 0 && e[2] === 0 && e[3] === 0) continue; // nur markiert, noch nie gelernt
     started++;
-    if (e[0] >= MAXBOX) learned++;
+    if (e[0] >= LEARNED) learned++;
     if (e[1] <= now) due++;
   }
-  return {learned, started, due, total: questions.length, fresh: questions.length - started};
+  return {learned, started, due, marked, total: questions.length, fresh: questions.length - started};
 }
 
 /* ---------- Ansichten ---------- */
@@ -330,9 +342,14 @@ function renderSubject() {
     h('div', {class:'row', style:'justify-content:space-between;align-items:flex-end'},
       h('div', {}, h('div', {class:'eyebrow'}, s.code), h('h2', {}, s.name)),
       h('div', {class:'stats'}, h('span', {}, h('strong', {}, st.learned), ' ' + T('of') + ' ', h('strong', {}, st.total), ' ' + T('learned')), h('span', {}, h('strong', {}, st.due), ' ' + T('due')))),
+    h('h3', {}, T('boxes')),
     h('div', {class:'row'},
-      h('button', {class:'btn-p', disabled: st.due === 0 && st.fresh === 0, onclick: () => startCards(s, s.all, T('whole'))}, T('cardsall')),
-      h('span', {class:'note'}, T('cardshint'))),
+      h('button', {class:'btn-p', disabled: st.due === 0, onclick: () => startCards(s, s.all, T('whole'), 'due')}, `${T('dueCards')} (${st.due})`),
+      h('button', {class:'btn-s', disabled: st.fresh === 0, onclick: () => startCards(s, s.all, T('whole'), 'new')}, `${T('newCards')} (${st.fresh})`),
+      h('button', {class:'btn-s', disabled: st.marked === 0, onclick: () => startCards(s, s.all, T('markedCards'), 'marked')}, `★ ${T('markedCards')} (${st.marked})`),
+      h('button', {class:'btn-s', disabled: st.learned === 0, onclick: () => startCards(s, s.all, T('learnedCards'), 'learned')}, `${T('learnedCards')} (${st.learned})`),
+      h('button', {class:'btn-g', onclick: () => startCards(s, s.all, T('whole'), 'all')}, T('allCards'))),
+    h('p', {class:'note'}, T('learnedHint'), ' ', T('cardshint')),
     h('h3', {}, T('pts')),
     h('div', {class:'pt-list'}, s.tests.map(t => {
       const mc = t.q.filter(q => q.o.length > 1).length;
@@ -356,7 +373,7 @@ function startExam(s, t) {
   const pool = shuffle(t.q.filter(q => q.o.length > 1)).slice(0, TEST_N);
   const items = pool.map(q => {
     const order = shuffle(q.o.map((_, i) => i));
-    return {q, order, sel: new Set(), flag: false, multi: q.a.length > 1};
+    return {q, order, sel: new Set(), flag: isMarked(s.code, q.key), multi: q.a.length > 1};
   });
   exam = {s, t, items, i: 0, start: Date.now(), limit: items.length * 60, timer: true, tick: null, confirm: false};
   go('exam');
@@ -385,7 +402,7 @@ function renderExam() {
     h('div', {class:'q'},
       h('div', {class:'head'},
         h('span', {class:'eyebrow'}, T('qof', {i: ex.i+1, n: ex.items.length}), ' · ', h('span', {class:'mono'}, qkey(ex.t.id, q.n))),
-        h('div', {class:'row'}, it.multi && h('span', {class:'tag multi'}, T('correctN', {n: q.a.length})), h('button', {class:'btn-g', onclick: () => { it.flag = !it.flag; render(); }}, it.flag ? T('flagged') : T('flag')))),
+        h('div', {class:'row'}, it.multi && h('span', {class:'tag multi'}, T('correctN', {n: q.a.length})), h('button', {class:'btn-g', onclick: () => { it.flag = !it.flag; toggleMark(ex.s.code, q.key); render(); }}, it.flag ? T('marked1') : T('mark')))),
       h('div', {class:'text'}, q.q),
       q.img && h('div', {class:'img'}, T('imgnote') + q.img),
       h('div', {class:'opts'}, optBtns)),
@@ -437,13 +454,24 @@ function renderResult() {
 
 /* ---------- Karteikarten ---------- */
 let sess = null;
-function startCards(s, questions, label) {
+let cardMode = 'reveal';
+try { cardMode = localStorage.getItem('atpl-cardmode') || 'reveal'; } catch (e) {}
+function startCards(s, questions, label, filter = 'due') {
   const now = Date.now();
-  const due = shuffle(questions.filter(q => { const e = entry(s.code, q.key); return e && e[1] <= now; }));
-  const fresh = shuffle(questions.filter(q => !entry(s.code, q.key)));
-  const queue = [...due, ...fresh].slice(0, 40);
+  const started = q => { const e = entry(s.code, q.key); return e && (e[0] > 0 || e[2] > 0 || e[3] > 0); };
+  let queue;
+  if (filter === 'new') queue = shuffle(questions.filter(q => !started(q)));
+  else if (filter === 'marked') queue = shuffle(questions.filter(q => isMarked(s.code, q.key)));
+  else if (filter === 'learned') queue = shuffle(questions.filter(q => { const e = entry(s.code, q.key); return e && e[0] >= LEARNED; }));
+  else if (filter === 'all') queue = shuffle(questions.slice());
+  else {
+    const due = shuffle(questions.filter(q => { const e = entry(s.code, q.key); return started(q) && e[1] <= now; }));
+    const fresh = shuffle(questions.filter(q => !started(q)));
+    queue = [...due, ...fresh];
+  }
+  queue = queue.slice(0, 40);
   if (!queue.length) { toast(T('nothing')); return; }
-  sess = {s, label, queue, src: questions, i: 0, open: false, grades: [0,0,0], order: null, done: false};
+  sess = {s, label, queue, src: questions, filter, i: 0, open: false, sel: new Set(), grades: [0,0,0], order: null, done: false};
   go('cards');
 }
 function renderCards() {
@@ -457,36 +485,58 @@ function renderCards() {
         h('div', {class:'card'}, h('span', {class:'eyebrow'}, T('hard')), h('div', {class:'big', style:'color:var(--warn)'}, se.grades[1])),
         h('div', {class:'card'}, h('span', {class:'eyebrow'}, T('again')), h('div', {class:'big', style:'color:var(--bad)'}, se.grades[0]))),
       h('div', {class:'row'},
-        h('button', {class:'btn-p', onclick: () => startCards(se.s, se.src, se.label)}, T('nextrun')),
+        h('button', {class:'btn-p', onclick: () => startCards(se.s, se.src, se.label, se.filter)}, T('nextrun')),
         h('button', {class:'btn-s', onclick: () => go('subject', {code: se.s.code})}, T('backsub'))));
     return;
   }
   const q = se.queue[se.i], e = entry(se.s.code, q.key), mc = q.o.length > 1;
   if (!se.order) se.order = shuffle(q.o.map((_, i) => i));
+  const answerMode = cardMode === 'answer' && mc;
+  const multi = q.a.length > 1;
+  let correct = null;
+  if (se.open && answerMode) correct = q.a.join(',') === [...se.sel].sort((a,b)=>a-b).join(',');
+  const started = e && (e[0] > 0 || e[2] > 0 || e[3] > 0);
+  const optEls = se.order.map((oi, pos) => {
+    const isA = q.a.includes(oi), chosen = se.sel.has(oi);
+    let cls = '';
+    if (se.open) cls = answerMode ? (isA && chosen ? ' ok' : chosen ? ' wrong' : isA ? ' miss' : '') : (isA ? ' ok' : '');
+    else if (chosen) cls = ' sel';
+    const tag = answerMode && !se.open ? 'button' : 'div';
+    return h(tag, {class:'opt' + cls, onclick: answerMode && !se.open ? () => { if (multi) { chosen ? se.sel.delete(oi) : se.sel.add(oi); } else { se.sel.clear(); se.sel.add(oi); } render(); } : null},
+      h('span', {class:'l'}, LET[pos] + ')'), h('span', {}, q.o[oi]));
+  });
   app.append(
     h('div', {class:'row', style:'justify-content:space-between'},
       h('div', {}, h('div', {class:'eyebrow'}, se.s.name), h('h2', {}, se.label, ' · ' + T('cards'))),
-      h('button', {class:'btn-g', onclick: () => { se.done = true; render(); }}, T('endrun'))),
+      h('div', {class:'row'},
+        h('div', {class:'seg'},
+          h('button', {'aria-pressed': cardMode === 'reveal', onclick: () => setCardMode('reveal')}, T('modeReveal')),
+          h('button', {'aria-pressed': cardMode === 'answer', onclick: () => setCardMode('answer')}, T('modeAnswer'))),
+        h('button', {class:'btn-g', onclick: () => { se.done = true; render(); }}, T('endrun')))),
     h('div', {class:'meter'}, h('b', {style:`width:${se.i/se.queue.length*100}%`})),
     h('div', {class:'q'},
       h('div', {class:'head'},
         h('span', {class:'eyebrow'}, T('cardof', {i: se.i+1, n: se.queue.length}), ' · ', h('span', {class:'mono'}, q.key)),
-        h('span', {class:'tag'}, e ? T('box', {b: e[0]}) : T('new'))),
+        h('div', {class:'row'},
+          multi && answerMode && h('span', {class:'tag multi'}, T('correctN', {n: q.a.length})),
+          h('span', {class:'tag'}, started ? T('box', {b: e[0]}) : T('new')),
+          h('button', {class:'btn-g', onclick: () => { toggleMark(se.s.code, q.key); render(); }}, isMarked(se.s.code, q.key) ? T('marked1') : T('mark')))),
       h('div', {class:'text'}, q.q),
       q.img && h('div', {class:'img'}, T('imgnote') + q.img),
-      mc && h('div', {class:'opts'}, se.order.map((oi, pos) => h('div', {class:'opt' + (se.open && q.a.includes(oi) ? ' ok' : '')}, h('span', {class:'l'}, LET[pos] + ')'), h('span', {}, q.o[oi])))),
+      mc && h('div', {class:'opts'}, optEls),
       !se.open
-        ? h('button', {class:'btn-p', style:'align-self:flex-start', onclick: () => { se.open = true; render(); }}, T('reveal'))
+        ? h('button', {class:'btn-p', style:'align-self:flex-start', disabled: answerMode && se.sel.size === 0, onclick: () => { se.open = true; render(); }}, answerMode ? T('check') : T('reveal'))
         : h('div', {class:'answer'},
-            h('span', {class:'eyebrow'}, T('answer')),
+            h('div', {class:'row'}, h('span', {class:'eyebrow'}, T('answer')), correct != null && h('span', {class:'tag ' + (correct ? 'pass' : 'fail')}, correct ? T('ok') : T('wrong'))),
             h('div', {class:'a'}, mc ? q.a.map(ai => LET[se.order.indexOf(ai)] + ') ' + q.o[ai]).join('\n') : q.o[q.a[0]]),
             h('div', {class:'rate'},
-              h('button', {class:'r0', onclick: () => grade(0)}, T('again'), h('small', {}, T('today'))),
+              h('button', {class:'r0' + (correct === false ? ' suggest' : ''), onclick: () => grade(0)}, T('again'), h('small', {}, T('today'))),
               h('button', {class:'r1', onclick: () => grade(1)}, T('hard'), h('small', {}, T('stays'))),
-              h('button', {class:'r2', onclick: () => grade(2)}, T('good'), h('small', {}, nextIn(e)))))));
-  function grade(g) { rate(se.s.code, q.key, g); se.grades[g]++; if (g === 0) se.queue.push(q); se.i++; se.open = false; se.order = null; render(); window.scrollTo(0,0); }
+              h('button', {class:'r2' + (correct === true ? ' suggest' : ''), onclick: () => grade(2)}, T('good'), h('small', {}, nextIn(started ? e : null)))))));
+  function grade(g) { rate(se.s.code, q.key, g); se.grades[g]++; if (g === 0) se.queue.push(q); se.i++; se.open = false; se.order = null; se.sel = new Set(); render(); window.scrollTo(0,0); }
 }
-function nextIn(e) { const b = Math.min(MAXBOX, (e ? e[0] : 0) + 1); return b >= MAXBOX ? T('learnedS') : T('inDays', {d: INTERVALS[b], u: INTERVALS[b] === 1 ? T('day') : T('days')}); }
+function setCardMode(m) { cardMode = m; try { localStorage.setItem('atpl-cardmode', m); } catch (e) {} sess.sel = new Set(); render(); }
+function nextIn(e) { const b = Math.min(MAXBOX, (e ? e[0] : 0) + 1); return b >= LEARNED ? T('learnedS') + ', ' + T('inDays', {d: INTERVALS[b], u: T('days')}) : T('inDays', {d: INTERVALS[b], u: INTERVALS[b] === 1 ? T('day') : T('days')}); }
 
 /* ---------- Statistik ---------- */
 function renderStats() {
