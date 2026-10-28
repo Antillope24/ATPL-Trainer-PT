@@ -36,6 +36,7 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var
 nav{display:flex;gap:4px}
 nav button{background:none;border:0;padding:8px 12px;border-radius:8px;font-weight:600;color:var(--muted)}
 nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.langsel{font:inherit;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin-left:4px}
 nav button:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 main{flex:1;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
@@ -119,12 +120,9 @@ label.chk{display:flex;gap:8px;align-items:center;font-weight:500}
 
 <header><div class="bar">
   <h1>ATPL Progress Trainer <small id="hdr-count"></small></h1>
-  <nav id="nav">
-    <button data-view="home" aria-current="page">Fächer</button>
-    <button data-view="stats">Statistik</button>
-  </nav>
+  <nav id="nav"></nav>
 </div></header>
-<main><div class="wrap" id="app"><div class="empty">Fragen werden geladen …</div></div></main>
+<main><div class="wrap" id="app"><div class="empty" id="loading">…</div></div></main>
 
 <script>
 (() => {
@@ -142,6 +140,62 @@ const h = (tag, attrs={}, ...kids) => {
   for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k));
   return el;
 };
+
+const I18N = {
+de: {lang:'Deutsch', subjects:'Fächer', stats:'Statistik', questions:'Fragen', loading:'Fragen werden geladen …', loadfail:'Die Fragen konnten nicht geladen werden. Bitte Seite neu laden.',
+ synced:'Fortschritt wird in deinem Konto gespeichert', local:'Fortschritt nur in diesem Browser gespeichert', savefail:'Kein Schreibrecht im Konto. Fortschritt wird nur in diesem Browser gespeichert.',
+ qfrom:'{n} Fragen aus {t} Progress Tests', due:'fällig', lasttest:'Letzter Test', back:'← Fächer', learned:'gelernt', of:'von',
+ cardsall:'Karteikarten ganzes Fach', cardshint:'Fällige Karten zuerst, dann neue. Mehr als 40 pro Durchgang gibt es nicht.', pts:'Progress Tests', mc:'Multiple Choice',
+ test:'Test ({n} Fragen)', cards:'Karteikarten', testhint:'Der Test zieht zufällige Multiple Choice Fragen aus diesem PT, Auswertung erst am Ende, Bestehensgrenze 75 %. Falsch beantwortete Fragen landen im Karteikasten wieder auf Kasten 0.',
+ exam:'Test', timer:'Timer', qof:'Frage {i} von {n}', correctN:'{n} richtige', flagged:'⚑ markiert', flag:'⚐ markieren', imgnote:'Zu dieser Frage gehört eine Abbildung: ', prev:'← Zurück', next:'Weiter →', answered:'{a} von {n} beantwortet',
+ openq:'{n} Fragen sind noch offen. Trotzdem abgeben?', submitq:'Test jetzt abgeben?', yes:'Ja, abgeben', backtest:'Zurück zum Test', submit:'Test abgeben', cancel:'Abbrechen',
+ result:'Ergebnis', pass:'Bestanden', fail:'Nicht bestanden', right:'Richtig', ofq:'von {n} Fragen', dur:'Dauer', passmark:'Bestehensgrenze 75 %', newtest:'Neuer Test aus {t}', backsub:'Zurück zum Fach', review:'Alle Fragen im Rückblick', q:'Frage {n}', ok:'richtig', wrong:'falsch', img:'Abbildung: ', missed:' (richtig, nicht gewählt)',
+ nothing:'Nichts fällig. Alle Karten in diesem Bereich sind in Bearbeitung und noch nicht wieder dran.', whole:'Ganzes Fach', done:'Durchgang beendet', good:'Gut', hard:'Schwer', again:'Nochmal', nextrun:'Nächster Durchgang', endrun:'Durchgang beenden', cardof:'Karte {i} von {n}', box:'Kasten {b}', new:'neu', reveal:'Antwort aufdecken', answer:'Antwort', today:'heute wieder', stays:'Kasten bleibt', learnedS:'gelernt', inDays:'in {d} {u}', day:'Tag', days:'Tagen',
+ statsTitle:'Statistik', statsSub:'{l} von {t} Karten gelernt (Kasten 5)', subject:'Fach', inwork:'In Arbeit', tests:'Tests', avg:'Ø Ergebnis', best:'Bestes', lasttests:'Letzte Tests', date:'Datum', notests:'Noch kein Test abgelegt. Öffne ein Fach und starte einen Test aus einem PT.', passed:'bestanden', failed:'nicht bestanden', pt:'PT'},
+en: {lang:'English', subjects:'Subjects', stats:'Statistics', questions:'questions', loading:'Loading questions …', loadfail:'The questions could not be loaded. Please reload the page.',
+ synced:'Progress is saved to your account', local:'Progress is saved in this browser only', savefail:'No write access to the account. Progress is saved in this browser only.',
+ qfrom:'{n} questions from {t} progress tests', due:'due', lasttest:'Last test', back:'← Subjects', learned:'learned', of:'of',
+ cardsall:'Flashcards whole subject', cardshint:'Due cards first, then new ones. No more than 40 per round.', pts:'Progress tests', mc:'multiple choice',
+ test:'Test ({n} questions)', cards:'Flashcards', testhint:'The test draws random multiple choice questions from this PT, graded at the end, pass mark 75 %. Wrong answers go back to box 0 in the flashcards.',
+ exam:'Test', timer:'Timer', qof:'Question {i} of {n}', correctN:'{n} correct', flagged:'⚑ flagged', flag:'⚐ flag', imgnote:'This question refers to a figure: ', prev:'← Back', next:'Next →', answered:'{a} of {n} answered',
+ openq:'{n} questions are still open. Submit anyway?', submitq:'Submit the test now?', yes:'Yes, submit', backtest:'Back to test', submit:'Submit test', cancel:'Cancel',
+ result:'Result', pass:'Passed', fail:'Failed', right:'Correct', ofq:'of {n} questions', dur:'Time', passmark:'Pass mark 75 %', newtest:'New test from {t}', backsub:'Back to subject', review:'Review all questions', q:'Question {n}', ok:'correct', wrong:'wrong', img:'Figure: ', missed:' (correct, not chosen)',
+ nothing:'Nothing due. All cards in this area are in progress and not up yet.', whole:'Whole subject', done:'Round finished', good:'Good', hard:'Hard', again:'Again', nextrun:'Next round', endrun:'End round', cardof:'Card {i} of {n}', box:'Box {b}', new:'new', reveal:'Reveal answer', answer:'Answer', today:'again today', stays:'box stays', learnedS:'learned', inDays:'in {d} {u}', day:'day', days:'days',
+ statsTitle:'Statistics', statsSub:'{l} of {t} cards learned (box 5)', subject:'Subject', inwork:'In progress', tests:'Tests', avg:'Avg. result', best:'Best', lasttests:'Recent tests', date:'Date', notests:'No test taken yet. Open a subject and start a test from a PT.', passed:'passed', failed:'failed', pt:'PT'},
+fr: {lang:'Français', subjects:'Matières', stats:'Statistiques', questions:'questions', loading:'Chargement des questions …', loadfail:'Impossible de charger les questions. Rechargez la page.',
+ synced:'Progression enregistrée dans votre compte', local:'Progression enregistrée uniquement dans ce navigateur', savefail:'Pas de droit d’écriture dans le compte. Progression enregistrée uniquement dans ce navigateur.',
+ qfrom:'{n} questions issues de {t} progress tests', due:'à revoir', lasttest:'Dernier test', back:'← Matières', learned:'acquises', of:'sur',
+ cardsall:'Cartes de toute la matière', cardshint:'Les cartes à revoir d’abord, puis les nouvelles. 40 au maximum par série.', pts:'Progress tests', mc:'choix multiple',
+ test:'Test ({n} questions)', cards:'Cartes', testhint:'Le test tire des questions à choix multiple au hasard dans ce PT, correction à la fin, seuil de réussite 75 %. Les erreurs reviennent dans la boîte 0 des cartes.',
+ exam:'Test', timer:'Chrono', qof:'Question {i} sur {n}', correctN:'{n} bonnes réponses', flagged:'⚑ marquée', flag:'⚐ marquer', imgnote:'Cette question renvoie à une figure : ', prev:'← Retour', next:'Suivant →', answered:'{a} sur {n} répondues',
+ openq:'{n} questions restent sans réponse. Rendre quand même ?', submitq:'Rendre le test maintenant ?', yes:'Oui, rendre', backtest:'Retour au test', submit:'Rendre le test', cancel:'Annuler',
+ result:'Résultat', pass:'Réussi', fail:'Échoué', right:'Bonnes réponses', ofq:'sur {n} questions', dur:'Durée', passmark:'Seuil de réussite 75 %', newtest:'Nouveau test de {t}', backsub:'Retour à la matière', review:'Toutes les questions', q:'Question {n}', ok:'juste', wrong:'faux', img:'Figure : ', missed:' (juste, non choisie)',
+ nothing:'Rien à revoir. Toutes les cartes de cette zone sont en cours et pas encore dues.', whole:'Toute la matière', done:'Série terminée', good:'Bien', hard:'Difficile', again:'Encore', nextrun:'Série suivante', endrun:'Terminer la série', cardof:'Carte {i} sur {n}', box:'Boîte {b}', new:'nouvelle', reveal:'Voir la réponse', answer:'Réponse', today:'à nouveau aujourd’hui', stays:'boîte inchangée', learnedS:'acquise', inDays:'dans {d} {u}', day:'jour', days:'jours',
+ statsTitle:'Statistiques', statsSub:'{l} cartes sur {t} acquises (boîte 5)', subject:'Matière', inwork:'En cours', tests:'Tests', avg:'Moyenne', best:'Meilleur', lasttests:'Derniers tests', date:'Date', notests:'Aucun test passé. Ouvrez une matière et lancez un test depuis un PT.', passed:'réussi', failed:'échoué', pt:'PT'},
+ksh: {lang:'Kölsch', subjects:'Fächer', stats:'Zahle', questions:'Froore', loading:'Froore wääde jelade …', loadfail:'De Froore kunnte nit jelade wääde. Maach de Sigg ens neu op.',
+ synced:'Dinge Fortschrett weed en dingem Konto jespeichert', local:'Dinge Fortschrett bliev nur he em Browser', savefail:'Kei Schriefrääch em Konto. Dinge Fortschrett bliev nur he em Browser.',
+ qfrom:'{n} Froore us {t} Progress Tests', due:'dran', lasttest:'Letzte Tess', back:'← Fächer', learned:'jelernt', of:'vun',
+ cardsall:'Kaate för et janze Fach', cardshint:'Eets dat, wat dran es, dann et Neue. Mih wie 40 pro Rund jitt et nit.', pts:'Progress Tests', mc:'Multiple Choice',
+ test:'Tess ({n} Froore)', cards:'Kaate', testhint:'Dä Tess zeht zofällije Multiple Choice Froore us däm PT, usjewäät weed am Engk, bestande häs de ab 75 %. Wat falsch wor, landt widder en Kaste 0.',
+ exam:'Tess', timer:'Uhr', qof:'Froch {i} vun {n}', correctN:'{n} richtije', flagged:'⚑ markeet', flag:'⚐ markeere', imgnote:'Zo dä Froch jehöt e Bildche: ', prev:'← Zoröck', next:'Wigger →', answered:'{a} vun {n} beantwoot',
+ openq:'{n} Froore sin noch op. Trotzdäm avjevve?', submitq:'Dä Tess jetz avjevve?', yes:'Jo, avjevve', backtest:'Zoröck zom Tess', submit:'Tess avjevve', cancel:'Loss et',
+ result:'Erjebnis', pass:'Bestande', fail:'Nit bestande', right:'Richtich', ofq:'vun {n} Froore', dur:'Duur', passmark:'Bestande ab 75 %', newtest:'Neue Tess us {t}', backsub:'Zoröck zom Fach', review:'All Froore noch ens', q:'Froch {n}', ok:'richtich', wrong:'falsch', img:'Bildche: ', missed:' (richtich, ävver nit jewählt)',
+ nothing:'Nix dran. All Kaate he sin en Arbeit un noch nit widder fällich.', whole:'Janze Fach', done:'Rund eröm', good:'Joot', hard:'Schwer', again:'Nochens', nextrun:'Nächste Rund', endrun:'Rund beende', cardof:'Kaat {i} vun {n}', box:'Kaste {b}', new:'neu', reveal:'Antwoot zeije', answer:'Antwoot', today:'hück widder', stays:'Kaste bliev', learnedS:'jelernt', inDays:'en {d} {u}', day:'Daach', days:'Dääch',
+ statsTitle:'Zahle', statsSub:'{l} vun {t} Kaate jelernt (Kaste 5)', subject:'Fach', inwork:'En Arbeit', tests:'Tesse', avg:'Ø Erjebnis', best:'Bess', lasttests:'Letzte Tesse', date:'Datum', notests:'Noch keine Tess jemaat. Maach e Fach op un fang ene Tess us enem PT aan.', passed:'bestande', failed:'nit bestande', pt:'PT'}
+};
+let LANG = 'de';
+try { LANG = localStorage.getItem('atpl-lang') || (navigator.language.startsWith('fr') ? 'fr' : navigator.language.startsWith('de') ? 'de' : 'en'); } catch (e) {}
+if (!I18N[LANG]) LANG = 'de';
+const T = (k, v={}) => (I18N[LANG][k] ?? I18N.de[k] ?? k).replace(/\{(\w+)\}/g, (_, n) => v[n]);
+function setLang(l) { LANG = l; try { localStorage.setItem('atpl-lang', l); } catch (e) {} document.documentElement.lang = l === 'ksh' ? 'de' : l; renderNav(); render(); }
+function renderNav() {
+  const nav = $('#nav'); nav.innerHTML = '';
+  nav.append(h('button', {'data-view':'home'}, T('subjects')), h('button', {'data-view':'stats'}, T('stats')));
+  const sel = h('select', {id:'lang', class:'langsel', 'aria-label':'Language', onchange: e => setLang(e.target.value)}, Object.entries(I18N).map(([k, v]) => h('option', {value:k, selected: k === LANG}, v.lang)));
+  nav.append(sel);
+  $('#hdr-count').textContent = DATA ? DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ' + T('questions') : '';
+}
+
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
 const MAXBOX = 5;
@@ -150,7 +204,7 @@ const PASS = 75;
 const DAY = 86400000;
 const fmtPct = n => Math.round(n) + ' %';
 const fmtTime = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-const fmtDate = ts => new Date(ts).toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit', year:'2-digit'});
+const fmtDate = ts => new Date(ts).toLocaleDateString(LANG === 'en' ? 'en-GB' : LANG === 'fr' ? 'fr-FR' : 'de-DE', {day:'2-digit', month:'2-digit', year:'2-digit'});
 const shuffle = a => { for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
 
 let DATA = null;
@@ -195,7 +249,7 @@ const store = {
   },
   async flush(doc, body) {
     try { await this.db.collection('data/users/' + this.uid).doc(doc).set(body); }
-    catch (e) { this.online = false; renderSync(); toast('Kein Schreibrecht im Konto. Fortschritt wird nur in diesem Browser gespeichert.'); }
+    catch (e) { this.online = false; renderSync(); toast(T('savefail')); }
   }
 };
 function ls(k, def) { try { const v = JSON.parse(localStorage.getItem('atpl-' + k)); return v ? (v.k || v.list || def) : def; } catch (e) { return def; } }
@@ -203,7 +257,7 @@ function renderSync() {
   const el = $('#sync'); if (!el) return;
   el.className = 'sync' + (store.online ? ' on' : '');
   el.innerHTML = '';
-  el.append(h('i'), store.online ? 'Fortschritt wird in deinem Konto gespeichert' : 'Fortschritt nur in diesem Browser gespeichert');
+  el.append(h('i'), store.online ? T('synced') : T('local'));
 }
 
 /* ---------- Karteikasten ---------- */
@@ -238,10 +292,10 @@ function cardStats(code, questions) {
 let view = 'home', ctx = {};
 function go(v, c = {}) { view = v; ctx = c; if (v === 'home' || v === 'stats') location.hash = v; render(); window.scrollTo(0, 0); }
 window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if ((v === 'home' || v === 'stats') && v !== view) go(v); });
-$('#nav').addEventListener('click', e => { const b = e.target.closest('button'); if (b) go(b.dataset.view); });
+$('#nav').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b.dataset.view) go(b.dataset.view); });
 
 function render() {
-  for (const b of $('#nav').children) b.toggleAttribute('aria-current', b.dataset.view === (view === 'stats' ? 'stats' : 'home'));
+  for (const b of $('#nav').querySelectorAll('button')) b.toggleAttribute('aria-current', b.dataset.view === (view === 'stats' ? 'stats' : 'home'));
   app.innerHTML = '';
   ({home: renderHome, subject: renderSubject, exam: renderExam, result: renderResult, cards: renderCards, stats: renderStats})[view]();
   renderSync();
@@ -251,7 +305,7 @@ function renderHome() {
   const total = DATA.subjects.reduce((n, s) => n + s.all.length, 0);
   app.append(
     h('div', {class:'row', style:'justify-content:space-between'},
-      h('div', {}, h('h2', {}, 'Fächer'), h('div', {class:'note'}, `${total.toLocaleString('de-DE')} Fragen aus ${DATA.subjects.reduce((n,s)=>n+s.tests.length,0)} Progress Tests`)),
+      h('div', {}, h('h2', {}, T('subjects')), h('div', {class:'note'}, T('qfrom', {n: total.toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE'), t: DATA.subjects.reduce((n,s)=>n+s.tests.length,0)}))),
       h('div', {class:'sync', id:'sync'})),
     h('div', {class:'grid'}, DATA.subjects.map(s => {
       const st = cardStats(s.code, s.all);
@@ -261,10 +315,10 @@ function renderHome() {
         h('div', {class:'top'}, h('h3', {}, s.name), h('span', {class:'code'}, s.code)),
         h('div', {class:'meter'}, h('b', {style:`width:${st.learned/st.total*100}%`}), h('i', {style:`width:${(st.started-st.learned)/st.total*100}%`})),
         h('div', {class:'stats'},
-          h('span', {}, h('strong', {}, s.tests.length), ' PT'),
-          h('span', {}, h('strong', {}, s.all.length), ' Fragen'),
-          h('span', {}, h('strong', {}, st.due), ' fällig'),
-          lastPct != null && h('span', {}, 'Letzter Test ', h('strong', {style: lastPct >= PASS ? 'color:var(--good)' : 'color:var(--bad)'}, lastPct + ' %'))));
+          h('span', {}, h('strong', {}, s.tests.length), ' ' + T('pt')),
+          h('span', {}, h('strong', {}, s.all.length), ' ' + T('questions')),
+          h('span', {}, h('strong', {}, st.due), ' ' + T('due')),
+          lastPct != null && h('span', {}, T('lasttest') + ' ', h('strong', {style: lastPct >= PASS ? 'color:var(--good)' : 'color:var(--bad)'}, lastPct + ' %'))));
     })));
 }
 
@@ -272,14 +326,14 @@ function renderSubject() {
   const s = DATA.subjects.find(x => x.code === ctx.code);
   const st = cardStats(s.code, s.all);
   app.append(
-    h('div', {class:'row'}, h('button', {class:'btn-g', onclick: () => go('home')}, '← Fächer')),
+    h('div', {class:'row'}, h('button', {class:'btn-g', onclick: () => go('home')}, T('back'))),
     h('div', {class:'row', style:'justify-content:space-between;align-items:flex-end'},
       h('div', {}, h('div', {class:'eyebrow'}, s.code), h('h2', {}, s.name)),
-      h('div', {class:'stats'}, h('span', {}, h('strong', {}, st.learned), ' von ', h('strong', {}, st.total), ' gelernt'), h('span', {}, h('strong', {}, st.due), ' fällig'))),
+      h('div', {class:'stats'}, h('span', {}, h('strong', {}, st.learned), ' ' + T('of') + ' ', h('strong', {}, st.total), ' ' + T('learned')), h('span', {}, h('strong', {}, st.due), ' ' + T('due')))),
     h('div', {class:'row'},
-      h('button', {class:'btn-p', disabled: st.due === 0 && st.fresh === 0, onclick: () => startCards(s, s.all, 'Ganzes Fach')}, 'Karteikarten ganzes Fach'),
-      h('span', {class:'note'}, 'Fällige Karten zuerst, dann neue. Mehr als 40 pro Durchgang gibt es nicht.')),
-    h('h3', {}, 'Progress Tests'),
+      h('button', {class:'btn-p', disabled: st.due === 0 && st.fresh === 0, onclick: () => startCards(s, s.all, T('whole'))}, T('cardsall')),
+      h('span', {class:'note'}, T('cardshint'))),
+    h('h3', {}, T('pts')),
     h('div', {class:'pt-list'}, s.tests.map(t => {
       const mc = t.q.filter(q => q.o.length > 1).length;
       const ts = cardStats(s.code, t.q);
@@ -287,13 +341,13 @@ function renderSubject() {
       return h('div', {class:'pt'},
         h('div', {class:'info'},
           h('div', {class:'name'}, t.id),
-          h('div', {class:'stats'}, h('span', {}, h('strong', {}, t.q.length), ' Fragen'), h('span', {}, h('strong', {}, mc), ' Multiple Choice'), h('span', {}, h('strong', {}, ts.learned), ' gelernt'), h('span', {}, h('strong', {}, ts.due), ' fällig'),
-            last && h('span', {}, 'Letzter Test ', h('strong', {style: last.pct >= PASS ? 'color:var(--good)' : 'color:var(--bad)'}, Math.round(last.pct) + ' %')))),
+          h('div', {class:'stats'}, h('span', {}, h('strong', {}, t.q.length), ' ' + T('questions')), h('span', {}, h('strong', {}, mc), ' ' + T('mc')), h('span', {}, h('strong', {}, ts.learned), ' ' + T('learned')), h('span', {}, h('strong', {}, ts.due), ' ' + T('due')),
+            last && h('span', {}, T('lasttest') + ' ', h('strong', {style: last.pct >= PASS ? 'color:var(--good)' : 'color:var(--bad)'}, Math.round(last.pct) + ' %')))),
         h('div', {class:'acts'},
-          h('button', {class:'btn-p', disabled: mc === 0, onclick: () => startExam(s, t)}, `Test (${Math.min(TEST_N, mc)} Fragen)`),
-          h('button', {class:'btn-s', onclick: () => startCards(s, t.q, t.id)}, 'Karteikarten')));
+          h('button', {class:'btn-p', disabled: mc === 0, onclick: () => startExam(s, t)}, T('test', {n: Math.min(TEST_N, mc)})),
+          h('button', {class:'btn-s', onclick: () => startCards(s, t.q, t.id)}, T('cards'))));
     })),
-    h('p', {class:'note'}, 'Der Test zieht zufällige Multiple Choice Fragen aus diesem PT, Auswertung erst am Ende, Bestehensgrenze 75 %. Falsch beantwortete Fragen landen im Karteikasten wieder auf Kasten 0.'));
+    h('p', {class:'note'}, T('testhint')));
 }
 
 /* ---------- Testmodus ---------- */
@@ -324,27 +378,27 @@ function renderExam() {
     }}, h('span', {class:'l'}, LET[pos] + ')'), h('span', {}, q.o[oi])));
   app.append(
     h('div', {class:'row', style:'justify-content:space-between'},
-      h('div', {}, h('div', {class:'eyebrow'}, ex.s.name), h('h2', {}, ex.t.id, ' · Test')),
+      h('div', {}, h('div', {class:'eyebrow'}, ex.s.name), h('h2', {}, ex.t.id, ' · ' + T('exam'))),
       h('div', {class:'row'},
         timerEl,
-        h('label', {class:'chk'}, h('input', {type:'checkbox', id:'timer-on', checked: ex.timer, onchange: e => { ex.timer = e.target.checked; render(); }}), 'Timer'))),
+        h('label', {class:'chk'}, h('input', {type:'checkbox', id:'timer-on', checked: ex.timer, onchange: e => { ex.timer = e.target.checked; render(); }}), T('timer')))),
     h('div', {class:'q'},
       h('div', {class:'head'},
-        h('span', {class:'eyebrow'}, `Frage ${ex.i+1} von ${ex.items.length}`, ' · ', h('span', {class:'mono'}, qkey(ex.t.id, q.n))),
-        h('div', {class:'row'}, it.multi && h('span', {class:'tag multi'}, `${q.a.length} richtige`), h('button', {class:'btn-g', onclick: () => { it.flag = !it.flag; render(); }}, it.flag ? '⚑ markiert' : '⚐ markieren'))),
+        h('span', {class:'eyebrow'}, T('qof', {i: ex.i+1, n: ex.items.length}), ' · ', h('span', {class:'mono'}, qkey(ex.t.id, q.n))),
+        h('div', {class:'row'}, it.multi && h('span', {class:'tag multi'}, T('correctN', {n: q.a.length})), h('button', {class:'btn-g', onclick: () => { it.flag = !it.flag; render(); }}, it.flag ? T('flagged') : T('flag')))),
       h('div', {class:'text'}, q.q),
-      q.img && h('div', {class:'img'}, 'Zu dieser Frage gehört eine Abbildung: ' + q.img),
+      q.img && h('div', {class:'img'}, T('imgnote') + q.img),
       h('div', {class:'opts'}, optBtns)),
     h('div', {class:'row', style:'justify-content:space-between'},
-      h('button', {class:'btn-s', disabled: ex.i === 0, onclick: () => { ex.i--; render(); }}, '← Zurück'),
-      h('span', {class:'note'}, `${answered} von ${ex.items.length} beantwortet`),
-      h('button', {class:'btn-s', disabled: ex.i === ex.items.length-1, onclick: () => { ex.i++; render(); }}, 'Weiter →')),
+      h('button', {class:'btn-s', disabled: ex.i === 0, onclick: () => { ex.i--; render(); }}, T('prev')),
+      h('span', {class:'note'}, T('answered', {a: answered, n: ex.items.length})),
+      h('button', {class:'btn-s', disabled: ex.i === ex.items.length-1, onclick: () => { ex.i++; render(); }}, T('next'))),
     h('div', {class:'navgrid'}, ex.items.map((x, k) => h('button', {class: (x.sel.size ? 'done' : '') + (x.flag ? ' flag' : '') + (k === ex.i ? ' cur' : ''), onclick: () => { ex.i = k; render(); }}, k+1))),
     h('div', {class:'row'},
       ex.confirm
-        ? [h('span', {}, answered < ex.items.length ? `${ex.items.length - answered} Fragen sind noch offen. Trotzdem abgeben?` : 'Test jetzt abgeben?'),
-           h('button', {class:'btn-p', onclick: finishExam}, 'Ja, abgeben'), h('button', {class:'btn-g', onclick: () => { ex.confirm = false; render(); }}, 'Zurück zum Test')]
-        : [h('button', {class:'btn-p', onclick: () => { ex.confirm = true; render(); }}, 'Test abgeben'), h('button', {class:'btn-g', onclick: () => { clearInterval(ex.tick); go('subject', {code: ex.s.code}); }}, 'Abbrechen')]));
+        ? [h('span', {}, answered < ex.items.length ? T('openq', {n: ex.items.length - answered}) : T('submitq')),
+           h('button', {class:'btn-p', onclick: finishExam}, T('yes')), h('button', {class:'btn-g', onclick: () => { ex.confirm = false; render(); }}, T('backtest'))]
+        : [h('button', {class:'btn-p', onclick: () => { ex.confirm = true; render(); }}, T('submit')), h('button', {class:'btn-g', onclick: () => { clearInterval(ex.tick); go('subject', {code: ex.s.code}); }}, T('cancel'))]));
 }
 function finishExam() {
   const ex = exam; clearInterval(ex.tick);
@@ -360,24 +414,24 @@ function finishExam() {
 function renderResult() {
   const ex = exam, r = ctx.res, pass = r.pct >= PASS;
   app.append(
-    h('div', {class:'row'}, h('div', {}, h('div', {class:'eyebrow'}, ex.s.name), h('h2', {}, ex.t.id, ' · Ergebnis'))),
+    h('div', {class:'row'}, h('div', {}, h('div', {class:'eyebrow'}, ex.s.name), h('h2', {}, ex.t.id, ' · ' + T('result')))),
     h('div', {class:'result'},
-      h('div', {class:'card'}, h('span', {class:'eyebrow'}, 'Ergebnis'), h('div', {class:'big', style: pass ? 'color:var(--good)' : 'color:var(--bad)'}, Math.round(r.pct) + ' %'), h('span', {class:'tag ' + (pass ? 'pass' : 'fail')}, pass ? 'Bestanden' : 'Nicht bestanden')),
-      h('div', {class:'card'}, h('span', {class:'eyebrow'}, 'Richtig'), h('div', {class:'big'}, r.right), h('span', {class:'note'}, `von ${r.n} Fragen`)),
-      h('div', {class:'card'}, h('span', {class:'eyebrow'}, 'Dauer'), h('div', {class:'big'}, fmtTime(r.dur)), h('span', {class:'note'}, 'Bestehensgrenze 75 %'))),
+      h('div', {class:'card'}, h('span', {class:'eyebrow'}, T('result')), h('div', {class:'big', style: pass ? 'color:var(--good)' : 'color:var(--bad)'}, Math.round(r.pct) + ' %'), h('span', {class:'tag ' + (pass ? 'pass' : 'fail')}, pass ? T('pass') : T('fail'))),
+      h('div', {class:'card'}, h('span', {class:'eyebrow'}, T('right')), h('div', {class:'big'}, r.right), h('span', {class:'note'}, T('ofq', {n: r.n}))),
+      h('div', {class:'card'}, h('span', {class:'eyebrow'}, T('dur')), h('div', {class:'big'}, fmtTime(r.dur)), h('span', {class:'note'}, T('passmark')))),
     h('div', {class:'row'},
-      h('button', {class:'btn-p', onclick: () => startExam(ex.s, ex.t)}, 'Neuer Test aus ' + ex.t.id),
-      h('button', {class:'btn-s', onclick: () => go('subject', {code: ex.s.code})}, 'Zurück zum Fach')),
-    h('h3', {}, 'Alle Fragen im Rückblick'),
+      h('button', {class:'btn-p', onclick: () => startExam(ex.s, ex.t)}, T('newtest', {t: ex.t.id})),
+      h('button', {class:'btn-s', onclick: () => go('subject', {code: ex.s.code})}, T('backsub'))),
+    h('h3', {}, T('review')),
     h('div', {class:'navgrid'}, ex.items.map((x, k) => h('button', {class: x.ok ? 'ok' : 'bad', onclick: () => document.getElementById('rv' + k).scrollIntoView({behavior:'smooth', block:'start'})}, k+1))),
     ex.items.map((it, k) => h('div', {class:'q', id:'rv' + k},
-      h('div', {class:'head'}, h('span', {class:'eyebrow'}, `Frage ${k+1}`, ' · ', h('span', {class:'mono'}, qkey(ex.t.id, it.q.n))), h('span', {class:'tag ' + (it.ok ? 'pass' : 'fail')}, it.ok ? 'richtig' : 'falsch')),
+      h('div', {class:'head'}, h('span', {class:'eyebrow'}, T('q', {n: k+1}), ' · ', h('span', {class:'mono'}, qkey(ex.t.id, it.q.n))), h('span', {class:'tag ' + (it.ok ? 'pass' : 'fail')}, it.ok ? T('ok') : T('wrong'))),
       h('div', {class:'text'}, it.q.q),
-      it.q.img && h('div', {class:'img'}, 'Abbildung: ' + it.q.img),
+      it.q.img && h('div', {class:'img'}, T('img') + it.q.img),
       h('div', {class:'opts'}, it.order.map((oi, pos) => {
         const isA = it.q.a.includes(oi), chosen = it.sel.has(oi);
         const cls = isA && chosen ? ' ok' : chosen ? ' wrong' : isA ? ' miss' : '';
-        return h('div', {class:'opt' + cls}, h('span', {class:'l'}, LET[pos] + ')'), h('span', {}, it.q.o[oi], isA && !chosen ? h('span', {class:'note'}, ' (richtig, nicht gewählt)') : null));
+        return h('div', {class:'opt' + cls}, h('span', {class:'l'}, LET[pos] + ')'), h('span', {}, it.q.o[oi], isA && !chosen ? h('span', {class:'note'}, T('missed')) : null));
       })))));
 }
 
@@ -388,7 +442,7 @@ function startCards(s, questions, label) {
   const due = shuffle(questions.filter(q => { const e = entry(s.code, q.key); return e && e[1] <= now; }));
   const fresh = shuffle(questions.filter(q => !entry(s.code, q.key)));
   const queue = [...due, ...fresh].slice(0, 40);
-  if (!queue.length) { toast('Nichts fällig. Alle Karten in diesem Bereich sind in Bearbeitung und noch nicht wieder dran.'); return; }
+  if (!queue.length) { toast(T('nothing')); return; }
   sess = {s, label, queue, src: questions, i: 0, open: false, grades: [0,0,0], order: null, done: false};
   go('cards');
 }
@@ -397,78 +451,79 @@ function renderCards() {
   if (se.done || se.i >= se.queue.length) {
     const st = cardStats(se.s.code, se.queue);
     app.append(
-      h('div', {}, h('div', {class:'eyebrow'}, se.s.name), h('h2', {}, se.label, ' · Durchgang beendet')),
+      h('div', {}, h('div', {class:'eyebrow'}, se.s.name), h('h2', {}, se.label, ' · ' + T('done'))),
       h('div', {class:'result'},
-        h('div', {class:'card'}, h('span', {class:'eyebrow'}, 'Gut'), h('div', {class:'big', style:'color:var(--good)'}, se.grades[2])),
-        h('div', {class:'card'}, h('span', {class:'eyebrow'}, 'Schwer'), h('div', {class:'big', style:'color:var(--warn)'}, se.grades[1])),
-        h('div', {class:'card'}, h('span', {class:'eyebrow'}, 'Nochmal'), h('div', {class:'big', style:'color:var(--bad)'}, se.grades[0]))),
+        h('div', {class:'card'}, h('span', {class:'eyebrow'}, T('good')), h('div', {class:'big', style:'color:var(--good)'}, se.grades[2])),
+        h('div', {class:'card'}, h('span', {class:'eyebrow'}, T('hard')), h('div', {class:'big', style:'color:var(--warn)'}, se.grades[1])),
+        h('div', {class:'card'}, h('span', {class:'eyebrow'}, T('again')), h('div', {class:'big', style:'color:var(--bad)'}, se.grades[0]))),
       h('div', {class:'row'},
-        h('button', {class:'btn-p', onclick: () => startCards(se.s, se.src, se.label)}, 'Nächster Durchgang'),
-        h('button', {class:'btn-s', onclick: () => go('subject', {code: se.s.code})}, 'Zurück zum Fach')));
+        h('button', {class:'btn-p', onclick: () => startCards(se.s, se.src, se.label)}, T('nextrun')),
+        h('button', {class:'btn-s', onclick: () => go('subject', {code: se.s.code})}, T('backsub'))));
     return;
   }
   const q = se.queue[se.i], e = entry(se.s.code, q.key), mc = q.o.length > 1;
   if (!se.order) se.order = shuffle(q.o.map((_, i) => i));
   app.append(
     h('div', {class:'row', style:'justify-content:space-between'},
-      h('div', {}, h('div', {class:'eyebrow'}, se.s.name), h('h2', {}, se.label, ' · Karteikarten')),
-      h('button', {class:'btn-g', onclick: () => { se.done = true; render(); }}, 'Durchgang beenden')),
+      h('div', {}, h('div', {class:'eyebrow'}, se.s.name), h('h2', {}, se.label, ' · ' + T('cards'))),
+      h('button', {class:'btn-g', onclick: () => { se.done = true; render(); }}, T('endrun'))),
     h('div', {class:'meter'}, h('b', {style:`width:${se.i/se.queue.length*100}%`})),
     h('div', {class:'q'},
       h('div', {class:'head'},
-        h('span', {class:'eyebrow'}, `Karte ${se.i+1} von ${se.queue.length}`, ' · ', h('span', {class:'mono'}, q.key)),
-        h('span', {class:'tag'}, e ? `Kasten ${e[0]}` : 'neu')),
+        h('span', {class:'eyebrow'}, T('cardof', {i: se.i+1, n: se.queue.length}), ' · ', h('span', {class:'mono'}, q.key)),
+        h('span', {class:'tag'}, e ? T('box', {b: e[0]}) : T('new'))),
       h('div', {class:'text'}, q.q),
-      q.img && h('div', {class:'img'}, 'Zu dieser Frage gehört eine Abbildung: ' + q.img),
+      q.img && h('div', {class:'img'}, T('imgnote') + q.img),
       mc && h('div', {class:'opts'}, se.order.map((oi, pos) => h('div', {class:'opt' + (se.open && q.a.includes(oi) ? ' ok' : '')}, h('span', {class:'l'}, LET[pos] + ')'), h('span', {}, q.o[oi])))),
       !se.open
-        ? h('button', {class:'btn-p', style:'align-self:flex-start', onclick: () => { se.open = true; render(); }}, 'Antwort aufdecken')
+        ? h('button', {class:'btn-p', style:'align-self:flex-start', onclick: () => { se.open = true; render(); }}, T('reveal'))
         : h('div', {class:'answer'},
-            h('span', {class:'eyebrow'}, 'Antwort'),
+            h('span', {class:'eyebrow'}, T('answer')),
             h('div', {class:'a'}, mc ? q.a.map(ai => LET[se.order.indexOf(ai)] + ') ' + q.o[ai]).join('\n') : q.o[q.a[0]]),
             h('div', {class:'rate'},
-              h('button', {class:'r0', onclick: () => grade(0)}, 'Nochmal', h('small', {}, 'heute wieder')),
-              h('button', {class:'r1', onclick: () => grade(1)}, 'Schwer', h('small', {}, 'Kasten bleibt')),
-              h('button', {class:'r2', onclick: () => grade(2)}, 'Gut', h('small', {}, nextIn(e)))))));
+              h('button', {class:'r0', onclick: () => grade(0)}, T('again'), h('small', {}, T('today'))),
+              h('button', {class:'r1', onclick: () => grade(1)}, T('hard'), h('small', {}, T('stays'))),
+              h('button', {class:'r2', onclick: () => grade(2)}, T('good'), h('small', {}, nextIn(e)))))));
   function grade(g) { rate(se.s.code, q.key, g); se.grades[g]++; if (g === 0) se.queue.push(q); se.i++; se.open = false; se.order = null; render(); window.scrollTo(0,0); }
 }
-function nextIn(e) { const b = Math.min(MAXBOX, (e ? e[0] : 0) + 1); return b >= MAXBOX ? 'gelernt' : `in ${INTERVALS[b]} ${INTERVALS[b] === 1 ? 'Tag' : 'Tagen'}`; }
+function nextIn(e) { const b = Math.min(MAXBOX, (e ? e[0] : 0) + 1); return b >= MAXBOX ? T('learnedS') : T('inDays', {d: INTERVALS[b], u: INTERVALS[b] === 1 ? T('day') : T('days')}); }
 
 /* ---------- Statistik ---------- */
 function renderStats() {
   const rows = DATA.subjects.map(s => ({s, st: cardStats(s.code, s.all), tests: store.tests.filter(t => t.code === s.code)}));
   const totalLearned = rows.reduce((n, r) => n + r.st.learned, 0), total = rows.reduce((n, r) => n + r.st.total, 0);
   app.append(
-    h('div', {class:'row', style:'justify-content:space-between'}, h('div', {}, h('h2', {}, 'Statistik'), h('div', {class:'note'}, `${totalLearned} von ${total} Karten gelernt (Kasten 5)`)), h('div', {class:'sync', id:'sync'})),
+    h('div', {class:'row', style:'justify-content:space-between'}, h('div', {}, h('h2', {}, T('statsTitle')), h('div', {class:'note'}, T('statsSub', {l: totalLearned, t: total}))), h('div', {class:'sync', id:'sync'})),
     h('div', {class:'tablewrap'}, h('table', {},
-      h('thead', {}, h('tr', {}, h('th', {}, 'Fach'), h('th', {}, 'Gelernt'), h('th', {}, 'In Arbeit'), h('th', {}, 'Fällig'), h('th', {}, 'Tests'), h('th', {}, 'Ø Ergebnis'), h('th', {}, 'Bestes'))),
+      h('thead', {}, h('tr', {}, h('th', {}, T('subject')), h('th', {}, T('learned')), h('th', {}, T('inwork')), h('th', {}, T('due')), h('th', {}, T('tests')), h('th', {}, T('avg')), h('th', {}, T('best')))),
       h('tbody', {}, rows.map(r => {
         const avg = r.tests.length ? r.tests.reduce((n, t) => n + t.pct, 0) / r.tests.length : null;
         const best = r.tests.length ? Math.max(...r.tests.map(t => t.pct)) : null;
         return h('tr', {}, h('td', {}, r.s.name, ' ', h('span', {class:'code'}, r.s.code)), h('td', {class:'num'}, `${r.st.learned} / ${r.st.total}`), h('td', {class:'num'}, r.st.started - r.st.learned), h('td', {class:'num'}, r.st.due), h('td', {class:'num'}, r.tests.length), h('td', {class:'num'}, avg == null ? '' : fmtPct(avg)), h('td', {class:'num'}, best == null ? '' : fmtPct(best)));
       })))),
-    h('h3', {}, 'Letzte Tests'),
+    h('h3', {}, T('lasttests')),
     store.tests.length
       ? h('div', {class:'tablewrap'}, h('table', {},
-          h('thead', {}, h('tr', {}, h('th', {}, 'Datum'), h('th', {}, 'PT'), h('th', {}, 'Richtig'), h('th', {}, 'Ergebnis'), h('th', {}, 'Dauer'), h('th', {}, ''))),
-          h('tbody', {}, store.tests.slice(-25).reverse().map(t => h('tr', {}, h('td', {}, fmtDate(t.ts)), h('td', {}, h('span', {class:'mono'}, t.pt)), h('td', {class:'num'}, `${t.right} / ${t.n}`), h('td', {class:'num'}, fmtPct(t.pct)), h('td', {class:'num'}, fmtTime(t.dur)), h('td', {}, h('span', {class:'tag ' + (t.pct >= PASS ? 'pass' : 'fail')}, t.pct >= PASS ? 'bestanden' : 'nicht bestanden')))))))
-      : h('div', {class:'empty'}, 'Noch kein Test abgelegt. Öffne ein Fach und starte einen Test aus einem PT.'));
+          h('thead', {}, h('tr', {}, h('th', {}, T('date')), h('th', {}, T('pt')), h('th', {}, T('right')), h('th', {}, T('result')), h('th', {}, T('dur')), h('th', {}, ''))),
+          h('tbody', {}, store.tests.slice(-25).reverse().map(t => h('tr', {}, h('td', {}, fmtDate(t.ts)), h('td', {}, h('span', {class:'mono'}, t.pt)), h('td', {class:'num'}, `${t.right} / ${t.n}`), h('td', {class:'num'}, fmtPct(t.pct)), h('td', {class:'num'}, fmtTime(t.dur)), h('td', {}, h('span', {class:'tag ' + (t.pct >= PASS ? 'pass' : 'fail')}, t.pct >= PASS ? T('passed') : T('failed'))))))))
+      : h('div', {class:'empty'}, T('notests')));
 }
 
 function toast(msg) { const t = h('div', {class:'toast'}, msg); document.body.append(t); setTimeout(() => t.remove(), 3500); }
 
 /* ---------- Start ---------- */
 (async () => {
+  $('#loading').textContent = T('loading');
   try {
     const inline = document.getElementById('qdata');
     if (inline) DATA = JSON.parse(inline.textContent);
     else { const r = await fetch('questions.json'); DATA = await r.json(); }
-  } catch (e) { app.innerHTML = '<div class="empty">Die Fragen konnten nicht geladen werden. Bitte Seite neu laden.</div>'; return; }
+  } catch (e) { app.innerHTML = ''; app.append(h('div', {class:'empty'}, T('loadfail'))); return; }
   for (const s of DATA.subjects) {
     s.all = [];
     for (const t of s.tests) for (const q of t.q) { q.key = qkey(t.id, q.n); q.tid = t.id; s.all.push(q); QBYKEY.set(q.key, q); }
   }
-  $('#hdr-count').textContent = DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString('de-DE') + ' Fragen';
+  renderNav();
   await store.init();
   const v = location.hash.slice(1);
   go(v === 'stats' ? 'stats' : 'home');
