@@ -129,6 +129,9 @@ label.chk{display:flex;gap:8px;align-items:center;font-weight:500}
 .greet .hello{font-family:var(--display);font-size:1.5rem;font-weight:700;line-height:1.15}
 .greet .quote{color:var(--muted);font-style:italic}
 .name-in{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);min-width:0;width:160px}
+.goal{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.searchbox{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
+.pace{font-size:.8rem}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:500;z-index:20;max-width:90vw}
 @media (prefers-reduced-motion:no-preference){.card.btn:active{transform:scale(.99)}}
 </style>
@@ -159,7 +162,7 @@ const h = (tag, attrs={}, ...kids) => {
 };
 
 const I18N = {
-de: { hello:'Was lernen wir heute, {n}?', helloNo:'Was lernen wir heute?', askName:'Wie heißt du? (für die Begrüßung)', nameSave:'Speichern', nameSkip:'Ohne Namen', editName:'Name ändern', showCount:'Anzahl richtiger', yours:'Deine Antwort', correctA:'Richtige Antwort', noanswer:'keine Antwort', close:'Schließen', tapnum:'Tipp auf eine Nummer, um Frage und Antworten zu sehen.', practiceWrong:'Fehler üben', wrongN:'{n} Fehler', mistakesOf:'Fehler aus {t}', boxes:'Karteikasten', dueCards:'Fällige', newCards:'Neue', markedCards:'Markierte', learnedCards:'Gelernte', allCards:'Alle', learnedHint:'Gelernt heißt: mindestens 3 mal hintereinander „Gut“ (Kasten 3 oder höher). „Nochmal“ oder ein Fehler im Test setzt die Karte auf Kasten 0 zurück. Kasten 0 bis 5, Wiederholung nach 0, 1, 3, 7, 14 und 30 Tagen.', mark:'☆ markieren', marked1:'★ markiert', modeReveal:'Aufdecken', modeAnswer:'Antworten', check:'Prüfen', suggest:'Vorschlag', lang:'Deutsch', subjects:'Fächer', stats:'Statistik', questions:'Fragen', loading:'Fragen werden geladen …', loadfail:'Die Fragen konnten nicht geladen werden. Bitte Seite neu laden.',
+de: { weak:'Schwachstellen', weakHint:'Die Fragen mit den meisten Fehlern in diesem Fach, aus Tests und Karteikarten.', weakNone:'Noch keine Fehler erfasst. Mach einen Test oder einen Kartendurchgang.', practiseAll:'Alle als Durchgang üben', errors:'Fehler', correctS:'richtig', today:'heute wieder', goalToday:'Heute {n} von {g}', streak:'{n} Tage in Folge', streak1:'1 Tag in Folge', goalLbl:'Tagesziel', goalDone:'Tagesziel erreicht', search:'Frage suchen', searchPh:'z.B. LAW-PT03 #41 oder Stichwort', results:'{n} Treffer', noresults:'Keine Treffer', showMore:'nur die ersten 30 angezeigt', pacing:'Soll: Frage {n}', ahead:'{m} min vor', behind:'{m} min hinter', onTime:'im Zeitplan', hello:'Was lernen wir heute, {n}?', helloNo:'Was lernen wir heute?', askName:'Wie heißt du? (für die Begrüßung)', nameSave:'Speichern', nameSkip:'Ohne Namen', editName:'Name ändern', showCount:'Anzahl richtiger', yours:'Deine Antwort', correctA:'Richtige Antwort', noanswer:'keine Antwort', close:'Schließen', tapnum:'Tipp auf eine Nummer, um Frage und Antworten zu sehen.', practiceWrong:'Fehler üben', wrongN:'{n} Fehler', mistakesOf:'Fehler aus {t}', boxes:'Karteikasten', dueCards:'Fällige', newCards:'Neue', markedCards:'Markierte', learnedCards:'Gelernte', allCards:'Alle', learnedHint:'Gelernt heißt: mindestens 3 mal hintereinander „Gut“ (Kasten 3 oder höher). „Nochmal“ oder ein Fehler im Test setzt die Karte auf Kasten 0 zurück. Kasten 0 bis 5, Wiederholung nach 0, 1, 3, 7, 14 und 30 Tagen.', mark:'☆ markieren', marked1:'★ markiert', modeReveal:'Aufdecken', modeAnswer:'Antworten', check:'Prüfen', suggest:'Vorschlag', lang:'Deutsch', subjects:'Fächer', stats:'Statistik', questions:'Fragen', loading:'Fragen werden geladen …', loadfail:'Die Fragen konnten nicht geladen werden. Bitte Seite neu laden.',
  synced:'Fortschritt wird in deinem Konto gespeichert', local:'Fortschritt nur in diesem Browser gespeichert', savefail:'Kein Schreibrecht im Konto. Fortschritt wird nur in diesem Browser gespeichert.',
  qfrom:'{n} Fragen aus {t} Progress Tests', due:'fällig', lasttest:'Letzter Test', back:'← Fächer', learned:'gelernt', of:'von',
  cardsall:'Karteikarten ganzes Fach', cardshint:'Fällige Karten zuerst, dann neue. Mehr als 40 pro Durchgang gibt es nicht.', pts:'Progress Tests', mc:'Multiple Choice',
@@ -169,7 +172,7 @@ de: { hello:'Was lernen wir heute, {n}?', helloNo:'Was lernen wir heute?', askNa
  result:'Ergebnis', pass:'Bestanden', fail:'Nicht bestanden', right:'Richtig', ofq:'von {n} Fragen', dur:'Dauer', passmark:'Bestehensgrenze 75 %', newtest:'Neuer Test aus {t}', backsub:'Zurück zum Fach', review:'Alle Fragen im Rückblick', q:'Frage {n}', ok:'richtig', wrong:'falsch', img:'Abbildung: ', missed:' (richtig, nicht gewählt)',
  nothing:'Nichts fällig. Alle Karten in diesem Bereich sind in Bearbeitung und noch nicht wieder dran.', whole:'Ganzes Fach', done:'Durchgang beendet', good:'Gut', hard:'Schwer', again:'Nochmal', nextrun:'Nächster Durchgang', endrun:'Durchgang beenden', cardof:'Karte {i} von {n}', box:'Kasten {b}', new:'neu', reveal:'Antwort aufdecken', answer:'Antwort', today:'heute wieder', stays:'Kasten bleibt', learnedS:'gelernt', inDays:'in {d} {u}', day:'Tag', days:'Tagen',
  statsTitle:'Statistik', statsSub:'{l} von {t} Karten gelernt (Kasten 3 oder höher)', subject:'Fach', inwork:'In Arbeit', tests:'Tests', avg:'Ø Ergebnis', best:'Bestes', lasttests:'Letzte Tests', date:'Datum', notests:'Noch kein Test abgelegt. Öffne ein Fach und starte einen Test aus einem PT.', passed:'bestanden', failed:'nicht bestanden', pt:'PT'},
-en: { hello:'What are we learning today, {n}?', helloNo:'What are we learning today?', askName:'What is your name? (for the greeting)', nameSave:'Save', nameSkip:'No name', editName:'Change name', showCount:'Show count', yours:'Your answer', correctA:'Correct answer', noanswer:'no answer', close:'Close', tapnum:'Tap a number to see the question and answers.', practiceWrong:'Practise mistakes', wrongN:'{n} wrong', mistakesOf:'Mistakes from {t}', boxes:'Flashcard boxes', dueCards:'Due', newCards:'New', markedCards:'Marked', learnedCards:'Learned', allCards:'All', learnedHint:'Learned means at least 3 consecutive "Good" ratings (box 3 or higher). "Again" or a wrong answer in a test sends the card back to box 0. Boxes 0 to 5, review after 0, 1, 3, 7, 14 and 30 days.', mark:'☆ mark', marked1:'★ marked', modeReveal:'Reveal', modeAnswer:'Answer', check:'Check', suggest:'Suggested', lang:'English', subjects:'Subjects', stats:'Statistics', questions:'questions', loading:'Loading questions …', loadfail:'The questions could not be loaded. Please reload the page.',
+en: { weak:'Weak spots', weakHint:'The questions with the most mistakes in this subject, from tests and flashcards.', weakNone:'No mistakes recorded yet. Take a test or run a flashcard round.', practiseAll:'Practise all as a round', errors:'wrong', correctS:'correct', today:'again today', goalToday:'Today {n} of {g}', streak:'{n} days in a row', streak1:'1 day in a row', goalLbl:'Daily goal', goalDone:'Daily goal reached', search:'Find a question', searchPh:'e.g. LAW-PT03 #41 or keyword', results:'{n} hits', noresults:'No hits', showMore:'only the first 30 shown', pacing:'Target: question {n}', ahead:'{m} min ahead', behind:'{m} min behind', onTime:'on schedule', hello:'What are we learning today, {n}?', helloNo:'What are we learning today?', askName:'What is your name? (for the greeting)', nameSave:'Save', nameSkip:'No name', editName:'Change name', showCount:'Show count', yours:'Your answer', correctA:'Correct answer', noanswer:'no answer', close:'Close', tapnum:'Tap a number to see the question and answers.', practiceWrong:'Practise mistakes', wrongN:'{n} wrong', mistakesOf:'Mistakes from {t}', boxes:'Flashcard boxes', dueCards:'Due', newCards:'New', markedCards:'Marked', learnedCards:'Learned', allCards:'All', learnedHint:'Learned means at least 3 consecutive "Good" ratings (box 3 or higher). "Again" or a wrong answer in a test sends the card back to box 0. Boxes 0 to 5, review after 0, 1, 3, 7, 14 and 30 days.', mark:'☆ mark', marked1:'★ marked', modeReveal:'Reveal', modeAnswer:'Answer', check:'Check', suggest:'Suggested', lang:'English', subjects:'Subjects', stats:'Statistics', questions:'questions', loading:'Loading questions …', loadfail:'The questions could not be loaded. Please reload the page.',
  synced:'Progress is saved to your account', local:'Progress is saved in this browser only', savefail:'No write access to the account. Progress is saved in this browser only.',
  qfrom:'{n} questions from {t} progress tests', due:'due', lasttest:'Last test', back:'← Subjects', learned:'learned', of:'of',
  cardsall:'Flashcards whole subject', cardshint:'Due cards first, then new ones. No more than 40 per round.', pts:'Progress tests', mc:'multiple choice',
@@ -179,7 +182,7 @@ en: { hello:'What are we learning today, {n}?', helloNo:'What are we learning to
  result:'Result', pass:'Passed', fail:'Failed', right:'Correct', ofq:'of {n} questions', dur:'Time', passmark:'Pass mark 75 %', newtest:'New test from {t}', backsub:'Back to subject', review:'Review all questions', q:'Question {n}', ok:'correct', wrong:'wrong', img:'Figure: ', missed:' (correct, not chosen)',
  nothing:'Nothing due. All cards in this area are in progress and not up yet.', whole:'Whole subject', done:'Round finished', good:'Good', hard:'Hard', again:'Again', nextrun:'Next round', endrun:'End round', cardof:'Card {i} of {n}', box:'Box {b}', new:'new', reveal:'Reveal answer', answer:'Answer', today:'again today', stays:'box stays', learnedS:'learned', inDays:'in {d} {u}', day:'day', days:'days',
  statsTitle:'Statistics', statsSub:'{l} of {t} cards learned (box 3 or higher)', subject:'Subject', inwork:'In progress', tests:'Tests', avg:'Avg. result', best:'Best', lasttests:'Recent tests', date:'Date', notests:'No test taken yet. Open a subject and start a test from a PT.', passed:'passed', failed:'failed', pt:'PT'},
-fr: { hello:'Qu’apprend-on aujourd’hui, {n} ?', helloNo:'Qu’apprend-on aujourd’hui ?', askName:'Comment t’appelles-tu ? (pour l’accueil)', nameSave:'Enregistrer', nameSkip:'Sans nom', editName:'Changer le nom', showCount:'Nombre de bonnes', yours:'Votre réponse', correctA:'Bonne réponse', noanswer:'sans réponse', close:'Fermer', tapnum:'Touchez un numéro pour voir la question et les réponses.', practiceWrong:'Revoir les erreurs', wrongN:'{n} erreurs', mistakesOf:'Erreurs de {t}', boxes:'Boîtes de cartes', dueCards:'À revoir', newCards:'Nouvelles', markedCards:'Marquées', learnedCards:'Acquises', allCards:'Toutes', learnedHint:'Acquise signifie au moins 3 fois « Bien » de suite (boîte 3 ou plus). « Encore » ou une erreur au test renvoie la carte en boîte 0. Boîtes 0 à 5, révision après 0, 1, 3, 7, 14 et 30 jours.', mark:'☆ marquer', marked1:'★ marquée', modeReveal:'Révéler', modeAnswer:'Répondre', check:'Vérifier', suggest:'Suggestion', lang:'Français', subjects:'Matières', stats:'Statistiques', questions:'questions', loading:'Chargement des questions …', loadfail:'Impossible de charger les questions. Rechargez la page.',
+fr: { weak:'Points faibles', weakHint:'Les questions avec le plus d’erreurs dans cette matière, tests et cartes confondus.', weakNone:'Aucune erreur enregistrée. Passez un test ou une série de cartes.', practiseAll:'Tout réviser en une série', errors:'erreurs', correctS:'justes', today:'à nouveau aujourd’hui', goalToday:'Aujourd’hui {n} sur {g}', streak:'{n} jours de suite', streak1:'1 jour de suite', goalLbl:'Objectif du jour', goalDone:'Objectif atteint', search:'Chercher une question', searchPh:'ex. LAW-PT03 #41 ou mot-clé', results:'{n} résultats', noresults:'Aucun résultat', showMore:'seulement les 30 premiers', pacing:'Cible : question {n}', ahead:'{m} min d’avance', behind:'{m} min de retard', onTime:'dans les temps', hello:'Qu’apprend-on aujourd’hui, {n} ?', helloNo:'Qu’apprend-on aujourd’hui ?', askName:'Comment t’appelles-tu ? (pour l’accueil)', nameSave:'Enregistrer', nameSkip:'Sans nom', editName:'Changer le nom', showCount:'Nombre de bonnes', yours:'Votre réponse', correctA:'Bonne réponse', noanswer:'sans réponse', close:'Fermer', tapnum:'Touchez un numéro pour voir la question et les réponses.', practiceWrong:'Revoir les erreurs', wrongN:'{n} erreurs', mistakesOf:'Erreurs de {t}', boxes:'Boîtes de cartes', dueCards:'À revoir', newCards:'Nouvelles', markedCards:'Marquées', learnedCards:'Acquises', allCards:'Toutes', learnedHint:'Acquise signifie au moins 3 fois « Bien » de suite (boîte 3 ou plus). « Encore » ou une erreur au test renvoie la carte en boîte 0. Boîtes 0 à 5, révision après 0, 1, 3, 7, 14 et 30 jours.', mark:'☆ marquer', marked1:'★ marquée', modeReveal:'Révéler', modeAnswer:'Répondre', check:'Vérifier', suggest:'Suggestion', lang:'Français', subjects:'Matières', stats:'Statistiques', questions:'questions', loading:'Chargement des questions …', loadfail:'Impossible de charger les questions. Rechargez la page.',
  synced:'Progression enregistrée dans votre compte', local:'Progression enregistrée uniquement dans ce navigateur', savefail:'Pas de droit d’écriture dans le compte. Progression enregistrée uniquement dans ce navigateur.',
  qfrom:'{n} questions issues de {t} progress tests', due:'à revoir', lasttest:'Dernier test', back:'← Matières', learned:'acquises', of:'sur',
  cardsall:'Cartes de toute la matière', cardshint:'Les cartes à revoir d’abord, puis les nouvelles. 40 au maximum par série.', pts:'Progress tests', mc:'choix multiple',
@@ -189,7 +192,7 @@ fr: { hello:'Qu’apprend-on aujourd’hui, {n} ?', helloNo:'Qu’apprend-on auj
  result:'Résultat', pass:'Réussi', fail:'Échoué', right:'Bonnes réponses', ofq:'sur {n} questions', dur:'Durée', passmark:'Seuil de réussite 75 %', newtest:'Nouveau test de {t}', backsub:'Retour à la matière', review:'Toutes les questions', q:'Question {n}', ok:'juste', wrong:'faux', img:'Figure : ', missed:' (juste, non choisie)',
  nothing:'Rien à revoir. Toutes les cartes de cette zone sont en cours et pas encore dues.', whole:'Toute la matière', done:'Série terminée', good:'Bien', hard:'Difficile', again:'Encore', nextrun:'Série suivante', endrun:'Terminer la série', cardof:'Carte {i} sur {n}', box:'Boîte {b}', new:'nouvelle', reveal:'Voir la réponse', answer:'Réponse', today:'à nouveau aujourd’hui', stays:'boîte inchangée', learnedS:'acquise', inDays:'dans {d} {u}', day:'jour', days:'jours',
  statsTitle:'Statistiques', statsSub:'{l} cartes sur {t} acquises (boîte 3 ou plus)', subject:'Matière', inwork:'En cours', tests:'Tests', avg:'Moyenne', best:'Meilleur', lasttests:'Derniers tests', date:'Date', notests:'Aucun test passé. Ouvrez une matière et lancez un test depuis un PT.', passed:'réussi', failed:'échoué', pt:'PT'},
-ksh: { hello:'Wat liere mer hück, {n}?', helloNo:'Wat liere mer hück?', askName:'Wie heiß de? (för et Hallo)', nameSave:'Speißere', nameSkip:'Ohne Name', editName:'Name ändere', showCount:'Wievill richtich', yours:'Ding Antwoot', correctA:'Richtije Antwoot', noanswer:'kein Antwoot', close:'Zomaache', tapnum:'Tipp op en Nummer, dann sühs de Froch un Antwoote.', practiceWrong:'Fähler übe', wrongN:'{n} Fähler', mistakesOf:'Fähler us {t}', boxes:'Kaatekaste', dueCards:'Dran', newCards:'Neu', markedCards:'Markeet', learnedCards:'Jelernt', allCards:'All', learnedHint:'Jelernt heiß: wenichstens 3 mol hingerenander „Joot“ (Kaste 3 oder höher). „Nochens“ oder ene Fähler em Tess schick de Kaat zoröck en Kaste 0. Kaste 0 bes 5, widder dran noh 0, 1, 3, 7, 14 un 30 Dääch.', mark:'☆ markeere', marked1:'★ markeet', modeReveal:'Opdecke', modeAnswer:'Antwoote', check:'Nohluure', suggest:'Vörschlag', lang:'Kölsch', subjects:'Fächer', stats:'Zahle', questions:'Froore', loading:'Froore wääde jelade …', loadfail:'De Froore kunnte nit jelade wääde. Maach de Sigg ens neu op.',
+ksh: { weak:'Schwachstelle', weakHint:'De Froore met de miehste Fähler en däm Fach, us Tesse un Kaate.', weakNone:'Noch kein Fähler drin. Maach ene Tess oder en Rund Kaate.', practiseAll:'All als Rund übe', errors:'Fähler', correctS:'richtich', today:'hück widder', goalToday:'Hück {n} vun {g}', streak:'{n} Dääch hingerenander', streak1:'1 Daach hingerenander', goalLbl:'Daachziel', goalDone:'Daachziel jeschaff', search:'Froch söke', searchPh:'z.B. LAW-PT03 #41 oder Stichwoot', results:'{n} Treffer', noresults:'Nix jefunge', showMore:'nur de eetste 30', pacing:'Soll: Froch {n}', ahead:'{m} min vör', behind:'{m} min hinger', onTime:'em Plan', hello:'Wat liere mer hück, {n}?', helloNo:'Wat liere mer hück?', askName:'Wie heiß de? (för et Hallo)', nameSave:'Speißere', nameSkip:'Ohne Name', editName:'Name ändere', showCount:'Wievill richtich', yours:'Ding Antwoot', correctA:'Richtije Antwoot', noanswer:'kein Antwoot', close:'Zomaache', tapnum:'Tipp op en Nummer, dann sühs de Froch un Antwoote.', practiceWrong:'Fähler übe', wrongN:'{n} Fähler', mistakesOf:'Fähler us {t}', boxes:'Kaatekaste', dueCards:'Dran', newCards:'Neu', markedCards:'Markeet', learnedCards:'Jelernt', allCards:'All', learnedHint:'Jelernt heiß: wenichstens 3 mol hingerenander „Joot“ (Kaste 3 oder höher). „Nochens“ oder ene Fähler em Tess schick de Kaat zoröck en Kaste 0. Kaste 0 bes 5, widder dran noh 0, 1, 3, 7, 14 un 30 Dääch.', mark:'☆ markeere', marked1:'★ markeet', modeReveal:'Opdecke', modeAnswer:'Antwoote', check:'Nohluure', suggest:'Vörschlag', lang:'Kölsch', subjects:'Fächer', stats:'Zahle', questions:'Froore', loading:'Froore wääde jelade …', loadfail:'De Froore kunnte nit jelade wääde. Maach de Sigg ens neu op.',
  synced:'Dinge Fortschrett weed en dingem Konto jespeichert', local:'Dinge Fortschrett bliev nur he em Browser', savefail:'Kei Schriefrääch em Konto. Dinge Fortschrett bliev nur he em Browser.',
  qfrom:'{n} Froore us {t} Progress Tests', due:'dran', lasttest:'Letzte Tess', back:'← Fächer', learned:'jelernt', of:'vun',
  cardsall:'Kaate för et janze Fach', cardshint:'Eets dat, wat dran es, dann et Neue. Mih wie 40 pro Rund jitt et nit.', pts:'Progress Tests', mc:'Multiple Choice',
@@ -213,7 +216,7 @@ function renderNav() {
   $('#hdr-count').textContent = DATA ? DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ' + T('questions') : '';
 }
 
-const VERSION = '2026.11.04-1040';
+const VERSION = '2026.11.04-1044';
 $('#ver').textContent = 'v' + VERSION;
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
@@ -234,7 +237,8 @@ const app = $('#app');
 /* ---------- Speicher: db pro Nutzer, sonst localStorage ---------- */
 const store = {
   db: null, uid: null, online: false,
-  fc: {},      // code -> { key: [box, due, right, wrong] }
+  fc: {},      // code -> { key: [box, due, right, wrong, marked] }
+  daily: {d: {}, goal: 50},
   tests: [],   // Ergebnisse
   pending: new Map(),
   async init() {
@@ -250,18 +254,20 @@ const store = {
     } catch (e) {}
     if (this.online) {
       const col = this.db.collection('data/users/' + this.uid);
-      const snaps = await Promise.all([...DATA.subjects.map(s => col.doc('fc-' + s.code).get()), col.doc('tests').get()]);
+      const snaps = await Promise.all([...DATA.subjects.map(s => col.doc('fc-' + s.code).get()), col.doc('tests').get(), col.doc('daily').get()]);
+      const dd = snaps[snaps.length-1].data(); this.daily = (dd && dd.d) ? {d: dd.d, goal: dd.goal || 50} : lsRaw('daily', {d: {}, goal: 50});
       DATA.subjects.forEach((s, i) => { const d = snaps[i].data(); this.fc[s.code] = (d && d.k) || ls('fc-' + s.code, {}); });
-      const t = snaps[snaps.length-1].data(); this.tests = (t && t.list) || ls('tests', []);
+      const t = snaps[snaps.length-2].data(); this.tests = (t && t.list) || ls('tests', []);
     } else {
       for (const s of DATA.subjects) this.fc[s.code] = ls('fc-' + s.code, {});
       this.tests = ls('tests', []);
+      this.daily = lsRaw('daily', {d: {}, goal: 50});
     }
     renderSync();
   },
   save(code) {
-    const body = code === 'tests' ? {list: this.tests} : {k: this.fc[code]};
-    const doc = code === 'tests' ? 'tests' : 'fc-' + code;
+    const body = code === 'tests' ? {list: this.tests} : code === 'daily' ? this.daily : {k: this.fc[code]};
+    const doc = (code === 'tests' || code === 'daily') ? code : 'fc-' + code;
     try { localStorage.setItem('atpl-' + doc, JSON.stringify(body)); } catch (e) {}
     if (!this.online) return;
     clearTimeout(this.pending.get(doc));
@@ -272,6 +278,7 @@ const store = {
     catch (e) { this.online = false; renderSync(); toast(T('savefail')); }
   }
 };
+function lsRaw(k, def) { try { const v = JSON.parse(localStorage.getItem('atpl-' + k)); return v && typeof v === 'object' ? v : def; } catch (e) { return def; } }
 function ls(k, def) { try { const v = JSON.parse(localStorage.getItem('atpl-' + k)); return v ? (v.k || v.list || def) : def; } catch (e) { return def; } }
 function renderSync() {
   const el = $('#sync'); if (!el) return;
@@ -289,7 +296,7 @@ function rate(code, key, grade) { // 0 nochmal, 1 schwer, 2 gut
   else if (grade === 1) { box = Math.max(1, box); e[2]++; }
   else { box = Math.min(MAXBOX, box + 1); e[2]++; }
   e[0] = box; e[1] = Date.now() + INTERVALS[box] * DAY;
-  store.fc[code][key] = e; store.save(code);
+  store.fc[code][key] = e; store.save(code); logActivity(1);
 }
 function markWrong(code, key) {
   const e = store.fc[code][key] || [0, 0, 0, 0];
@@ -300,6 +307,19 @@ function toggleMark(code, key) {
   const e = store.fc[code][key] || [0, 0, 0, 0, 0];
   while (e.length < 5) e.push(0);
   e[4] = e[4] ? 0 : 1; store.fc[code][key] = e; store.save(code);
+}
+function dayKey(ts = Date.now()) { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function logActivity(n) {
+  const k = dayKey(); const d = store.daily.d;
+  d[k] = (d[k] || 0) + n;
+  const keys = Object.keys(d).sort(); while (keys.length > 120) delete d[keys.shift()];
+  store.save('daily');
+}
+function streak() {
+  let n = 0, t = Date.now();
+  if (!store.daily.d[dayKey(t)]) t -= DAY; // heute noch nichts: Streak bis gestern zaehlt
+  while (store.daily.d[dayKey(t)]) { n++; t -= DAY; }
+  return n;
 }
 function qkey(tid, n) { return tid + '#' + n; }
 function cardStats(code, questions) {
@@ -367,6 +387,16 @@ function renderSubject() {
       h('button', {class:'btn-s', disabled: st.learned === 0, onclick: () => startCards(s, s.all, T('learnedCards'), 'learned')}, `${T('learnedCards')} (${st.learned})`),
       h('button', {class:'btn-g', onclick: () => startCards(s, s.all, T('whole'), 'all')}, T('allCards'))),
     h('p', {class:'note'}, T('learnedHint'), ' ', T('cardshint')),
+    (() => {
+      const weak = s.all.filter(q => { const e = entry(s.code, q.key); return e && e[3] > 0; }).sort((a, b) => { const ea = entry(s.code, a.key), eb = entry(s.code, b.key); return (eb[3] - eb[2]) - (ea[3] - ea[2]) || eb[3] - ea[3]; }).slice(0, 20);
+      return h('div', {class:'card', style:'gap:10px'},
+        h('div', {class:'row', style:'justify-content:space-between'}, h('h3', {}, T('weak'), weak.length ? ` (${weak.length})` : ''),
+          weak.length ? h('button', {class:'btn-p', onclick: () => { sess = {s, label: T('weak'), queue: shuffle(weak.slice()), src: weak, filter: 'all', i: 0, open: false, sel: new Set(), grades: [0,0,0], order: null, done: false}; go('cards'); }}, T('practiseAll')) : null),
+        h('div', {class:'note'}, weak.length ? T('weakHint') : T('weakNone')),
+        weak.length ? h('div', {class:'pt-list'}, weak.map(q => { const e = entry(s.code, q.key); return h('button', {class:'card btn', style:'gap:4px;padding:10px 12px', onclick: () => showQuestion(q)},
+          h('div', {class:'row', style:'justify-content:space-between'}, h('span', {class:'mono'}, q.key), h('span', {class:'tag fail'}, `${e[3]} ${T('errors')} · ${e[2]} ${T('correctS')}`)),
+          h('div', {style:'font-size:.95rem'}, q.q.length > 140 ? q.q.slice(0, 137) + '…' : q.q)); })) : null);
+    })(),
     h('h3', {}, T('pts')),
     h('div', {class:'pt-list'}, s.tests.map(t => {
       const mc = t.q.filter(q => q.o.length > 1).length;
@@ -399,8 +429,14 @@ function renderExam() {
   const ex = exam, it = ex.items[ex.i], q = it.q;
   const answered = ex.items.filter(x => x.sel.size).length;
   const timerEl = h('span', {class:'timer', hidden: !ex.timer});
+  const paceEl = h('span', {class:'note pace'});
   const updTimer = () => {
-    const left = ex.limit - Math.floor((Date.now() - ex.start) / 1000);
+    const elapsed = Math.floor((Date.now() - ex.start) / 1000);
+    const left = ex.limit - elapsed;
+    const target = Math.min(ex.items.length, Math.floor(elapsed / 60) + 1);
+    const diff = Math.round((target - (ex.i + 1)) );
+    paceEl.textContent = T('pacing', {n: target}) + ' · ' + (diff > 0 ? T('behind', {m: diff}) : diff < 0 ? T('ahead', {m: -diff}) : T('onTime'));
+    paceEl.style.color = diff > 2 ? 'var(--bad)' : diff < -2 ? 'var(--good)' : 'var(--muted)';
     timerEl.textContent = fmtTime(Math.max(0, left));
     timerEl.classList.toggle('low', left < 300);
     if (left <= 0 && ex.timer) { clearInterval(ex.tick); finishExam(); }
@@ -414,7 +450,7 @@ function renderExam() {
     h('div', {class:'row', style:'justify-content:space-between'},
       h('div', {}, h('div', {class:'eyebrow'}, ex.s.name), h('h2', {}, ex.t.id, ' · ' + T('exam'))),
       h('div', {class:'row'},
-        timerEl,
+        timerEl, paceEl,
         h('label', {class:'chk'}, h('input', {type:'checkbox', id:'timer-on', checked: ex.timer, onchange: e => { ex.timer = e.target.checked; render(); }}), T('timer')),
         h('label', {class:'chk'}, h('input', {type:'checkbox', id:'count-on', checked: showCount, onchange: e => setShowCount(e.target.checked)}), T('showCount')))),
     h('div', {class:'q'},
@@ -443,7 +479,7 @@ function finishExam() {
     it.ok = want === got; if (it.ok) right++; else markWrong(ex.s.code, it.q.key);
   }
   const res = {ts: Date.now(), code: ex.s.code, pt: ex.t.id, n: ex.items.length, right, pct: right / ex.items.length * 100, dur: Math.round((Date.now() - ex.start) / 1000), wrong: ex.items.filter(it => !it.ok).map(it => it.q.key)};
-  store.tests.push(res); if (store.tests.length > 300) store.tests = store.tests.slice(-300); store.save('tests');
+  store.tests.push(res); if (store.tests.length > 300) store.tests = store.tests.slice(-300); store.save('tests'); logActivity(ex.items.length);
   ctx = {res}; view = 'result'; render(); window.scrollTo(0, 0);
 }
 function renderResult() {
@@ -480,7 +516,9 @@ function showItem(it, k) {
         const cls = isA && ch ? ' ok' : ch ? ' wrong' : isA ? ' miss' : '';
         return h('div', {class:'opt' + cls}, h('span', {class:'l'}, L[pos] + ')'), h('span', {}, q.o[oi]));
       })),
-      h('button', {class:'btn-p', onclick: () => bg.remove()}, T('close'))));
+      h('div', {class:'row'},
+        (() => { const code = exam.s.code; const mb = h('button', {class:'btn-s', onclick: () => { toggleMark(code, q.key); it.flag = isMarked(code, q.key); mb.textContent = it.flag ? T('marked1') : T('mark'); }}, isMarked(code, q.key) ? T('marked1') : T('mark')); return mb; })(),
+        h('button', {class:'btn-p', onclick: () => bg.remove()}, T('close')))));
   document.body.append(bg);
 }
 
@@ -524,9 +562,60 @@ function greeting() {
         h('button', {class:'btn-g', onclick: () => setName('')}, T('nameSkip'))),
       h('div', {class:'quote'}, quote));
   }
+  const today = store.daily.d[dayKey()] || 0, goal = store.daily.goal || 50, st = streak();
+  const goalSel = h('select', {class:'langsel', 'aria-label': T('goalLbl'), onchange: e => { store.daily.goal = +e.target.value; store.save('daily'); render(); }},
+    [20, 30, 50, 75, 100, 150].map(g => h('option', {value: g, selected: g === goal}, g)));
   return h('div', {class:'greet'},
     h('div', {class:'hello'}, userName ? T('hello', {n: userName}) : T('helloNo'), ' ', h('button', {class:'btn-g', style:'padding:2px 6px;font-size:.75rem', onclick: () => { try { localStorage.removeItem('atpl-name-asked'); } catch (e) {} userName = ''; render(); }}, T('editName'))),
-    h('div', {class:'quote'}, quote));
+    h('div', {class:'quote'}, quote),
+    h('div', {class:'goal'},
+      h('div', {class:'meter', style:'flex:1;min-width:120px'}, h('b', {style:`width:${Math.min(100, today/goal*100)}%`})),
+      h('span', {class:'stats'}, h('span', {}, h('strong', {}, today), ' / ', h('strong', {}, goal), today >= goal ? ' ✓ ' + T('goalDone') : ''), h('span', {}, h('strong', {}, st), ' ', st === 1 ? T('streak1').replace('1 ', '') : T('streak', {n: ''}).trim())),
+      h('label', {class:'note'}, T('goalLbl'), ' ', goalSel)),
+    searchBox());
+}
+let searchQ = '';
+function searchBox() {
+  const inp = h('input', {type:'search', id:'q-search', class:'name-in', style:'width:100%;max-width:420px', placeholder: T('searchPh'), value: searchQ, oninput: e => { searchQ = e.target.value; renderSearch(); }});
+  const out = h('div', {id:'search-out', class:'pt-list'});
+  return h('div', {class:'searchbox'}, h('label', {class:'eyebrow', for:'q-search'}, T('search')), inp, out);
+}
+function renderSearch() {
+  const out = $('#search-out'); if (!out) return;
+  out.innerHTML = '';
+  const q = searchQ.trim(); if (q.length < 2) return;
+  const idm = q.toUpperCase().replace(/\s+/g, '').match(/^([A-Z0-9]+-PT\d+)#?(\d+)?$/);
+  let hits = [];
+  if (idm) {
+    for (const [k, qq] of QBYKEY) if (k.startsWith(idm[1] + '#') && (!idm[2] || k === idm[1] + '#' + idm[2])) hits.push(qq);
+  } else {
+    const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    for (const qq of QBYKEY.values()) { const t = (qq.q + ' ' + qq.o.join(' ')).toLowerCase(); if (words.every(w => t.includes(w))) hits.push(qq); }
+  }
+  hits.sort((a, b) => a.key.localeCompare(b.key, undefined, {numeric: true}));
+  out.append(h('div', {class:'note'}, hits.length ? T('results', {n: hits.length}) + (hits.length > 30 ? ', ' + T('showMore') : '') : T('noresults')));
+  for (const qq of hits.slice(0, 30)) {
+    const code = qq.key.split('-')[0].replace(/\d+$/, '');
+    out.append(h('button', {class:'card btn', style:'gap:4px', onclick: () => showQuestion(qq)},
+      h('div', {class:'row', style:'justify-content:space-between'}, h('span', {class:'mono'}, qq.key), isMarked(subjectOf(qq).code, qq.key) && h('span', {class:'tag flag'}, '★')),
+      h('div', {}, qq.q.length > 160 ? qq.q.slice(0, 157) + '…' : qq.q)));
+  }
+}
+function subjectOf(q) { return DATA.subjects.find(s => s.tests.some(t => t.id === q.tid)); }
+function showQuestion(q) {
+  const s = subjectOf(q), mc = q.o.length > 1, e = entry(s.code, q.key);
+  const bg = h('div', {class:'modal-bg', onclick: ev => { if (ev.target === bg) bg.remove(); }});
+  const markBtn = h('button', {class:'btn-s', onclick: () => { toggleMark(s.code, q.key); markBtn.textContent = isMarked(s.code, q.key) ? T('marked1') : T('mark'); }}, isMarked(s.code, q.key) ? T('marked1') : T('mark'));
+  bg.append(h('div', {class:'modal', role:'dialog', 'aria-modal': true},
+    h('div', {class:'row', style:'justify-content:space-between'},
+      h('span', {class:'eyebrow'}, s.name, ' · ', h('span', {class:'mono'}, q.key)),
+      e && (e[2] || e[3]) ? h('span', {class:'tag'}, `${e[3]} ${T('errors')} · ${e[2]} ${T('correctS')}`) : null),
+    h('div', {class:'text'}, q.q),
+    q.img && h('div', {class:'img'}, T('img') + q.img),
+    mc && h('div', {class:'opts'}, q.o.map((o, i) => h('div', {class:'opt' + (q.a.includes(i) ? ' ok' : '')}, h('span', {class:'l'}, LET[i] + ')'), h('span', {}, o)))),
+    !mc && h('div', {}, h('div', {class:'lbl corr'}, T('correctA')), h('div', {class:'ans corr'}, q.o[q.a[0]])),
+    h('div', {class:'row'}, markBtn, h('button', {class:'btn-p', onclick: () => bg.remove()}, T('close')))));
+  document.body.append(bg);
 }
 let showCount = true;
 try { showCount = localStorage.getItem('atpl-showcount') !== '0'; } catch (e) {}
