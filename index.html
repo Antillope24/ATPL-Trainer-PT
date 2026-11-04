@@ -216,7 +216,7 @@ function renderNav() {
   $('#hdr-count').textContent = DATA ? DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ' + T('questions') : '';
 }
 
-const VERSION = '2026.11.04-1044';
+const VERSION = '2026.11.04-1047';
 $('#ver').textContent = 'v' + VERSION;
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
@@ -544,15 +544,45 @@ const QUOTES = [
   'Keep the blue side up and the box count rising.',
   'Fifty questions a day keeps the resit away.',
   'Trust your instruments, verify your knowledge.',
-  'Slow is smooth, smooth is fast. Learn it right the first time.'
+  'Slow is smooth, smooth is fast. Learn it right the first time.',
+  'Fly the aircraft first. Pass the exam first. Everything else can wait.',
+  'There are old pilots and bold pilots. The old ones did their revision.',
+  'A good landing is one you can walk away from. A great one is when you can use the aircraft again. A great exam is 75 % plus.',
+  'Stay ahead of the aircraft. Stay ahead of the syllabus.',
+  'Never let an aircraft take you somewhere your brain did not get to five minutes earlier.',
+  'Runway behind you, altitude above you and questions you skipped are of no use at all.',
+  'Expect the unexpected. Then open the question bank anyway.',
+  'The checklist is not a suggestion. Neither is the daily goal.',
+  'Learn from the mistakes of others. You will not live long enough to make them all yourself. Your flashcards are those mistakes.',
+  'It is better to be on the ground wishing you were in the air than in the exam wishing you had studied.',
+  'Speed is life, altitude is life insurance, knowledge is the premium.',
+  'Any pilot can fly in good weather. Any student can pass an easy PT.',
+  'Gear down, flaps set, brain on.',
+  'Cleared for takeoff. Wind calm, visibility unlimited, 45 questions ahead.',
+  'Read back, hear back, learn back.',
+  'The further ahead you think, the slower the aircraft seems to go. Same with exams.',
+  'Every expert was once a student who did not quit after a failed PT.',
+  'Minimum fuel is a warning. Minimum study is a failure.',
+  'Pitch plus power equals performance. Time plus repetition equals pass.',
+  'Nobody remembers the question they skipped. The examiner does.',
+  'If in doubt, there is no doubt. Review it again.',
+  'Flying is hours of boredom punctuated by moments of terror. Studying is the boredom part. Embrace it.',
+  'Crosscheck, verify, confirm. Then click Gut.',
+  'Before takeoff: brief. Before the exam: revise. Before you quit: one more card.',
+  'Headwind on the ground, tailwind in your head. Keep going.',
+  'Push the box count, not the luck.',
+  'What the hand does, the mind remembers. Tap through the cards.',
+  'Ceiling and visibility unlimited starts with a clear head and a full night of sleep.',
+  'Wheels up. Books open.'
 ];
+let lastQuote = -1;
 let userName = '';
 try { userName = localStorage.getItem('atpl-name') || ''; } catch (e) {}
 function setName(n) { userName = n.trim(); try { localStorage.setItem('atpl-name', userName); localStorage.setItem('atpl-name-asked', '1'); } catch (e) {} render(); }
 function nameAsked() { try { return localStorage.getItem('atpl-name-asked') === '1'; } catch (e) { return true; } }
 function greeting() {
-  const day = Math.floor(Date.now() / DAY);
-  const quote = QUOTES[day % QUOTES.length];
+  let qi; do { qi = Math.floor(Math.random() * QUOTES.length); } while (qi === lastQuote && QUOTES.length > 1);
+  lastQuote = qi; const quote = QUOTES[qi];
   if (!userName && !nameAsked()) {
     const inp = h('input', {type:'text', id:'name-in', class:'name-in', placeholder:'Name', maxlength:'30', autocomplete:'given-name'});
     return h('div', {class:'greet'},
