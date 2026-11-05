@@ -95,36 +95,27 @@ input[type=range]{width:100%}
 .ok{color:var(--good)}.no{color:var(--bad)}
 svg text{font-family:var(--body)}
 </style>
-
 <header><div class="bar">
-  <h1>Air Law Explorer</h1>
-  <nav id="nav">
-    <button class="chip" data-v="home">Start</button>
-    <button class="chip" data-v="air">Luftraumklassen</button>
-    <button class="chip" data-v="vmc">VMC Rechner</button>
-    <button class="chip soon" data-v="soon">Flugflächen</button>
-    <button class="chip soon" data-v="soon">Ausweichregeln</button>
-    <button class="chip soon" data-v="soon">Signale</button>
-    <button class="chip soon" data-v="soon">Lizenzen</button>
-    <button class="chip soon" data-v="soon">ICAO</button>
-  </nav>
+  <h1 id="h-title">Air Law Explorer</h1>
+  <nav id="nav"></nav>
+  <select id="lang" class="chip" aria-label="Language"></select>
 </div></header>
 <main>
   <section class="view" id="v-home"><div class="wrap" id="home"></div></section>
   <section class="view" id="v-air" hidden>
     <div id="stage"></div><div class="tip" id="tip"></div>
     <div class="top">
-      <div class="pill seg" id="mode"><button aria-pressed="true" data-m="de">Deutschland</button><button aria-pressed="false" data-m="icao">ICAO A bis G</button></div>
+      <div class="pill seg" id="mode"><button aria-pressed="true" data-m="de"></button><button aria-pressed="false" data-m="icao"></button></div>
       <div class="views" id="views"></div>
     </div>
     <div class="drawer" id="drawer">
-      <div class="head"><div class="tabs"><button class="chip" id="tab-list" aria-pressed="true">Zonen</button><button class="chip" id="tab-info" aria-pressed="false">Daten</button><button class="chip" id="tab-cmp" aria-pressed="false">Vergleich</button><button class="chip" id="tab-help" aria-pressed="false">Hilfe</button></div><button class="btn-s" id="btn-close" aria-label="Panel schließen">✕</button></div>
+      <div class="head"><div class="tabs"><button class="chip" id="tab-list" aria-pressed="true"></button><button class="chip" id="tab-info" aria-pressed="false"></button><button class="chip" id="tab-cmp" aria-pressed="false"></button><button class="chip" id="tab-help" aria-pressed="false"></button></div><button class="btn-s" id="btn-close">✕</button></div>
       <div class="body" id="body"></div>
     </div>
-    <button class="fab" id="fab">Zonen und Daten</button>
+    <button class="fab" id="fab"></button>
   </section>
   <section class="view" id="v-vmc" hidden><div class="wrap" id="vmc"></div></section>
-  <section class="view" id="v-soon" hidden><div class="wrap"><h2>Kommt als Nächstes</h2><p class="muted">Dieses Modul ist geplant. Reihenfolge: Flugflächen und Halbkreisregel, Ausweichregeln, Signale, Lizenzen und Fristen, ICAO Struktur.</p></div></section>
+  <section class="view" id="v-soon" hidden><div class="wrap" id="soon"></div></section>
 </main>
 
 <script src="three.min.js"></script>
@@ -1178,110 +1169,344 @@ svg text{font-family:var(--body)}
 
 </script>
 <script>
+const I18N = {
+de: {
+  lang:'Deutsch', title:'Air Law Explorer', start:'Start', mAir:'Luftraumklassen', mVmc:'VMC Rechner', mFl:'Flugflächen', mRow:'Ausweichregeln', mSig:'Signale', mLic:'Lizenzen', mIcao:'ICAO',
+  soonT:'Kommt als Nächstes', soonP:'Dieses Modul ist geplant. Reihenfolge: Flugflächen und Halbkreisregel, Ausweichregeln, Signale, Lizenzen und Fristen, ICAO Struktur.',
+  homeEyebrow:'ATPL 010 Air Law', homeT:'Nachschlagen, anschauen, verstehen', homeP:'Die trockenen Teile von Air Law als interaktive Werkzeuge. Jedes Modul ist für das iPad gebaut und läuft offline. Zum Üben der passenden Fragen geht es in den ATPL Progress Trainer.',
+  module:'Modul', ready:'verfügbar', planned:'geplant', toTrainer:'Zum ATPL Progress Trainer',
+  mod:[['Luftraumklassen A bis G','ICAO Klassen und deutsche Struktur in 3D, Vergleichstabelle mit Freigabe, Staffelung, Funk, Transponder und VMC.'],['VMC Minima Rechner','Luftraum, Höhe und Geschwindigkeit einstellen, Flugsicht und Wolkenabstand ablesen, mit Skizze.'],['Flugflächen und Halbkreisregel','Kurs drehen, erlaubte Flugflächen sehen, Transition Altitude und Level, RVSM.'],['Ausweichregeln','Szenen von oben: wer weicht aus? Mit Positionslichtern bei Nacht.'],['Signale und Zeichen','Lichtsignale, Bodensignale, Abfangsignale, Marshalling.'],['Lizenzen, Medical, Fristen','Zeitleiste mit Gültigkeiten und Recency nach Part-FCL und Part-MED.'],['ICAO und Annexe','Chicago Convention, 19 Annexe, Freiheiten der Luft.']],
+  germany:'Deutschland', icao:'ICAO A bis G', zones:'Zonen', data:'Daten', compare:'Vergleich', help:'Hilfe', close:'Panel schließen', fab:'Zonen und Daten',
+  views:['Übersicht','Von vorn','Flughafen','TMZ + CTR','Alpen','Von oben'], viewsIcao:['Übersicht','Von vorn','Unten (E bis G)','Oben (A bis C)'],
+  hintIcao:'Die sieben ICAO Klassen als Stapel, A oben, G unten (schematisch, nicht maßstäblich). Antippen zeigt die Regeln.', hintDe:'Antippen zeigt die Daten und fliegt die Kamera hin. Das Auge blendet die Zone aus.',
+  showAll:'Alle einblenden', groundOnly:'Nur Bodenzonen', noSel:'Keine Zone gewählt', noSelP:'Tippe im 3D Bild auf ein Volumen oder wähle eine Zone aus der Liste.', cls:'Luftraumklasse',
+  fly:'Kamera hinfliegen', clear:'Auswahl aufheben', practise:'Dazu üben im Trainer',
+  cmpHint:'Alle sieben Klassen nach SERA / ICAO Annex 11. Spalte antippen markiert sie im 3D Bild (ICAO Ansicht).',
+  cmpMemo:'Merkhilfe: Von A nach G nimmt die Kontrolle ab. A bis D: Freigabe für alle. E: nur IFR braucht Freigabe. F und G: unkontrolliert. Staffelung aller Flüge nur in A und B.',
+  helpT:'Bedienung', help1:'iPad: ein Finger drehen, zwei Finger zoomen oder verschieben, kurz antippen wählt eine Zone. Rechner: linke Maustaste drehen, Mausrad zoomen, rechte Maustaste verschieben.', help2:'Oben links schaltest du zwischen der deutschen Struktur (DFS Schema 08/2016, Höhen 3-fach überhöht) und dem ICAO Stapel A bis G um.', help3:'Quellen: SERA.5001 und SERA.6001, ICAO Annex 2 und 11, AIP Germany. Werte vor der Prüfung gegenchecken.',
+  rows:{flights:'Flugarten', clr:'Freigabe', sep:'Staffelung', ti:'Verkehrsinformation', radio:'Funk', tx:'Transponder', spd:'Geschwindigkeit', vmc:'VMC Minima', de:'In Deutschland'},
+  vmcT:'VMC Minima Rechner', vmcP:'Sichtflugwetterbedingungen nach SERA.5001. Stell Luftraum, Höhe und Geschwindigkeit ein, die Minima und die Skizze passen sich an.',
+  fCls:'Luftraumklasse', notDe:' (nicht in DE)', fAlt:'Höhe', fSpd:'Geschwindigkeit', aeroplane:'Flugzeug', heli:'Hubschrauber', noVfr:'VFR nicht möglich', noVfrP:'In Luftraum A ist VFR nicht erlaubt.',
+  vis:'Flugsicht', cloud:'Abstand zu Wolken', free:'frei', freeP:'von Wolken, Erdsicht', cloudP:'horizontal, 1000 ft vertikal', rule:'Regel',
+  vmcNote:'Zusätzlich gilt in Kontrollzonen: Bodensicht mindestens 5 km und Hauptwolkenuntergrenze mindestens 1500 ft, sonst nur Sonder-VFR. Nacht-VFR: Deutschland verlangt Flugsicht 5 km und 1500 m / 1000 ft auch in G.',
+  bandFL:'Ab FL 100 (10 000 ft)', bandLow:'Unter 3000 ft AMSL / 1000 ft AGL, Klasse ', bandMid:'Unter FL 100 und über 3000 ft AMSL / 1000 ft AGL', ruleAll:'SERA.5001, alle Klassen', ruleNat:'SERA.5001 mit nationaler Ausnahme',
+  heliX:'Hubschrauber: 800 m, wenn so langsam geflogen wird, dass anderer Verkehr und Hindernisse rechtzeitig erkannt werden.', slowX:'Flugzeuge bis 140 kt IAS: 1500 m zulässig (Deutschland), wenn Verkehr und Hindernisse rechtzeitig erkannt werden können.',
+  memoT:'Merktabelle SERA.5001', memoH:['Höhenband','Klasse','Flugsicht','Wolkenabstand'], memoR:[['ab FL 100','A bis G','8 km','1500 m / 1000 ft'],['unter FL 100, über 3000 ft AMSL oder 1000 ft AGL','A bis G','5 km','1500 m / 1000 ft'],['unter 3000 ft AMSL oder 1000 ft AGL','B bis E','5 km','1500 m / 1000 ft'],['unter 3000 ft AMSL oder 1000 ft AGL','F und G','5 km (1,5 km bei ≤140 kt, Hubschrauber 800 m)','frei von Wolken, Erdsicht']],
+  svgVis:'Flugsicht', svgH:'1500 m horizontal', svgV:'1000 ft vertikal', svgFree:'frei von Wolken', svgGround:'Erdsicht',
+  noThree:'3D Bibliothek nicht geladen', noThreeP:'Internetverbindung prüfen und neu laden.',
+  k:{lower:'Untergrenze', upper:'Obergrenze', clr:'Freigabe', sep:'Staffelung', tx:'Transponder', vmc:'VMC', note:'Hinweis', radio:'Funk'},
+},
+en: {
+  lang:'English', title:'Air Law Explorer', start:'Home', mAir:'Airspace classes', mVmc:'VMC calculator', mFl:'Flight levels', mRow:'Right of way', mSig:'Signals', mLic:'Licences', mIcao:'ICAO',
+  soonT:'Coming next', soonP:'This module is planned. Order: flight levels and semicircular rule, right of way, signals, licences and validity, ICAO structure.',
+  homeEyebrow:'ATPL 010 Air Law', homeT:'Look it up, see it, understand it', homeP:'The dry parts of Air Law as interactive tools. Every module is built for the iPad and works offline. To practise the matching questions, go to the ATPL Progress Trainer.',
+  module:'Module', ready:'available', planned:'planned', toTrainer:'Open ATPL Progress Trainer',
+  mod:[['Airspace classes A to G','ICAO classes and the German structure in 3D, comparison table with clearance, separation, radio, transponder and VMC.'],['VMC minima calculator','Set airspace, altitude and speed, read flight visibility and cloud clearance, with a sketch.'],['Flight levels and semicircular rule','Turn the heading, see the allowed flight levels, transition altitude and level, RVSM.'],['Right of way','Scenes from above: who gives way? With navigation lights at night.'],['Signals','Light signals, ground signals, interception signals, marshalling.'],['Licences, medical, validity','Timeline with validity periods and recency under Part-FCL and Part-MED.'],['ICAO and annexes','Chicago Convention, 19 annexes, freedoms of the air.']],
+  germany:'Germany', icao:'ICAO A to G', zones:'Zones', data:'Data', compare:'Compare', help:'Help', close:'Close panel', fab:'Zones and data',
+  views:['Overview','From the front','Airport','TMZ + CTR','Alps','From above'], viewsIcao:['Overview','From the front','Lower (E to G)','Upper (A to C)'],
+  hintIcao:'The seven ICAO classes as a stack, A on top, G at the bottom (schematic, not to scale). Tap to see the rules.', hintDe:'Tap to show the data and fly the camera there. The eye hides a zone.',
+  showAll:'Show all', groundOnly:'Ground zones only', noSel:'No zone selected', noSelP:'Tap a volume in the 3D view or pick a zone from the list.', cls:'Airspace class',
+  fly:'Fly camera there', clear:'Clear selection', practise:'Practise in the trainer',
+  cmpHint:'All seven classes per SERA / ICAO Annex 11. Tap a column to highlight it in the 3D view (ICAO mode).',
+  cmpMemo:'Memory hook: control decreases from A to G. A to D: clearance for everyone. E: only IFR needs a clearance. F and G: uncontrolled. Separation of all flights only in A and B.',
+  helpT:'Controls', help1:'iPad: one finger rotates, two fingers zoom or pan, a short tap selects a zone. Desktop: left mouse rotates, wheel zooms, right mouse pans.', help2:'Top left switches between the German structure (DFS schematic 08/2016, heights exaggerated 3x) and the ICAO stack A to G.', help3:'Sources: SERA.5001 and SERA.6001, ICAO Annex 2 and 11, AIP Germany. Verify values before the exam.',
+  rows:{flights:'Flights', clr:'Clearance', sep:'Separation', ti:'Traffic information', radio:'Radio', tx:'Transponder', spd:'Speed limit', vmc:'VMC minima', de:'In Germany'},
+  vmcT:'VMC minima calculator', vmcP:'Visual meteorological conditions per SERA.5001. Set airspace, altitude and speed; minima and sketch update.',
+  fCls:'Airspace class', notDe:' (not in DE)', fAlt:'Altitude', fSpd:'Speed', aeroplane:'Aeroplane', heli:'Helicopter', noVfr:'VFR not possible', noVfrP:'VFR is not permitted in class A.',
+  vis:'Flight visibility', cloud:'Distance from cloud', free:'clear', freeP:'of cloud, surface in sight', cloudP:'horizontally, 1000 ft vertically', rule:'Rule',
+  vmcNote:'In control zones additionally: ground visibility at least 5 km and ceiling at least 1500 ft, otherwise special VFR only. Night VFR: Germany requires 5 km and 1500 m / 1000 ft in class G too.',
+  bandFL:'At or above FL 100 (10 000 ft)', bandLow:'Below 3000 ft AMSL / 1000 ft AGL, class ', bandMid:'Below FL 100 and above 3000 ft AMSL / 1000 ft AGL', ruleAll:'SERA.5001, all classes', ruleNat:'SERA.5001 with national exemption',
+  heliX:'Helicopters: 800 m if flown at a speed that gives adequate opportunity to observe other traffic and obstacles.', slowX:'Aeroplanes up to 140 kt IAS: 1500 m permitted (Germany) if traffic and obstacles can be seen in time.',
+  memoT:'Memory table SERA.5001', memoH:['Altitude band','Class','Flight visibility','Distance from cloud'], memoR:[['at or above FL 100','A to G','8 km','1500 m / 1000 ft'],['below FL 100, above 3000 ft AMSL or 1000 ft AGL','A to G','5 km','1500 m / 1000 ft'],['below 3000 ft AMSL or 1000 ft AGL','B to E','5 km','1500 m / 1000 ft'],['below 3000 ft AMSL or 1000 ft AGL','F and G','5 km (1.5 km at ≤140 kt, helicopters 800 m)','clear of cloud, surface in sight']],
+  svgVis:'Flight visibility', svgH:'1500 m horizontal', svgV:'1000 ft vertical', svgFree:'clear of cloud', svgGround:'surface in sight',
+  noThree:'3D library not loaded', noThreeP:'Check the internet connection and reload.',
+  k:{lower:'Lower limit', upper:'Upper limit', clr:'Clearance', sep:'Separation', tx:'Transponder', vmc:'VMC', note:'Note', radio:'Radio'},
+},
+fr: {
+  lang:'Français', title:'Air Law Explorer', start:'Accueil', mAir:'Classes d’espace', mVmc:'Calculateur VMC', mFl:'Niveaux de vol', mRow:'Priorités', mSig:'Signaux', mLic:'Licences', mIcao:'OACI',
+  soonT:'À venir', soonP:'Ce module est prévu. Ordre : niveaux de vol et règle semi-circulaire, priorités, signaux, licences et validités, structure OACI.',
+  homeEyebrow:'ATPL 010 Air Law', homeT:'Consulter, visualiser, comprendre', homeP:'Les parties arides du droit aérien sous forme d’outils interactifs. Chaque module est conçu pour l’iPad et fonctionne hors ligne. Pour s’entraîner sur les questions, direction l’ATPL Progress Trainer.',
+  module:'Module', ready:'disponible', planned:'prévu', toTrainer:'Ouvrir l’ATPL Progress Trainer',
+  mod:[['Classes d’espace A à G','Classes OACI et structure allemande en 3D, tableau comparatif : clairance, séparation, radio, transpondeur et VMC.'],['Calculateur de minima VMC','Régler l’espace, l’altitude et la vitesse, lire la visibilité en vol et la distance aux nuages, avec schéma.'],['Niveaux de vol et règle semi-circulaire','Tourner le cap, voir les niveaux autorisés, altitude et niveau de transition, RVSM.'],['Règles de priorité','Scènes vues de dessus : qui s’écarte ? Avec feux de navigation la nuit.'],['Signaux','Signaux lumineux, signaux au sol, interception, signaux de guidage au sol.'],['Licences, médical, validités','Frise avec validités et expérience récente selon Part-FCL et Part-MED.'],['OACI et annexes','Convention de Chicago, 19 annexes, libertés de l’air.']],
+  germany:'Allemagne', icao:'OACI A à G', zones:'Zones', data:'Données', compare:'Comparer', help:'Aide', close:'Fermer le panneau', fab:'Zones et données',
+  views:['Vue d’ensemble','De face','Aéroport','TMZ + CTR','Alpes','Vue de dessus'], viewsIcao:['Vue d’ensemble','De face','Bas (E à G)','Haut (A à C)'],
+  hintIcao:'Les sept classes OACI empilées, A en haut, G en bas (schéma, pas à l’échelle). Toucher pour voir les règles.', hintDe:'Toucher affiche les données et déplace la caméra. L’œil masque la zone.',
+  showAll:'Tout afficher', groundOnly:'Zones au sol seulement', noSel:'Aucune zone choisie', noSelP:'Touchez un volume dans la vue 3D ou choisissez une zone dans la liste.', cls:'Classe d’espace',
+  fly:'Déplacer la caméra', clear:'Annuler la sélection', practise:'S’entraîner dans le trainer',
+  cmpHint:'Les sept classes selon SERA / Annexe 11 OACI. Toucher une colonne la met en évidence dans la vue 3D (mode OACI).',
+  cmpMemo:'Repère : le contrôle diminue de A à G. A à D : clairance pour tous. E : seul l’IFR a besoin d’une clairance. F et G : non contrôlé. Séparation de tous les vols uniquement en A et B.',
+  helpT:'Commandes', help1:'iPad : un doigt tourne, deux doigts zooment ou déplacent, un appui bref sélectionne une zone. Ordinateur : bouton gauche tourne, molette zoome, bouton droit déplace.', help2:'En haut à gauche, bascule entre la structure allemande (schéma DFS 08/2016, hauteurs exagérées 3x) et la pile OACI A à G.', help3:'Sources : SERA.5001 et SERA.6001, Annexes 2 et 11 OACI, AIP Allemagne. Vérifier les valeurs avant l’examen.',
+  rows:{flights:'Vols', clr:'Clairance', sep:'Séparation', ti:'Information de trafic', radio:'Radio', tx:'Transpondeur', spd:'Limite de vitesse', vmc:'Minima VMC', de:'En Allemagne'},
+  vmcT:'Calculateur de minima VMC', vmcP:'Conditions météorologiques de vol à vue selon SERA.5001. Réglez l’espace, l’altitude et la vitesse ; les minima et le schéma se mettent à jour.',
+  fCls:'Classe d’espace', notDe:' (pas en DE)', fAlt:'Altitude', fSpd:'Vitesse', aeroplane:'Avion', heli:'Hélicoptère', noVfr:'VFR impossible', noVfrP:'Le VFR n’est pas autorisé en classe A.',
+  vis:'Visibilité en vol', cloud:'Distance aux nuages', free:'hors', freeP:'des nuages, sol en vue', cloudP:'horizontalement, 1000 ft verticalement', rule:'Règle',
+  vmcNote:'En zone de contrôle en plus : visibilité au sol d’au moins 5 km et plafond d’au moins 1500 ft, sinon VFR spécial uniquement. VFR de nuit : l’Allemagne exige 5 km et 1500 m / 1000 ft aussi en G.',
+  bandFL:'À partir du FL 100 (10 000 ft)', bandLow:'Sous 3000 ft AMSL / 1000 ft AGL, classe ', bandMid:'Sous le FL 100 et au-dessus de 3000 ft AMSL / 1000 ft AGL', ruleAll:'SERA.5001, toutes classes', ruleNat:'SERA.5001 avec exemption nationale',
+  heliX:'Hélicoptères : 800 m si la vitesse permet de voir le trafic et les obstacles à temps.', slowX:'Avions jusqu’à 140 kt IAS : 1500 m admis (Allemagne) si le trafic et les obstacles peuvent être vus à temps.',
+  memoT:'Tableau mémo SERA.5001', memoH:['Bande d’altitude','Classe','Visibilité en vol','Distance aux nuages'], memoR:[['à partir du FL 100','A à G','8 km','1500 m / 1000 ft'],['sous le FL 100, au-dessus de 3000 ft AMSL ou 1000 ft AGL','A à G','5 km','1500 m / 1000 ft'],['sous 3000 ft AMSL ou 1000 ft AGL','B à E','5 km','1500 m / 1000 ft'],['sous 3000 ft AMSL ou 1000 ft AGL','F et G','5 km (1,5 km à ≤140 kt, hélicoptères 800 m)','hors des nuages, sol en vue']],
+  svgVis:'Visibilité', svgH:'1500 m horizontal', svgV:'1000 ft vertical', svgFree:'hors des nuages', svgGround:'sol en vue',
+  noThree:'Bibliothèque 3D non chargée', noThreeP:'Vérifier la connexion et recharger.',
+  k:{lower:'Limite inférieure', upper:'Limite supérieure', clr:'Clairance', sep:'Séparation', tx:'Transpondeur', vmc:'VMC', note:'Remarque', radio:'Radio'},
+}
+};
+
+/* Klassen A bis G, je Sprache */
+const CLASSES_L = {
+de: [
+  {c:'A', flights:'nur IFR', clr:'ja', sep:'alle Flüge voneinander', ti:'nicht nötig (alle gestaffelt)', radio:'ständig', tx:'ja', spd:'keine', vmc:'VFR nicht erlaubt', de:'In Deutschland nicht verwendet'},
+  {c:'B', flights:'IFR und VFR', clr:'ja', sep:'alle Flüge voneinander', ti:'nicht nötig', radio:'ständig', tx:'ja', spd:'keine', vmc:'8 km ab FL 100, sonst 5 km; 1500 m / 1000 ft', de:'In Deutschland nicht verwendet'},
+  {c:'C', flights:'IFR und VFR', clr:'ja', sep:'IFR von IFR und VFR; VFR von IFR', ti:'VFR/VFR', radio:'ständig', tx:'ja', spd:'VFR 250 kt IAS unter FL 100', vmc:'8 km ab FL 100, sonst 5 km; 1500 m / 1000 ft', de:'Oberer Luftraum ab FL 100 (Alpen FL 130), um große Flughäfen'},
+  {c:'D', flights:'IFR und VFR', clr:'ja', sep:'IFR von IFR', ti:'IFR/VFR und VFR/VFR', radio:'ständig', tx:'ja', spd:'250 kt IAS unter FL 100', vmc:'5 km; 1500 m / 1000 ft (CTR: Bodensicht 5 km, Ceiling 1500 ft)', de:'Kontrollzonen, Teile um Flughäfen'},
+  {c:'E', flights:'IFR und VFR', clr:'IFR ja, VFR nein', sep:'IFR von IFR', ti:'soweit möglich', radio:'IFR ständig, VFR nicht nötig', tx:'motorgetriebene VFR über 5000 ft AMSL / 3500 ft AGL', spd:'250 kt IAS unter FL 100', vmc:'8 km ab FL 100, sonst 5 km; 1500 m / 1000 ft', de:'Standard zwischen 2500 ft AGL (bzw. 1000/1700 ft) und FL 100'},
+  {c:'F', flights:'IFR und VFR', clr:'nein (Flugverkehrsberatung)', sep:'IFR von IFR, soweit möglich (advisory)', ti:'Fluginformation', radio:'IFR ständig, VFR nicht nötig', tx:'nein', spd:'250 kt IAS unter FL 100', vmc:'wie G', de:'In Deutschland nicht verwendet'},
+  {c:'G', flights:'IFR und VFR', clr:'nein', sep:'keine', ti:'Fluginformation soweit möglich', radio:'nicht nötig (außer RMZ)', tx:'nein (außer TMZ)', spd:'250 kt IAS unter FL 100', vmc:'ab FL 100: 8 km; über 3000 ft AMSL / 1000 ft AGL: 5 km, 1500 m / 1000 ft; darunter: 5 km (1,5 km bei ≤140 kt), frei von Wolken, Erdsicht', de:'Vom Boden bis 2500 ft AGL (bzw. 1000/1700 ft)'}],
+en: [
+  {c:'A', flights:'IFR only', clr:'yes', sep:'all flights from each other', ti:'not needed (all separated)', radio:'continuous', tx:'yes', spd:'none', vmc:'VFR not permitted', de:'Not used in Germany'},
+  {c:'B', flights:'IFR and VFR', clr:'yes', sep:'all flights from each other', ti:'not needed', radio:'continuous', tx:'yes', spd:'none', vmc:'8 km at/above FL 100, else 5 km; 1500 m / 1000 ft', de:'Not used in Germany'},
+  {c:'C', flights:'IFR and VFR', clr:'yes', sep:'IFR from IFR and VFR; VFR from IFR', ti:'VFR/VFR', radio:'continuous', tx:'yes', spd:'VFR 250 kt IAS below FL 100', vmc:'8 km at/above FL 100, else 5 km; 1500 m / 1000 ft', de:'Upper airspace from FL 100 (Alps FL 130), around major airports'},
+  {c:'D', flights:'IFR and VFR', clr:'yes', sep:'IFR from IFR', ti:'IFR/VFR and VFR/VFR', radio:'continuous', tx:'yes', spd:'250 kt IAS below FL 100', vmc:'5 km; 1500 m / 1000 ft (CTR: ground visibility 5 km, ceiling 1500 ft)', de:'Control zones, parts around airports'},
+  {c:'E', flights:'IFR and VFR', clr:'IFR yes, VFR no', sep:'IFR from IFR', ti:'as far as practicable', radio:'IFR continuous, VFR not required', tx:'powered VFR above 5000 ft AMSL / 3500 ft AGL', spd:'250 kt IAS below FL 100', vmc:'8 km at/above FL 100, else 5 km; 1500 m / 1000 ft', de:'Standard between 2500 ft AGL (or 1000/1700 ft) and FL 100'},
+  {c:'F', flights:'IFR and VFR', clr:'no (advisory service)', sep:'IFR from IFR as far as practicable (advisory)', ti:'flight information', radio:'IFR continuous, VFR not required', tx:'no', spd:'250 kt IAS below FL 100', vmc:'as G', de:'Not used in Germany'},
+  {c:'G', flights:'IFR and VFR', clr:'no', sep:'none', ti:'flight information as far as practicable', radio:'not required (except RMZ)', tx:'no (except TMZ)', spd:'250 kt IAS below FL 100', vmc:'at/above FL 100: 8 km; above 3000 ft AMSL / 1000 ft AGL: 5 km, 1500 m / 1000 ft; below: 5 km (1.5 km at ≤140 kt), clear of cloud, surface in sight', de:'Ground to 2500 ft AGL (or 1000/1700 ft)'}],
+fr: [
+  {c:'A', flights:'IFR seulement', clr:'oui', sep:'tous les vols entre eux', ti:'inutile (tous séparés)', radio:'permanente', tx:'oui', spd:'aucune', vmc:'VFR interdit', de:'Non utilisée en Allemagne'},
+  {c:'B', flights:'IFR et VFR', clr:'oui', sep:'tous les vols entre eux', ti:'inutile', radio:'permanente', tx:'oui', spd:'aucune', vmc:'8 km à partir du FL 100, sinon 5 km ; 1500 m / 1000 ft', de:'Non utilisée en Allemagne'},
+  {c:'C', flights:'IFR et VFR', clr:'oui', sep:'IFR des IFR et VFR ; VFR des IFR', ti:'VFR/VFR', radio:'permanente', tx:'oui', spd:'VFR 250 kt IAS sous le FL 100', vmc:'8 km à partir du FL 100, sinon 5 km ; 1500 m / 1000 ft', de:'Espace supérieur dès le FL 100 (Alpes FL 130), autour des grands aéroports'},
+  {c:'D', flights:'IFR et VFR', clr:'oui', sep:'IFR des IFR', ti:'IFR/VFR et VFR/VFR', radio:'permanente', tx:'oui', spd:'250 kt IAS sous le FL 100', vmc:'5 km ; 1500 m / 1000 ft (CTR : visibilité au sol 5 km, plafond 1500 ft)', de:'Zones de contrôle, parties autour des aéroports'},
+  {c:'E', flights:'IFR et VFR', clr:'IFR oui, VFR non', sep:'IFR des IFR', ti:'dans la mesure du possible', radio:'IFR permanente, VFR non requise', tx:'VFR motorisé au-dessus de 5000 ft AMSL / 3500 ft AGL', spd:'250 kt IAS sous le FL 100', vmc:'8 km à partir du FL 100, sinon 5 km ; 1500 m / 1000 ft', de:'Standard entre 2500 ft AGL (ou 1000/1700 ft) et le FL 100'},
+  {c:'F', flights:'IFR et VFR', clr:'non (service consultatif)', sep:'IFR des IFR dans la mesure du possible (consultatif)', ti:'information de vol', radio:'IFR permanente, VFR non requise', tx:'non', spd:'250 kt IAS sous le FL 100', vmc:'comme G', de:'Non utilisée en Allemagne'},
+  {c:'G', flights:'IFR et VFR', clr:'non', sep:'aucune', ti:'information de vol dans la mesure du possible', radio:'non requise (sauf RMZ)', tx:'non (sauf TMZ)', spd:'250 kt IAS sous le FL 100', vmc:'dès le FL 100 : 8 km ; au-dessus de 3000 ft AMSL / 1000 ft AGL : 5 km, 1500 m / 1000 ft ; en dessous : 5 km (1,5 km à ≤140 kt), hors des nuages, sol en vue', de:'Du sol à 2500 ft AGL (ou 1000/1700 ft)'}]
+};
+const CLASS_COLORS = {A:0x3a4f6e, B:0x4a6a94, C:0x5b7fa6, D:0xd9a06b, E:0x7fa3c8, F:0xa0b4c6, G:0xc8d2dc};
+
+/* Deutsche Zonen: Name und Daten je Sprache, Geometrie gemeinsam */
+const VOL_GEO = [
+  {id:'C', cls:'C', color:0x5b7fa6, op:.22, x:[0,200], y:[10000,66000], z:[-40,40], layer:'C'},
+  {id:'E', cls:'E', color:0x7fa3c8, op:.18, x:[0,200], y:[2500,10000], z:[-40,40], layer:'E'},
+  {id:'E2', cls:'E', color:0x7fa3c8, op:.18, x:[172,200], y:[10000,13000], z:[-40,40], layer:'E'},
+  {id:'CD1', cls:'C/D', color:0x6b6bb0, op:.3, x:[40,105], y:[5000,10000], z:[-20,20], layer:'CD'},
+  {id:'CD2', cls:'C/D', color:0x6b6bb0, op:.3, x:[48,98], y:[2500,5000], z:[-14,14], layer:'CD'},
+  {id:'CTR1', cls:'D', color:0xd9a06b, op:.45, x:[62,83], y:[0,2500], z:[-9,9], layer:'CTR'},
+  {id:'CTR2', cls:'D', color:0xd9a06b, op:.45, x:[128,143], y:[0,2500], z:[-7,7], layer:'CTR'},
+  {id:'TMZ', cls:'TMZ', color:0x3b4a5c, op:.12, x:[123,148], y:[2500,5000], z:[-12,12], layer:'TMZ', wire:true},
+  {id:'G1', cls:'G', color:0xc8d2dc, op:.25, x:[0,200], y:[0,2500], z:[-40,40], layer:'G'},
+  {id:'ATZ', cls:'ATZ', color:0x2f6f9f, op:.15, x:[150,160], y:[0,1500], z:[-5,5], layer:'ATZ', wire:true},
+  {id:'RMZ', cls:'RMZ', color:0x2f6f9f, op:.15, x:[165,180], y:[0,2500], z:[-7,7], layer:'ATZ', wire:true},
+  {id:'EDR1', cls:'ED-R', color:0xc0392b, op:.2, x:[14,28], y:[0,8000], z:[-6,6], layer:'R', wire:true},
+  {id:'EDR2', cls:'ED-R', color:0xc0392b, op:.2, x:[112,134], y:[8000,40000], z:[-10,10], layer:'R', wire:true},
+  {id:'EDD', cls:'ED-D', color:0xc0392b, op:.12, x:[4,16], y:[6000,30000], z:[-6,6], layer:'R', wire:true},
+  {id:'MIL', cls:'Mil', color:0x8f9aa5, op:.25, x:[18,42], y:[1000,2000], z:[-40,40], layer:'MIL'},
+  {id:'MIL2', cls:'Mil', color:0x8f9aa5, op:.25, x:[108,120], y:[250,500], z:[-40,40], layer:'MIL'},
+];
+// Datenfelder: lower, upper, clr, sep, tx, radio, vmc, note (Schluessel werden ueber I18N[lang].k beschriftet)
+const VMCT = {
+  de:{c:'Flugsicht 8 km (unter FL 100: 5 km), Wolkenabstand 1500 m horizontal / 1000 ft vertikal', e:'Flugsicht 5 km (ab FL 100: 8 km), Wolkenabstand 1500 m horizontal / 1000 ft vertikal', d:'Flugsicht 5 km, Wolkenabstand 1500 m / 1000 ft; CTR zusätzlich Bodensicht 5 km und Hauptwolkenuntergrenze 1500 ft (sonst Sonder-VFR)', g:'Bis 3000 ft AMSL bzw. 1000 ft AGL: Flugsicht 1,5 km (bei >140 kt: 5 km), frei von Wolken, Erdsicht. Darüber: 5 km, 1500 m / 1000 ft', asG:'Wie Luftraum G'},
+  en:{c:'Flight visibility 8 km (below FL 100: 5 km), 1500 m horizontally / 1000 ft vertically from cloud', e:'Flight visibility 5 km (at/above FL 100: 8 km), 1500 m horizontally / 1000 ft vertically from cloud', d:'Flight visibility 5 km, 1500 m / 1000 ft from cloud; in CTR also ground visibility 5 km and ceiling 1500 ft (otherwise special VFR)', g:'Up to 3000 ft AMSL or 1000 ft AGL: 1.5 km flight visibility (above 140 kt: 5 km), clear of cloud, surface in sight. Above: 5 km, 1500 m / 1000 ft', asG:'As class G'},
+  fr:{c:'Visibilité 8 km (sous le FL 100 : 5 km), 1500 m horizontalement / 1000 ft verticalement des nuages', e:'Visibilité 5 km (dès le FL 100 : 8 km), 1500 m horizontalement / 1000 ft verticalement des nuages', d:'Visibilité 5 km, 1500 m / 1000 ft des nuages ; en CTR aussi visibilité au sol 5 km et plafond 1500 ft (sinon VFR spécial)', g:'Jusqu’à 3000 ft AMSL ou 1000 ft AGL : visibilité 1,5 km (>140 kt : 5 km), hors des nuages, sol en vue. Au-dessus : 5 km, 1500 m / 1000 ft', asG:'Comme la classe G'}
+};
+const VOL_TXT = {
+de:{
+ C:['Luftraum C (oberer Luftraum)', {lower:'FL 100 (über Alpen FL 130)', upper:'FL 660', clr:'Ja, Freigabe erforderlich', sep:'IFR/IFR, IFR/VFR, VFR/VFR', tx:'Pflicht', vmc:'c', note:'Über FL 100 gilt 8 km Flugsicht. Zwischen FL 100 und FL 130 über den Alpen ist Luftraum E.'}],
+ E:['Luftraum E (kontrolliert, ohne Freigabe für VFR)', {lower:'2500 ft AGL (stellenweise 1000 ft oder 1700 ft AGL)', upper:'FL 100', clr:'VFR: nein. IFR: ja', sep:'IFR/IFR, Verkehrsinformation soweit möglich', tx:'Pflicht für motorgetriebene VFR-Flüge über 5000 ft AMSL bzw. 3500 ft AGL (Code 7000)', vmc:'e', note:'Höchstgeschwindigkeit unter FL 100: 250 kt IAS.'}],
+ E2:['Luftraum E über den Alpen', {lower:'FL 100', upper:'FL 130', clr:'VFR: nein', tx:'Pflicht (Code 7000)', vmc:'c', note:'Im Alpenraum beginnt Luftraum C erst bei FL 130.'}],
+ CD1:['Luftraum C/D um den Verkehrsflughafen (oberer Teil)', {lower:'5000 ft AMSL (Beispiel)', upper:'FL 100', clr:'Ja, Freigabe erforderlich', sep:'C: IFR/VFR. D: nur IFR/IFR, Verkehrsinformation', tx:'Pflicht', vmc:'d', note:'Umgekehrter Hochzeitskuchen: nach oben breiter, damit IFR-An- und Abflüge geschützt sind.'}],
+ CD2:['Luftraum C/D um den Verkehrsflughafen (unterer Teil)', {lower:'2500 ft AGL (Beispiel)', upper:'5000 ft AMSL', clr:'Ja, Freigabe erforderlich', tx:'Pflicht', vmc:'d', note:'Schließt direkt an die Kontrollzone an.'}],
+ CTR1:['Kontrollzone D (CTR) Verkehrsflughafen', {lower:'GND', upper:'2500 ft AGL (Beispiel, je nach Platz 1500 bis 2500 ft)', clr:'Ja, Freigabe erforderlich', tx:'Pflicht', vmc:'d', note:'Bodensicht unter 5 km oder Hauptwolkenuntergrenze unter 1500 ft: nur Sonder-VFR mit Freigabe.'}],
+ CTR2:['Kontrollzone D (CTR) Regionalflughafen', {lower:'GND', upper:'2500 ft AGL (Beispiel)', clr:'Ja, Freigabe erforderlich', tx:'Pflicht', vmc:'d', note:'Liegt hier innerhalb einer TMZ.'}],
+ TMZ:['TMZ (Transponder Mandatory Zone)', {lower:'Hier: Oberkante CTR (2500 ft)', upper:'5000 ft AMSL bzw. 3500 ft AGL', clr:'Nein (Luftraum E)', tx:'Pflicht für ALLE VFR-Flüge, Code 7000 (auch Segelflug, Ballon)', vmc:'e', note:'Darüber greift ohnehin die allgemeine Transponderpflicht für motorgetriebene VFR-Flüge.'}],
+ G1:['Luftraum G (unkontrolliert), Flachland', {lower:'GND', upper:'2500 ft AGL (stellenweise 1000 ft oder 1700 ft AGL)', clr:'Nein', sep:'Keine, Fluginformationsdienst', tx:'Nicht vorgeschrieben (außer TMZ)', vmc:'g', note:'Hubschrauber bis 800 m Flugsicht mit entsprechend reduzierter Geschwindigkeit. Höchstgeschwindigkeit 250 kt IAS.'}],
+ ATZ:['ATZ (Aerodrome Traffic Zone)', {lower:'GND', upper:'je Platz, oft 1500 bis 2000 ft', clr:'Nein, aber Platzrunde und Flugleiter beachten', tx:'Nicht vorgeschrieben', vmc:'asG', note:'Schutzraum des Flugplatzverkehrs an unkontrollierten Plätzen.'}],
+ RMZ:['RMZ (Radio Mandatory Zone)', {lower:'GND', upper:'je Platz, meist 1000 bis 2500 ft', clr:'Nein', tx:'Nicht vorgeschrieben', radio:'Pflicht: Hörbereitschaft und Meldung vor Einflug (Kennung, Typ, Position, Höhe, Absicht)', vmc:'asG', note:'Typisch an Plätzen mit IFR-Verfahren ohne Kontrollzone.'}],
+ EDR1:['Flugbeschränkungsgebiet ED-R', {lower:'GND', upper:'je Gebiet (hier bis FL 80)', clr:'Einflug verboten oder nur mit Genehmigung', tx:'je Gebiet', note:'Zum Beispiel Schießgebiete, Kernkraftwerke, Regierungsviertel. Zeiten im AIP und NOTAM.'}],
+ EDR2:['ED-R (TRA) im oberen Luftraum', {lower:'FL 80 (Beispiel)', upper:'FL 400 (Beispiel)', clr:'Nur mit Genehmigung, zeitlich aktiviert', note:'TRA = Temporary Reserved Area für militärische Übungen, Aktivierung per NOTAM oder AUP/UUP.'}],
+ EDD:['Gefahrengebiet ED-D', {lower:'FL 60 (Beispiel)', upper:'FL 300 (Beispiel)', clr:'Einflug nicht verboten, aber Gefahr (z. B. Schießübungen, Raketen)', note:'Eigenverantwortung, Aktivität über FIS erfragen.'}],
+ MIL:['Militärischer Tiefflug', {lower:'1000 ft AGL (Strahlflugzeuge), Hubschrauber ab 250 ft AGL', upper:'2000 ft AGL', clr:'Nein, aber erhöhte Aufmerksamkeit', note:'Tiefflugzeiten Montag bis Freitag, Infos über FIS.'}],
+ MIL2:['Militärischer Tiefflug (Hubschrauber)', {lower:'250 ft AGL', upper:'500 ft AGL', note:'Hubschrauberstrecken, besonders im Osten Deutschlands.'}],
+},
+en:{
+ C:['Class C (upper airspace)', {lower:'FL 100 (FL 130 over the Alps)', upper:'FL 660', clr:'Yes, clearance required', sep:'IFR/IFR, IFR/VFR, VFR/VFR', tx:'Mandatory', vmc:'c', note:'Above FL 100 flight visibility is 8 km. Between FL 100 and FL 130 over the Alps it is class E.'}],
+ E:['Class E (controlled, no clearance for VFR)', {lower:'2500 ft AGL (locally 1000 ft or 1700 ft AGL)', upper:'FL 100', clr:'VFR: no. IFR: yes', sep:'IFR/IFR, traffic information as far as practicable', tx:'Mandatory for powered VFR above 5000 ft AMSL or 3500 ft AGL (code 7000)', vmc:'e', note:'Speed limit below FL 100: 250 kt IAS.'}],
+ E2:['Class E over the Alps', {lower:'FL 100', upper:'FL 130', clr:'VFR: no', tx:'Mandatory (code 7000)', vmc:'c', note:'In the Alpine region class C starts at FL 130.'}],
+ CD1:['Class C/D around the major airport (upper part)', {lower:'5000 ft AMSL (example)', upper:'FL 100', clr:'Yes, clearance required', sep:'C: IFR/VFR. D: IFR/IFR only, traffic information', tx:'Mandatory', vmc:'d', note:'Inverted wedding cake: wider with height to protect IFR arrivals and departures.'}],
+ CD2:['Class C/D around the major airport (lower part)', {lower:'2500 ft AGL (example)', upper:'5000 ft AMSL', clr:'Yes, clearance required', tx:'Mandatory', vmc:'d', note:'Joins the control zone directly.'}],
+ CTR1:['Control zone D (CTR), major airport', {lower:'GND', upper:'2500 ft AGL (example, 1500 to 2500 ft depending on airport)', clr:'Yes, clearance required', tx:'Mandatory', vmc:'d', note:'Ground visibility below 5 km or ceiling below 1500 ft: special VFR with clearance only.'}],
+ CTR2:['Control zone D (CTR), regional airport', {lower:'GND', upper:'2500 ft AGL (example)', clr:'Yes, clearance required', tx:'Mandatory', vmc:'d', note:'Here inside a TMZ.'}],
+ TMZ:['TMZ (Transponder Mandatory Zone)', {lower:'Here: top of the CTR (2500 ft)', upper:'5000 ft AMSL or 3500 ft AGL', clr:'No (class E)', tx:'Mandatory for ALL VFR flights, code 7000 (gliders and balloons too)', vmc:'e', note:'Above that the general transponder requirement for powered VFR applies anyway.'}],
+ G1:['Class G (uncontrolled), lowlands', {lower:'GND', upper:'2500 ft AGL (locally 1000 ft or 1700 ft AGL)', clr:'No', sep:'None, flight information service', tx:'Not required (except TMZ)', vmc:'g', note:'Helicopters down to 800 m flight visibility at reduced speed. Speed limit 250 kt IAS.'}],
+ ATZ:['ATZ (Aerodrome Traffic Zone)', {lower:'GND', upper:'per aerodrome, often 1500 to 2000 ft', clr:'No, but observe circuit and flight supervisor', tx:'Not required', vmc:'asG', note:'Protects aerodrome traffic at uncontrolled aerodromes.'}],
+ RMZ:['RMZ (Radio Mandatory Zone)', {lower:'GND', upper:'per aerodrome, mostly 1000 to 2500 ft', clr:'No', tx:'Not required', radio:'Mandatory: listening watch and call before entry (callsign, type, position, altitude, intentions)', vmc:'asG', note:'Typical at aerodromes with IFR procedures but no control zone.'}],
+ EDR1:['Restricted area ED-R', {lower:'GND', upper:'per area (here up to FL 80)', clr:'Entry prohibited or with permission only', tx:'per area', note:'For example firing ranges, nuclear plants, government district. Times in AIP and NOTAM.'}],
+ EDR2:['ED-R (TRA) in the upper airspace', {lower:'FL 80 (example)', upper:'FL 400 (example)', clr:'Permission only, activated by time', note:'TRA = Temporary Reserved Area for military exercises, activated by NOTAM or AUP/UUP.'}],
+ EDD:['Danger area ED-D', {lower:'FL 60 (example)', upper:'FL 300 (example)', clr:'Entry not prohibited but dangerous (e.g. firing, missiles)', note:'Own responsibility, ask FIS for activity.'}],
+ MIL:['Military low flying', {lower:'1000 ft AGL (jets), helicopters from 250 ft AGL', upper:'2000 ft AGL', clr:'No, but increased vigilance', note:'Low flying times Monday to Friday, information via FIS.'}],
+ MIL2:['Military low flying (helicopters)', {lower:'250 ft AGL', upper:'500 ft AGL', note:'Helicopter routes, especially in eastern Germany.'}],
+},
+fr:{
+ C:['Classe C (espace supérieur)', {lower:'FL 100 (FL 130 sur les Alpes)', upper:'FL 660', clr:'Oui, clairance requise', sep:'IFR/IFR, IFR/VFR, VFR/VFR', tx:'Obligatoire', vmc:'c', note:'Au-dessus du FL 100 la visibilité est de 8 km. Entre FL 100 et FL 130 sur les Alpes, c’est la classe E.'}],
+ E:['Classe E (contrôlé, sans clairance pour le VFR)', {lower:'2500 ft AGL (localement 1000 ft ou 1700 ft AGL)', upper:'FL 100', clr:'VFR : non. IFR : oui', sep:'IFR/IFR, information de trafic dans la mesure du possible', tx:'Obligatoire pour le VFR motorisé au-dessus de 5000 ft AMSL ou 3500 ft AGL (code 7000)', vmc:'e', note:'Vitesse maximale sous le FL 100 : 250 kt IAS.'}],
+ E2:['Classe E sur les Alpes', {lower:'FL 100', upper:'FL 130', clr:'VFR : non', tx:'Obligatoire (code 7000)', vmc:'c', note:'Dans la région alpine la classe C commence au FL 130.'}],
+ CD1:['Classe C/D autour du grand aéroport (partie haute)', {lower:'5000 ft AMSL (exemple)', upper:'FL 100', clr:'Oui, clairance requise', sep:'C : IFR/VFR. D : IFR/IFR seulement, information de trafic', tx:'Obligatoire', vmc:'d', note:'Gâteau de mariage inversé : plus large en hauteur pour protéger arrivées et départs IFR.'}],
+ CD2:['Classe C/D autour du grand aéroport (partie basse)', {lower:'2500 ft AGL (exemple)', upper:'5000 ft AMSL', clr:'Oui, clairance requise', tx:'Obligatoire', vmc:'d', note:'Jouxte directement la zone de contrôle.'}],
+ CTR1:['Zone de contrôle D (CTR), grand aéroport', {lower:'SOL', upper:'2500 ft AGL (exemple, 1500 à 2500 ft selon l’aéroport)', clr:'Oui, clairance requise', tx:'Obligatoire', vmc:'d', note:'Visibilité au sol < 5 km ou plafond < 1500 ft : VFR spécial avec clairance uniquement.'}],
+ CTR2:['Zone de contrôle D (CTR), aéroport régional', {lower:'SOL', upper:'2500 ft AGL (exemple)', clr:'Oui, clairance requise', tx:'Obligatoire', vmc:'d', note:'Ici à l’intérieur d’une TMZ.'}],
+ TMZ:['TMZ (Transponder Mandatory Zone)', {lower:'Ici : sommet de la CTR (2500 ft)', upper:'5000 ft AMSL ou 3500 ft AGL', clr:'Non (classe E)', tx:'Obligatoire pour TOUS les vols VFR, code 7000 (planeurs et ballons aussi)', vmc:'e', note:'Au-dessus s’applique de toute façon l’obligation générale de transpondeur pour le VFR motorisé.'}],
+ G1:['Classe G (non contrôlé), plaine', {lower:'SOL', upper:'2500 ft AGL (localement 1000 ft ou 1700 ft AGL)', clr:'Non', sep:'Aucune, service d’information de vol', tx:'Non requis (sauf TMZ)', vmc:'g', note:'Hélicoptères jusqu’à 800 m de visibilité à vitesse réduite. Vitesse maximale 250 kt IAS.'}],
+ ATZ:['ATZ (Aerodrome Traffic Zone)', {lower:'SOL', upper:'selon l’aérodrome, souvent 1500 à 2000 ft', clr:'Non, mais respecter le circuit et le responsable', tx:'Non requis', vmc:'asG', note:'Protège le trafic d’aérodrome sur les terrains non contrôlés.'}],
+ RMZ:['RMZ (Radio Mandatory Zone)', {lower:'SOL', upper:'selon l’aérodrome, le plus souvent 1000 à 2500 ft', clr:'Non', tx:'Non requis', radio:'Obligatoire : veille et appel avant l’entrée (indicatif, type, position, altitude, intentions)', vmc:'asG', note:'Typique des aérodromes avec procédures IFR sans zone de contrôle.'}],
+ EDR1:['Zone réglementée ED-R', {lower:'SOL', upper:'selon la zone (ici jusqu’au FL 80)', clr:'Entrée interdite ou sur autorisation', tx:'selon la zone', note:'Par exemple champs de tir, centrales nucléaires, quartier gouvernemental. Horaires dans l’AIP et les NOTAM.'}],
+ EDR2:['ED-R (TRA) dans l’espace supérieur', {lower:'FL 80 (exemple)', upper:'FL 400 (exemple)', clr:'Sur autorisation, activée par créneaux', note:'TRA = Temporary Reserved Area pour exercices militaires, activée par NOTAM ou AUP/UUP.'}],
+ EDD:['Zone dangereuse ED-D', {lower:'FL 60 (exemple)', upper:'FL 300 (exemple)', clr:'Entrée non interdite mais dangereuse (tirs, missiles)', note:'Sous votre responsabilité, demander l’activité au FIS.'}],
+ MIL:['Vol militaire à basse altitude', {lower:'1000 ft AGL (jets), hélicoptères dès 250 ft AGL', upper:'2000 ft AGL', clr:'Non, mais vigilance accrue', note:'Créneaux du lundi au vendredi, informations via le FIS.'}],
+ MIL2:['Vol militaire à basse altitude (hélicoptères)', {lower:'250 ft AGL', upper:'500 ft AGL', note:'Itinéraires hélicoptères, surtout dans l’est de l’Allemagne.'}],
+}
+};
+
+</script>
+<script>
 (() => {
 'use strict';
 const $ = (s, el=document) => el.querySelector(s);
 const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
 const btn = (txt, fn, cls='btn-s') => { const b = el('button', cls, txt); b.onclick = fn; return b; };
 const TRAINER = 'https://antillope24.github.io/ATPL-Trainer-PT/';
+let LANG = 'de';
+try { LANG = localStorage.getItem('airlaw-lang') || (navigator.language.startsWith('fr') ? 'fr' : navigator.language.startsWith('de') ? 'de' : 'en'); } catch (e) {}
+if (!I18N[LANG]) LANG = 'de';
+const T = k => I18N[LANG][k] ?? I18N.de[k] ?? k;
+const CLASSES = () => CLASSES_L[LANG].map(k => ({...k, color: CLASS_COLORS[k.c]}));
+const ROWKEYS = ['flights','clr','sep','ti','radio','tx','spd','vmc','de'];
+function volName(v) { return v.icao ? T('cls') + ' ' + v.cls : VOL_TXT[LANG][v.id][0]; }
+function volData(v) {
+  if (v.icao) { const k = CLASSES().find(c => c.c === v.cls); const o = {}; for (const r of ROWKEYS) o[T('rows')[r]] = k[r]; return o; }
+  const d = VOL_TXT[LANG][v.id][1], K = T('k'), o = {};
+  for (const key of ['lower','upper','clr','sep','radio','tx','vmc','note']) if (d[key]) o[K[key]] = key === 'vmc' ? VMCT[LANG][d[key]] : d[key];
+  return o;
+}
 
-/* ---------- Routing ---------- */
+/* ---------- Sprache, Navigation ---------- */
+const sel = $('#lang');
+for (const [k, v] of Object.entries(I18N)) { const o = el('option', '', v.lang); o.value = k; o.selected = k === LANG; sel.append(o); }
+sel.onchange = () => { LANG = sel.value; try { localStorage.setItem('airlaw-lang', LANG); } catch (e) {} document.documentElement.lang = LANG; renderAll(); };
 let view = 'home';
-function go(v) { view = v; location.hash = v; for (const b of $('#nav').children) b.setAttribute('aria-pressed', b.dataset.v === v); for (const s of document.querySelectorAll('.view')) s.hidden = s.id !== 'v-' + v; if (v === 'air') { initScene(); resize(); } }
-$('#nav').addEventListener('click', e => { const b = e.target.closest('button'); if (b) go(b.dataset.v); });
+const NAV = [['home','start'],['air','mAir'],['vmc','mVmc'],['soon','mFl'],['soon','mRow'],['soon','mSig'],['soon','mLic'],['soon','mIcao']];
+function renderNav() {
+  const n = $('#nav'); n.innerHTML = '';
+  NAV.forEach(([v, k], i) => { const b = el('button', 'chip' + (v === 'soon' ? ' soon' : ''), T(k)); b.dataset.v = v; b.setAttribute('aria-pressed', v === view && (v !== 'soon' || i === 3)); b.onclick = () => go(v); n.append(b); });
+}
+function go(v) { view = v; location.hash = v; for (const b of $('#nav').children) b.setAttribute('aria-pressed', b.dataset.v === v && v !== 'soon'); for (const s of document.querySelectorAll('.view')) s.hidden = s.id !== 'v-' + v; if (v === 'air') { initScene(); resize(); } }
 window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (['home','air','vmc','soon'].includes(v) && v !== view) go(v); });
 
-/* ---------- Startseite ---------- */
-const MODULES = [
-  ['air', '1', 'Luftraumklassen A bis G', 'ICAO Klassen und deutsche Struktur in 3D, Vergleichstabelle mit Freigabe, Staffelung, Funk, Transponder und VMC.', true],
-  ['vmc', '2', 'VMC Minima Rechner', 'Luftraum, Höhe und Geschwindigkeit einstellen, Flugsicht und Wolkenabstand ablesen, mit Skizze.', true],
-  ['soon', '3', 'Flugflächen und Halbkreisregel', 'Kurs drehen, erlaubte Flugflächen sehen, Transition Altitude und Level, RVSM.', false],
-  ['soon', '4', 'Ausweichregeln', 'Szenen von oben: wer weicht aus? Mit Positionslichtern bei Nacht.', false],
-  ['soon', '5', 'Signale und Zeichen', 'Lichtsignale, Bodensignale, Abfangsignale, Marshalling.', false],
-  ['soon', '6', 'Lizenzen, Medical, Fristen', 'Zeitleiste mit Gültigkeiten und Recency nach Part-FCL und Part-MED.', false],
-  ['soon', '7', 'ICAO und Annexe', 'Chicago Convention, 19 Annexe, Freiheiten der Luft.', false],
-];
-(function renderHome() {
-  const h = $('#home');
-  h.append(el('div', 'eyebrow', 'ATPL 010 Air Law'), el('h2', '', 'Nachschlagen, anschauen, verstehen'), el('p', 'muted', 'Die trockenen Teile von Air Law als interaktive Werkzeuge. Jedes Modul ist für das iPad gebaut und läuft offline. Zum Üben der passenden Fragen geht es in den ATPL Progress Trainer.'));
+function renderHome() {
+  const h = $('#home'); h.innerHTML = '';
+  h.append(el('div', 'eyebrow', T('homeEyebrow')), el('h2', '', T('homeT')), el('p', 'muted', T('homeP')));
   const g = el('div', 'grid');
-  for (const [v, n, title, desc, ready] of MODULES) {
-    const c = el('button', 'card link'); c.append(el('span', 'num', 'Modul ' + n), el('h3', '', title), el('span', 'muted', desc), el('span', 'tag', ready ? 'verfügbar' : 'geplant'));
+  T('mod').forEach(([title, desc], i) => {
+    const v = NAV[i+1][0], ready = i < 2;
+    const c = el('button', 'card link'); c.append(el('span', 'num', T('module') + ' ' + (i+1)), el('h3', '', title), el('span', 'muted', desc), el('span', 'tag', ready ? T('ready') : T('planned')));
     c.onclick = () => go(v); if (!ready) c.style.opacity = .6; g.append(c);
-  }
+  });
   h.append(g);
-  const a = el('a', 'btn', 'Zum ATPL Progress Trainer'); a.href = TRAINER; a.style.alignSelf = 'flex-start'; a.style.textDecoration = 'none'; h.append(a);
-})();
+  const a = el('a', 'btn', T('toTrainer')); a.href = TRAINER; a.style.alignSelf = 'flex-start'; a.style.textDecoration = 'none'; h.append(a);
+  const so = $('#soon'); so.innerHTML = ''; so.append(el('h2', '', T('soonT')), el('p', 'muted', T('soonP')));
+}
+function renderAll() {
+  renderNav(); renderHome(); renderVmc();
+  const m = $('#mode'); m.children[0].textContent = T('germany'); m.children[1].textContent = T('icao');
+  $('#tab-list').textContent = T('zones'); $('#tab-info').textContent = T('data'); $('#tab-cmp').textContent = T('compare'); $('#tab-help').textContent = T('help'); $('#fab').textContent = T('fab'); $('#btn-close').setAttribute('aria-label', T('close'));
+  renderViews(); if (sceneReady) renderBody();
+}
 
-/* ---------- Daten Luftraumklassen (SERA / ICAO Annex 11) ---------- */
-const CLASSES = [
-  {c:'A', color:0x3a4f6e, flights:'nur IFR', clr:'ja', sep:'alle Flüge voneinander', ti:'nicht nötig (alle gestaffelt)', radio:'ständig', tx:'ja', spd:'keine', vmc:'VFR nicht erlaubt', de:'In Deutschland nicht verwendet'},
-  {c:'B', color:0x4a6a94, flights:'IFR und VFR', clr:'ja', sep:'alle Flüge voneinander', ti:'nicht nötig', radio:'ständig', tx:'ja', spd:'keine', vmc:'8 km ab FL 100, sonst 5 km; 1500 m / 1000 ft', de:'In Deutschland nicht verwendet'},
-  {c:'C', color:0x5b7fa6, flights:'IFR und VFR', clr:'ja', sep:'IFR von IFR und VFR; VFR von IFR', ti:'VFR/VFR', radio:'ständig', tx:'ja', spd:'VFR 250 kt IAS unter FL 100', vmc:'8 km ab FL 100, sonst 5 km; 1500 m / 1000 ft', de:'Oberer Luftraum ab FL 100 (Alpen FL 130), um große Flughäfen'},
-  {c:'D', color:0xd9a06b, flights:'IFR und VFR', clr:'ja', sep:'IFR von IFR', ti:'IFR/VFR und VFR/VFR', radio:'ständig', tx:'ja', spd:'250 kt IAS unter FL 100', vmc:'5 km; 1500 m / 1000 ft (CTR: Bodensicht 5 km, Ceiling 1500 ft)', de:'Kontrollzonen, Teile um Flughäfen'},
-  {c:'E', color:0x7fa3c8, flights:'IFR und VFR', clr:'IFR ja, VFR nein', sep:'IFR von IFR', ti:'soweit möglich', radio:'IFR ständig, VFR nicht nötig', tx:'motorgetriebene VFR über 5000 ft AMSL / 3500 ft AGL', spd:'250 kt IAS unter FL 100', vmc:'8 km ab FL 100, sonst 5 km; 1500 m / 1000 ft', de:'Standard zwischen 2500 ft AGL (bzw. 1000/1700 ft) und FL 100'},
-  {c:'F', color:0xa0b4c6, flights:'IFR und VFR', clr:'nein (Flugverkehrsberatung)', sep:'IFR von IFR, soweit möglich (advisory)', ti:'Fluginformation', radio:'IFR ständig, VFR nicht nötig', tx:'nein', spd:'250 kt IAS unter FL 100', vmc:'wie G', de:'In Deutschland nicht verwendet'},
-  {c:'G', color:0xc8d2dc, flights:'IFR und VFR', clr:'nein', sep:'keine', ti:'Fluginformation soweit möglich', radio:'nicht nötig (außer RMZ)', tx:'nein (außer TMZ)', spd:'250 kt IAS unter FL 100', vmc:'ab FL 100: 8 km; über 3000 ft AMSL / 1000 ft AGL: 5 km, 1500 m / 1000 ft; darunter: 5 km (1,5 km bei ≤140 kt), frei von Wolken, Erdsicht', de:'Vom Boden bis 2500 ft AGL (bzw. 1000/1700 ft)'},
-];
-const ROWS = [['flights','Flugarten'],['clr','Freigabe'],['sep','Staffelung'],['ti','Verkehrsinformation'],['radio','Funk'],['tx','Transponder'],['spd','Geschwindigkeit'],['vmc','VMC Minima'],['de','In Deutschland']];
-const ICAO_VOLS = CLASSES.map((k, i) => ({id:'ICAO'+k.c, name:'Luftraumklasse ' + k.c, cls:k.c, color:k.color, op:.28, x:[-60 + i*0, 60], y:[0, 0], z:[-30,30], layer:'ICAO', icao:true,
-  data:{Flugarten:k.flights, Freigabe:k.clr, Staffelung:k.sep, Verkehrsinformation:k.ti, Funk:k.radio, Transponder:k.tx, Geschwindigkeit:k.spd, VMC:k.vmc, 'In Deutschland':k.de}}));
-// Stapel: G unten, A oben, jede Klasse 9000 ft hoch (Schema, nicht maßstäblich)
-ICAO_VOLS.forEach((v, i) => { const lvl = 6 - i; v.x = [-60, 60]; v.y = [lvl*9000, lvl*9000 + 8500]; });
-
-const VMC = {
-  gLow: 'Flugsicht 1,5 km (bei >140 kt: 5 km), frei von Wolken, Erdsicht',
-  gHigh: 'Flugsicht 5 km, Wolkenabstand 1500 m horizontal / 1000 ft vertikal',
-  e: 'Flugsicht 5 km (ab FL 100: 8 km), Wolkenabstand 1500 m horizontal / 1000 ft vertikal',
-  c: 'Flugsicht 8 km (unter FL 100: 5 km), Wolkenabstand 1500 m horizontal / 1000 ft vertikal',
-  d: 'Flugsicht 5 km, Wolkenabstand 1500 m / 1000 ft; CTR zusätzlich Bodensicht 5 km und Hauptwolkenuntergrenze 1500 ft (sonst Sonder-VFR)'
-};
-// x in km (0 = Küste links, 200 = Alpen rechts), y in ft, z in km Tiefe
-const VOLS = [
-  {id:'C', name:'Luftraum C (oberer Luftraum)', cls:'C', color:0x5b7fa6, op:.22, x:[0,200], y:[10000,66000], z:[-40,40], layer:'C',
-   data:{Untergrenze:'FL 100 (über Alpen FL 130)', Obergrenze:'FL 660', Freigabe:'Ja, Freigabe erforderlich', Staffelung:'IFR/IFR, IFR/VFR, VFR/VFR', Transponder:'Pflicht', VMC:VMC.c, Hinweis:'Über FL 100 gilt 8 km Flugsicht. Zwischen FL 100 und FL 130 über den Alpen ist Luftraum E (siehe rechts).'}},
-  {id:'E', name:'Luftraum E (kontrolliert, ohne Freigabe für VFR)', cls:'E', color:0x7fa3c8, op:.18, x:[0,200], y:[2500,10000], z:[-40,40], layer:'E',
-   data:{Untergrenze:'2500 ft AGL (stellenweise 1000 ft oder 1700 ft AGL)', Obergrenze:'FL 100', Freigabe:'VFR: nein. IFR: ja', Staffelung:'IFR/IFR, Verkehrsinformation soweit möglich', Transponder:'Pflicht für motorgetriebene VFR-Flüge über 5000 ft AMSL bzw. 3500 ft AGL (Code 7000)', VMC:VMC.e, Hinweis:'Höchstgeschwindigkeit unter FL 100: 250 kt IAS.'}},
-  {id:'E2', name:'Luftraum E über den Alpen', cls:'E', color:0x7fa3c8, op:.18, x:[172,200], y:[10000,13000], z:[-40,40], layer:'E',
-   data:{Untergrenze:'FL 100', Obergrenze:'FL 130', Freigabe:'VFR: nein', Transponder:'Pflicht (Code 7000)', VMC:'Flugsicht 8 km, Wolkenabstand 1500 m / 1000 ft', Hinweis:'Im Alpenraum beginnt Luftraum C erst bei FL 130.'}},
-  {id:'CD1', name:'Luftraum C/D um den Verkehrsflughafen (oberer Teil)', cls:'C/D', color:0x6b6bb0, op:.3, x:[40,105], y:[5000,10000], z:[-20,20], layer:'CD',
-   data:{Untergrenze:'5000 ft AMSL (Beispiel)', Obergrenze:'FL 100', Freigabe:'Ja, Freigabe erforderlich', Staffelung:'C: IFR/VFR. D: nur IFR/IFR, Verkehrsinformation', Transponder:'Pflicht', VMC:'C: '+VMC.c+'. D: '+VMC.d, Hinweis:'Umgekehrter Hochzeitskuchen: nach oben breiter, damit IFR-An- und Abflüge geschützt sind.'}},
-  {id:'CD2', name:'Luftraum C/D um den Verkehrsflughafen (unterer Teil)', cls:'C/D', color:0x6b6bb0, op:.3, x:[48,98], y:[2500,5000], z:[-14,14], layer:'CD',
-   data:{Untergrenze:'2500 ft AGL (Beispiel)', Obergrenze:'5000 ft AMSL', Freigabe:'Ja, Freigabe erforderlich', Transponder:'Pflicht', VMC:'C: '+VMC.c+'. D: '+VMC.d, Hinweis:'Schließt direkt an die Kontrollzone an.'}},
-  {id:'CTR1', name:'Kontrollzone D (CTR) Verkehrsflughafen', cls:'D', color:0xd9a06b, op:.45, x:[62,83], y:[0,2500], z:[-9,9], layer:'CTR',
-   data:{Untergrenze:'GND', Obergrenze:'2500 ft AGL (Beispiel, je nach Platz 1500 bis 2500 ft)', Freigabe:'Ja, Freigabe erforderlich', Transponder:'Pflicht', VMC:VMC.d, Hinweis:'Bodensicht unter 5 km oder Hauptwolkenuntergrenze unter 1500 ft: nur Sonder-VFR mit Freigabe.'}},
-  {id:'CTR2', name:'Kontrollzone D (CTR) Regionalflughafen', cls:'D', color:0xd9a06b, op:.45, x:[128,143], y:[0,2500], z:[-7,7], layer:'CTR',
-   data:{Untergrenze:'GND', Obergrenze:'2500 ft AGL (Beispiel)', Freigabe:'Ja, Freigabe erforderlich', Transponder:'Pflicht', VMC:VMC.d, Hinweis:'Liegt hier innerhalb einer TMZ.'}},
-  {id:'TMZ', name:'TMZ (Transponder Mandatory Zone)', cls:'TMZ', color:0x3b4a5c, op:.12, x:[123,148], y:[2500,5000], z:[-12,12], layer:'TMZ', wire:true,
-   data:{Untergrenze:'Hier: Oberkante CTR (2500 ft)', Obergrenze:'5000 ft AMSL bzw. 3500 ft AGL', Freigabe:'Nein (Luftraum E)', Transponder:'Pflicht für ALLE VFR-Flüge, Code 7000 (auch Segelflug, Ballon)', VMC:VMC.e, Hinweis:'Darüber greift ohnehin die allgemeine Transponderpflicht für motorgetriebene VFR-Flüge.'}},
-  {id:'G1', name:'Luftraum G (unkontrolliert), Flachland', cls:'G', color:0xc8d2dc, op:.25, x:[0,200], y:[0,2500], z:[-40,40], layer:'G',
-   data:{Untergrenze:'GND', Obergrenze:'2500 ft AGL (stellenweise 1000 ft oder 1700 ft AGL)', Freigabe:'Nein', Staffelung:'Keine, Fluginformationsdienst', Transponder:'Nicht vorgeschrieben (außer TMZ)', VMC:'Bis 3000 ft AMSL bzw. 1000 ft AGL: '+VMC.gLow+'. Darüber: '+VMC.gHigh, Hinweis:'Hubschrauber bis 800 m Flugsicht mit entsprechend reduzierter Geschwindigkeit. Höchstgeschwindigkeit 250 kt IAS.'}},
-  {id:'ATZ', name:'ATZ (Aerodrome Traffic Zone)', cls:'ATZ', color:0x2f6f9f, op:.15, x:[150,160], y:[0,1500], z:[-5,5], layer:'ATZ', wire:true,
-   data:{Untergrenze:'GND', Obergrenze:'je Platz, oft 1500 bis 2000 ft', Freigabe:'Nein, aber Platzrunde und Flugleiter beachten', Transponder:'Nicht vorgeschrieben', VMC:'Wie Luftraum G', Hinweis:'Schutzraum des Flugplatzverkehrs an unkontrollierten Plätzen.'}},
-  {id:'RMZ', name:'RMZ (Radio Mandatory Zone)', cls:'RMZ', color:0x2f6f9f, op:.15, x:[165,180], y:[0,2500], z:[-7,7], layer:'ATZ', wire:true,
-   data:{Untergrenze:'GND', Obergrenze:'je Platz, meist 1000 bis 2500 ft', Freigabe:'Nein', Transponder:'Nicht vorgeschrieben', Funk:'Pflicht: Hörbereitschaft und Meldung vor Einflug (Kennung, Typ, Position, Höhe, Absicht)', VMC:'Wie Luftraum G', Hinweis:'Typisch an Plätzen mit IFR-Verfahren ohne Kontrollzone.'}},
-  {id:'EDR1', name:'Flugbeschränkungsgebiet ED-R', cls:'ED-R', color:0xc0392b, op:.2, x:[14,28], y:[0,8000], z:[-6,6], layer:'R', wire:true,
-   data:{Untergrenze:'GND', Obergrenze:'je Gebiet (hier bis FL 80)', Freigabe:'Einflug verboten oder nur mit Genehmigung', Transponder:'je Gebiet', Hinweis:'Zum Beispiel Schießgebiete, Kernkraftwerke, Regierungsviertel. Zeiten im AIP und NOTAM.'}},
-  {id:'EDR2', name:'ED-R (TRA) im oberen Luftraum', cls:'ED-R', color:0xc0392b, op:.2, x:[112,134], y:[8000,40000], z:[-10,10], layer:'R', wire:true,
-   data:{Untergrenze:'FL 80 (Beispiel)', Obergrenze:'FL 400 (Beispiel)', Freigabe:'Nur mit Genehmigung, zeitlich aktiviert', Hinweis:'TRA = Temporary Reserved Area für militärische Übungen, Aktivierung per NOTAM oder AUP/UUP.'}},
-  {id:'EDD', name:'Gefahrengebiet ED-D', cls:'ED-D', color:0xc0392b, op:.12, x:[4,16], y:[6000,30000], z:[-6,6], layer:'R', wire:true,
-   data:{Untergrenze:'FL 60 (Beispiel)', Obergrenze:'FL 300 (Beispiel)', Freigabe:'Einflug nicht verboten, aber Gefahr (z. B. Schießübungen, Raketen)', Hinweis:'Eigenverantwortung, Aktivität über FIS erfragen.'}},
-  {id:'MIL', name:'Militärischer Tiefflug', cls:'Mil', color:0x8f9aa5, op:.25, x:[18,42], y:[1000,2000], z:[-40,40], layer:'MIL',
-   data:{Untergrenze:'1000 ft AGL (Strahlflugzeuge), Hubschrauber ab 250 ft AGL', Obergrenze:'2000 ft AGL', Freigabe:'Nein, aber erhöhte Aufmerksamkeit', Hinweis:'Tiefflugzeiten Montag bis Freitag, Infos über FIS. Hubschrauber-Tiefflug zwischen 250 und 500 ft AGL (gestrichelt in der Grafik).'}},
-  {id:'MIL2', name:'Militärischer Tiefflug (Hubschrauber)', cls:'Mil', color:0x8f9aa5, op:.25, x:[108,120], y:[250,500], z:[-40,40], layer:'MIL',
-   data:{Untergrenze:'250 ft AGL', Obergrenze:'500 ft AGL', Hinweis:'Hubschrauberstrecken, besonders im Osten Deutschlands.'}},
-];
-const LAYERS = [['C','Luftraum C',0x5b7fa6],['E','Luftraum E',0x7fa3c8],['CD','C/D Flughafen',0x6b6bb0],['CTR','Kontrollzonen D',0xd9a06b],['TMZ','TMZ',0x3b4a5c],['G','Luftraum G',0xc8d2dc],['ATZ','ATZ / RMZ',0x2f6f9f],['R','ED-R / ED-D',0xc0392b],['MIL','Mil. Tiefflug',0x8f9aa5]];
-
+/* ---------- Daten Geometrie ---------- */
+const ICAO_VOLS = Object.keys(CLASS_COLORS).map((c, i) => ({id:'ICAO'+c, cls:c, color:CLASS_COLORS[c], op:.28, x:[-60,60], y:[(6-i)*9000, (6-i)*9000 + 8500], z:[-30,30], layer:'ICAO', icao:true}));
+const VOLS = VOL_GEO;
 const ALT = ft => ft / 2000 * 3;
 const X = km => km - 100;
 
 /* ---------- 3D Szene ---------- */
-let scene, camera, renderer, controls, meshes = [], byLayer = {}, sceneReady = false, mode = 'de', deGroup, icaoGroup;
+let scene, camera, renderer, controls, meshes = [], sceneReady = false, mode = 'de', deGroup, icaoGroup;
 const stage = $('#stage');
+// ---------- Flughafen und Verkehr ----------
+const movers = [];
+function box(w, h, d, color, x, y, z, group) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshLambertMaterial({color})); m.position.set(x, y, z); group.add(m); return m; }
+function buildAirport(group) {
+  const ap = new THREE.Group(); ap.position.set(X(72.5), 0, 0); ap.scale.set(2.6, 2.6, 2.6); group.add(ap);
+  const ax = 0, az = 0;
+  box(7, 0.2, 0.9, 0x444a52, ax, 0.1, az, ap);                         // Piste
+  box(7, 0.12, 0.5, 0x5a6168, ax, 0.1, az + 1.4, ap);                  // Rollbahn parallel
+  for (const dx of [-3, 0, 3]) box(0.4, 0.12, 1.2, 0x5a6168, ax + dx, 0.1, az + 0.85, ap);
+  box(5, 0.14, 2.2, 0x6f767d, ax, 0.1, az + 3, ap);                    // Vorfeld
+  box(3.6, 0.7, 0.8, 0xe8ecef, ax, 0.45, az + 4.3, ap);                // Terminal
+  box(3.8, 0.1, 1.0, 0x2f6f9f, ax, 0.85, az + 4.3, ap);                // Dach
+  box(1.2, 0.5, 0.9, 0xcfd6dd, ax + 3.2, 0.35, az + 3.2, ap);          // Hangar
+  const twr = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.25, 2.2, 10), new THREE.MeshLambertMaterial({color: 0xd9dee3})); twr.position.set(ax - 2.9, 1.2, az + 3.4); ap.add(twr);
+  const cab = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.4, 0.5, 10), new THREE.MeshLambertMaterial({color: 0x2f6f9f})); cab.position.set(ax - 2.9, 2.5, az + 3.4); ap.add(cab);
+  for (let i = -3; i <= 3; i++) box(0.5, 0.02, 0.08, 0xffffff, ax + i * 1.0, 0.21, az, ap);
+  for (let i = 1; i <= 6; i++) { const l = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), new THREE.MeshBasicMaterial({color: 0xffffff})); l.position.set(ax - 3.5 - i * 0.6, 0.15, az); ap.add(l); }
+  for (const dx of [-1.5, 0, 1.5]) { const p = makeAirliner(0.5); p.position.set(ax + dx, 0.4, az + 2.6); p.rotation.y = Math.PI / 2; ap.add(p); }
+}
+function makeSEP(s = 1) {
+  const g = new THREE.Group();
+  const white = new THREE.MeshLambertMaterial({color: 0xf4f6f8}), red = new THREE.MeshLambertMaterial({color: 0xc43f38});
+  const fus = new THREE.Mesh(new THREE.CylinderGeometry(0.12 * s, 0.22 * s, 2.2 * s, 8), white); fus.rotation.z = Math.PI / 2; g.add(fus);
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.22 * s, 8, 8), white); nose.position.x = 1.1 * s; g.add(nose);
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(0.6 * s, 0.06 * s, 3.2 * s), white); wing.position.set(0.1 * s, -0.08 * s, 0); g.add(wing);
+  const tipL = new THREE.Mesh(new THREE.BoxGeometry(0.6 * s, 0.07 * s, 0.4 * s), red); tipL.position.set(0.1 * s, -0.08 * s, 1.5 * s); g.add(tipL);
+  const tipR = tipL.clone(); tipR.position.z = -1.5 * s; g.add(tipR);
+  const hstab = new THREE.Mesh(new THREE.BoxGeometry(0.4 * s, 0.05 * s, 1.1 * s), white); hstab.position.set(-1.0 * s, 0, 0); g.add(hstab);
+  const fin = new THREE.Mesh(new THREE.BoxGeometry(0.4 * s, 0.6 * s, 0.05 * s), red); fin.position.set(-1.0 * s, 0.3 * s, 0); g.add(fin);
+  const prop = new THREE.Mesh(new THREE.BoxGeometry(0.05 * s, 0.9 * s, 0.08 * s), new THREE.MeshLambertMaterial({color: 0x333a42})); prop.position.x = 1.32 * s; g.add(prop); g.userData.prop = prop;
+  return g;
+}
+function makeAirliner(s = 1) {
+  // Weisser Rumpf, Leitwerk und Triebwerke in Luxair Tuerkis
+  const g = new THREE.Group();
+  const white = new THREE.MeshLambertMaterial({color: 0xf6f8fa}), teal = new THREE.MeshLambertMaterial({color: 0x1aa3b8}), dark = new THREE.MeshLambertMaterial({color: 0x3a4450});
+  const fus = new THREE.Mesh(new THREE.CylinderGeometry(0.42 * s, 0.42 * s, 7 * s, 12), white); fus.rotation.z = Math.PI / 2; g.add(fus);
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.42 * s, 12, 12), white); nose.position.x = 3.5 * s; nose.scale.x = 1.6; g.add(nose);
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.42 * s, 2.2 * s, 12), white); tail.rotation.z = Math.PI / 2; tail.position.x = -4.6 * s; g.add(tail);
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(1.6 * s, 0.1 * s, 8.5 * s), white); wing.position.set(0.2 * s, -0.25 * s, 0); wing.rotation.y = 0; g.add(wing);
+  wing.geometry.translate(0, 0, 0); // Pfeilung ueber Schraegstellung der Fluegelhaelften
+  const wl = new THREE.Mesh(new THREE.BoxGeometry(1.5 * s, 0.1 * s, 4.3 * s), white); wl.position.set(-0.3 * s, -0.25 * s, 2.3 * s); wl.rotation.y = 0.45; g.add(wl);
+  const wr = wl.clone(); wr.position.z = -2.3 * s; wr.rotation.y = -0.45; g.add(wr);
+  wing.visible = false;
+  for (const z of [1.7, -1.7]) { const e = new THREE.Mesh(new THREE.CylinderGeometry(0.3 * s, 0.3 * s, 1.3 * s, 10), teal); e.rotation.z = Math.PI / 2; e.position.set(0.2 * s, -0.55 * s, z * s); g.add(e); }
+  const fin = new THREE.Mesh(new THREE.BoxGeometry(1.4 * s, 1.6 * s, 0.1 * s), teal); fin.position.set(-4.3 * s, 0.9 * s, 0); fin.rotation.z = 0.35; g.add(fin);
+  const hs = new THREE.Mesh(new THREE.BoxGeometry(1.0 * s, 0.08 * s, 3.2 * s), white); hs.position.set(-4.5 * s, 0.2 * s, 0); g.add(hs);
+  const cheat = new THREE.Mesh(new THREE.BoxGeometry(6 * s, 0.12 * s, 0.86 * s), teal); cheat.position.set(-0.6 * s, -0.1 * s, 0); g.add(cheat); // Zierstreifen
+  const win = new THREE.Mesh(new THREE.BoxGeometry(5.5 * s, 0.12 * s, 0.86 * s), dark); win.position.set(-0.2 * s, 0.12 * s, 0); g.add(win);
+  return g;
+}
+// Pfade: Punkte [x km, y ft, z km]; Catmull-Rom, Schleife
+function addMover(obj, pts, period, group, opts = {}) {
+  const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(X(p[0]), ALT(p[1]) + (opts.ground ? 1.2 : 0), p[2])), true, 'catmullrom', 0.6);
+  group.add(obj); movers.push({obj, curve, period, t0: Math.random(), opts});
+}
+function buildTraffic(group) {
+  buildAirport(group);
+  // SEP im Sichtflug: Luftraum G und E, um die Zonen herum, Platzrunde am kleinen Platz
+  addMover(makeSEP(2.6), [[20, 1500, 20], [40, 2000, 28], [60, 3500, 24], [95, 4500, 22], [120, 3800, 26], [150, 2000, 18], [158, 1200, 6], [150, 900, -6], [140, 1800, -14], [110, 3000, -18], [85, 4000, -22], [55, 3000, -20], [30, 2000, -8]], 110, group);
+  addMover(makeSEP(2.4), [[165, 2000, 30], [175, 2500, 20], [185, 4500, 10], [178, 6000, -5], [168, 4000, -12], [160, 2500, 5]], 70, group);
+  // 737 im Luftraum C auf Reiseflughoehe
+  addMover(makeAirliner(3.2), [[-10, 34000, -30], [60, 35000, -20], [130, 36000, -10], [200, 35000, -5], [210, 35000, 20], [120, 34000, 30], [40, 35000, 25]], 90, group);
+  // 737 im Anflug: aus C ueber C/D in die CTR, Landung, Durchstart
+  addMover(makeAirliner(3.2), [[-20, 18000, 0], [20, 12000, 0], [45, 7000, 0], [58, 3500, 0], [66, 1200, 0], [71, 0, 0], [76, 0, 0], [82, 1500, 0], [100, 6000, 2], [130, 12000, 6], [160, 18000, 4], [120, 22000, -6], [60, 24000, -6], [10, 22000, -3]], 120, group, {ground: true});
+}
+function updateTraffic(now) {
+  for (const m of movers) {
+    const t = ((now / 1000) / m.period + m.t0) % 1;
+    const p = m.curve.getPointAt(t), q = m.curve.getPointAt((t + 0.004) % 1);
+    m.obj.position.copy(p);
+    const dir = q.clone().sub(p).normalize();
+    m.obj.lookAt(p.clone().add(dir));
+    m.obj.rotateY(-Math.PI / 2); // Modell zeigt mit +x nach vorn
+    m.obj.rotation.z += -dir.y * 0.4; // Nase hoch/runter andeuten
+    if (m.obj.userData.prop) m.obj.userData.prop.rotation.x += 0.6;
+  }
+}
+
 function initScene() {
   if (sceneReady) return; sceneReady = true;
-  if (!window.THREE) { $('#body').innerHTML = '<h2>3D Bibliothek nicht geladen</h2><div class="muted">Internetverbindung prüfen und neu laden.</div>'; return; }
+  if (!window.THREE) { $('#body').innerHTML = ''; $('#body').append(el('h2', '', T('noThree')), el('div', 'muted', T('noThreeP'))); return; }
   scene = new THREE.Scene();
   const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   scene.background = new THREE.Color(cssVar('--sky') || '#dfe9f3');
@@ -1296,13 +1521,13 @@ function initScene() {
   scene.add(new THREE.HemisphereLight(0xffffff, 0x667788, 0.9));
   const sun = new THREE.DirectionalLight(0xffffff, 0.7); sun.position.set(-80, 150, 80); scene.add(sun);
   deGroup = new THREE.Group(); icaoGroup = new THREE.Group(); scene.add(deGroup, icaoGroup);
-  buildTerrain(); buildVols(VOLS, deGroup); buildVols(ICAO_VOLS, icaoGroup);
+  buildTerrain(); buildTraffic(deGroup); buildVols(VOLS, deGroup); buildVols(ICAO_VOLS, icaoGroup);
   icaoGroup.visible = false;
-  // Hoehenlinien
   for (const [ft, lbl] of [[10000,'FL 100'],[66000,'FL 660'],[2500,'2500 ft AGL'],[5000,'5000 ft AMSL']]) altLine(ft, lbl, deGroup);
   renderBody(); setupPick();
   (function loop() { requestAnimationFrame(loop); if (!renderer) return;
     if (flight) { const t = Math.min(1, (performance.now() - flight.s) / 900), e = t < .5 ? 2*t*t : -1 + (4 - 2*t) * t; camera.position.lerpVectors(flight.p0, flight.p1, e); controls.target.lerpVectors(flight.t0, flight.t1, e); if (t >= 1) flight = null; }
+    if (deGroup.visible && view === 'air') updateTraffic(performance.now());
     controls.update(); renderer.render(scene, camera); })();
 }
 function buildTerrain() {
@@ -1318,16 +1543,15 @@ function buildTerrain() {
   }
   geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3)); geo.computeVertexNormals();
   deGroup.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({vertexColors: true})));
-  for (const [xkm, len] of [[72.5, 7], [135.5, 5], [155, 2.5], [172.5, 3]]) { const m = new THREE.Mesh(new THREE.BoxGeometry(len, 0.2, 0.9), new THREE.MeshLambertMaterial({color: 0x444a52})); m.position.set(X(xkm), 0.3, 0); deGroup.add(m); }
-  // ICAO: flacher Boden
+  for (const [xkm, len] of [[135.5, 5], [155, 2.5], [172.5, 3]]) { const m = new THREE.Mesh(new THREE.BoxGeometry(len, 0.2, 0.9), new THREE.MeshLambertMaterial({color: 0x444a52})); m.position.set(X(xkm), 0.3, 0); deGroup.add(m); }
   const g2 = new THREE.Mesh(new THREE.PlaneGeometry(160, 90), new THREE.MeshLambertMaterial({color: 0xb7873f})); g2.rotateX(-Math.PI / 2); icaoGroup.add(g2);
 }
 function altLine(ft, label, group) {
   const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-100, ALT(ft), -40), new THREE.Vector3(100, ALT(ft), -40)]);
   const l = new THREE.Line(g, new THREE.LineDashedMaterial({color: 0x556677, dashSize: 2, gapSize: 1.5})); l.computeLineDistances(); group.add(l);
-  group.add(textSprite(label, 0x556677, 6).translateX(-104).translateY(ALT(ft)).translateZ(-40));
+  group.add(textSprite(label, 0x556677, .045).translateX(-104).translateY(ALT(ft)).translateZ(-40));
 }
-function textSprite(text, color, size = 10) {
+function textSprite(text, color, size = .06) {
   const c = document.createElement('canvas'); const ctx = c.getContext('2d');
   ctx.font = '700 48px Barlow Semi Condensed, Arial'; const tw = ctx.measureText(text).width; const w = tw + 40, hh = 68; c.width = w; c.height = hh;
   ctx.font = '700 48px Barlow Semi Condensed, Arial';
@@ -1336,7 +1560,8 @@ function textSprite(text, color, size = 10) {
   const r = 16; ctx.beginPath(); ctx.moveTo(r, 3); ctx.lineTo(w - r, 3); ctx.quadraticCurveTo(w - 3, 3, w - 3, r); ctx.lineTo(w - 3, hh - r); ctx.quadraticCurveTo(w - 3, hh - 3, w - r, hh - 3); ctx.lineTo(r, hh - 3); ctx.quadraticCurveTo(3, hh - 3, 3, hh - r); ctx.lineTo(3, r); ctx.quadraticCurveTo(3, 3, r, 3); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#17202b'; ctx.textBaseline = 'middle'; ctx.fillText(text, 20, hh / 2 + 2);
   const t = new THREE.CanvasTexture(c); t.minFilter = THREE.LinearFilter;
-  const s = new THREE.Sprite(new THREE.SpriteMaterial({map: t, transparent: true, depthTest: false})); s.scale.set(size * w / hh, size, 1); return s;
+  // sizeAttenuation false: konstante Groesse auf dem Bildschirm (size = Anteil der Bildhoehe)
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({map: t, transparent: true, depthTest: false, sizeAttenuation: false})); s.scale.set(size * w / hh, size, 1); s.renderOrder = 5; return s;
 }
 function buildVols(list, group) {
   for (const v of list) {
@@ -1346,31 +1571,30 @@ function buildVols(list, group) {
     m.position.set(v.icao ? 0 : X((v.x[0] + v.x[1]) / 2), (ALT(v.y[0]) + ALT(v.y[1])) / 2, (v.z[0] + v.z[1]) / 2);
     m.userData = v; m.renderOrder = 1;
     m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({color: v.color, transparent: true, opacity: v.wire ? .9 : .5})));
-    const lbl = textSprite(v.cls, v.color, v.icao ? 12 : v.cls.length > 3 ? 7 : 10); lbl.position.set(v.icao ? -w/2 + 8 : 0, v.icao ? 0 : hgt / 2 - 2, d / 2 + 0.5); m.add(lbl);
-    group.add(m); meshes.push(m); (byLayer[v.layer] = byLayer[v.layer] || []).push(m);
+    const lbl = textSprite(v.cls, v.color, v.icao ? .07 : .05); lbl.position.set(v.icao ? -w/2 + 8 : 0, v.icao ? 0 : hgt / 2 - 2, d / 2 + 0.5); m.add(lbl);
+    group.add(m); meshes.push(m);
   }
 }
 function setMode(m) {
   mode = m; for (const b of $('#mode').children) b.setAttribute('aria-pressed', b.dataset.m === m);
-  if (!sceneReady || !deGroup) { renderViews(); return; }
+  renderViews();
+  if (!sceneReady || !deGroup) return;
   deGroup.visible = m === 'de'; icaoGroup.visible = m === 'icao';
   select(null); tab = 'list'; renderBody();
-  if (m === 'icao') flyTo([-120, 110, 170], [0, 45, 0]); else flyTo(VIEWS[0][1], VIEWS[0][2]);
-  renderViews();
+  if (m === 'icao') flyTo([-120, 110, 170], [0, 45, 0]); else flyTo(VIEWS()[0][1], VIEWS()[0][2]);
 }
 $('#mode').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.m); });
 const active = () => meshes.filter(m => (mode === 'icao') === !!m.userData.icao);
 
 /* ---------- Kamera ---------- */
-const VIEWS = [['Übersicht', [-60, 120, 210], [0, 25, 0]], ['Von vorn', [0, 60, 230], [0, 30, 0]], ['Flughafen', [-10, 45, 90], [X(72), 12, 0]], ['TMZ + CTR', [20, 35, 70], [X(136), 8, 0]], ['Alpen', [40, 60, 90], [X(185), 20, 0]], ['Von oben', [0, 320, 1], [0, 0, 0]]];
-const VIEWS_ICAO = [['Übersicht', [-120, 110, 170], [0, 45, 0]], ['Von vorn', [0, 50, 230], [0, 45, 0]], ['Unten (E bis G)', [-60, 40, 120], [0, 12, 0]], ['Oben (A bis C)', [-60, 100, 120], [0, 75, 0]]];
+const VIEWS = () => { const n = T('views'); return [[n[0], [-60, 120, 210], [0, 25, 0]], [n[1], [0, 60, 230], [0, 30, 0]], [n[2], [-10, 45, 90], [X(72), 12, 0]], [n[3], [20, 35, 70], [X(136), 8, 0]], [n[4], [40, 60, 90], [X(185), 20, 0]], [n[5], [0, 320, 1], [0, 0, 0]]]; };
+const VIEWS_ICAO = () => { const n = T('viewsIcao'); return [[n[0], [-120, 110, 170], [0, 45, 0]], [n[1], [0, 50, 230], [0, 45, 0]], [n[2], [-60, 40, 120], [0, 12, 0]], [n[3], [-60, 100, 120], [0, 75, 0]]]; };
 let flight = null;
-function flyTo(pos, target) { flight = {p0: camera.position.clone(), t0: controls.target.clone(), p1: new THREE.Vector3(...pos), t1: new THREE.Vector3(...target), s: performance.now()}; }
+function flyTo(pos, target) { if (!camera) return; flight = {p0: camera.position.clone(), t0: controls.target.clone(), p1: new THREE.Vector3(...pos), t1: new THREE.Vector3(...target), s: performance.now()}; }
 function renderViews() {
   const ve = $('#views'); ve.innerHTML = '';
-  (mode === 'icao' ? VIEWS_ICAO : VIEWS).forEach(([name, p, t], k) => { const b = el('button', 'chip', name); b.setAttribute('aria-pressed', k === 0); b.onclick = () => { for (const c of ve.children) c.setAttribute('aria-pressed', c === b); flyTo(p, t); }; ve.append(b); });
+  (mode === 'icao' ? VIEWS_ICAO() : VIEWS()).forEach(([name, p, t], k) => { const b = el('button', 'chip', name); b.setAttribute('aria-pressed', k === 0); b.onclick = () => { for (const c of ve.children) c.setAttribute('aria-pressed', c === b); flyTo(p, t); }; ve.append(b); });
 }
-renderViews();
 
 /* ---------- Drawer ---------- */
 const drawer = $('#drawer'), body = $('#body'), tip = $('#tip');
@@ -1383,36 +1607,35 @@ function renderBody() {
   for (const id of ['list', 'info', 'cmp', 'help']) $('#tab-' + id).setAttribute('aria-pressed', tab === id);
   body.innerHTML = '';
   if (tab === 'list') {
-    body.append(el('div', 'hint', mode === 'icao' ? 'Die sieben ICAO Klassen als Stapel, A oben, G unten (schematisch, nicht maßstäblich). Antippen zeigt die Regeln.' : 'Antippen zeigt die Daten und fliegt die Kamera hin. Das Auge blendet die Zone aus.'));
-    if (mode === 'de') { const row = el('div', 'row'); row.append(btn('Alle einblenden', () => { active().forEach(m => { m.visible = true; }); renderBody(); }), btn('Nur Bodenzonen', () => { active().forEach(m => { m.visible = !['C','E','G'].includes(m.userData.layer); }); renderBody(); })); body.append(row); }
+    body.append(el('div', 'hint', mode === 'icao' ? T('hintIcao') : T('hintDe')));
+    if (mode === 'de') { const row = el('div', 'row'); row.append(btn(T('showAll'), () => { active().forEach(m => { m.visible = true; }); renderBody(); }), btn(T('groundOnly'), () => { active().forEach(m => { m.visible = !['C','E','G'].includes(m.userData.layer); }); renderBody(); })); body.append(row); }
     const list = el('div', 'zones');
     for (const m of active()) {
       const v = m.userData; const z = el('button', 'zone' + (m === selected ? ' sel' : '')); const sw = el('span', 'sw'); sw.style.background = '#' + new THREE.Color(v.color).getHexString();
-      const n = el('span', 'n', v.name); n.append(el('span', 'cls', ' ' + v.cls));
+      const n = el('span', 'n', volName(v)); n.append(el('span', 'cls', ' ' + v.cls));
       const eye = el('button', 'eye', m.visible ? '👁' : '🚫'); eye.setAttribute('aria-pressed', m.visible);
       eye.onclick = ev => { ev.stopPropagation(); m.visible = !m.visible; eye.textContent = m.visible ? '👁' : '🚫'; eye.setAttribute('aria-pressed', m.visible); };
       z.append(sw, n, eye); z.onclick = () => select(m, true); list.append(z);
     }
     body.append(list);
   } else if (tab === 'info') {
-    if (!selected) { body.append(el('h2', '', 'Keine Zone gewählt'), el('div', 'muted', 'Tippe im 3D Bild auf ein Volumen oder wähle eine Zone aus der Liste.')); return; }
-    const v = selected.userData; const h2 = el('h2'); const sw = el('span', 'sw'); sw.style.background = '#' + new THREE.Color(v.color).getHexString(); h2.append(sw, v.name);
-    body.append(el('div', 'eyebrow', 'Luftraumklasse ' + v.cls), h2);
-    const dl = document.createElement('dl'); for (const [k, val] of Object.entries(v.data)) dl.append(el('dt', '', k), el('dd', '', val)); body.append(dl);
-    const row = el('div', 'row'); row.append(btn('Kamera hinfliegen', () => focusOn(selected)), btn('Vergleich', () => { tab = 'cmp'; renderBody(); }), btn('Auswahl aufheben', () => { select(null); tab = 'list'; renderBody(); }));
-    const a = el('a', 'btn-s', 'Dazu üben im Trainer'); a.href = TRAINER; a.style.textDecoration = 'none'; row.append(a); body.append(row);
+    if (!selected) { body.append(el('h2', '', T('noSel')), el('div', 'muted', T('noSelP'))); return; }
+    const v = selected.userData; const h2 = el('h2'); const sw = el('span', 'sw'); sw.style.background = '#' + new THREE.Color(v.color).getHexString(); h2.append(sw, volName(v));
+    body.append(el('div', 'eyebrow', T('cls') + ' ' + v.cls), h2);
+    const dl = document.createElement('dl'); for (const [k, val] of Object.entries(volData(v))) dl.append(el('dt', '', k), el('dd', '', val)); body.append(dl);
+    const row = el('div', 'row'); row.append(btn(T('fly'), () => focusOn(selected)), btn(T('compare'), () => { tab = 'cmp'; renderBody(); }), btn(T('clear'), () => { select(null); tab = 'list'; renderBody(); }));
+    const a = el('a', 'btn-s', T('practise')); a.href = TRAINER; a.style.textDecoration = 'none'; row.append(a); body.append(row);
   } else if (tab === 'cmp') {
-    body.append(el('div', 'hint', 'Alle sieben Klassen nach SERA / ICAO Annex 11. Spalte antippen markiert sie im 3D Bild (ICAO Ansicht).'));
+    body.append(el('div', 'hint', T('cmpHint')));
     const wrap = el('div', 'tablewrap'); const t = document.createElement('table'); t.className = 'cmp';
     const thead = document.createElement('thead'); const hr = document.createElement('tr'); hr.append(el('th', '', ''));
-    for (const k of CLASSES) { const th = el('th', '', k.c); th.style.cursor = 'pointer'; th.onclick = () => { if (mode !== 'icao') setMode('icao'); const m = meshes.find(x => x.userData.id === 'ICAO' + k.c); select(m, true); tab = 'cmp'; renderBody(); }; hr.append(th); }
+    for (const k of CLASSES()) { const th = el('th', '', k.c); th.style.cursor = 'pointer'; th.onclick = () => { if (mode !== 'icao') setMode('icao'); const m = meshes.find(x => x.userData.id === 'ICAO' + k.c); select(m, true); tab = 'cmp'; renderBody(); }; hr.append(th); }
     thead.append(hr); t.append(thead);
     const tb = document.createElement('tbody');
-    for (const [key, label] of ROWS) { const tr = document.createElement('tr'); tr.append(el('td', '', label)); for (const k of CLASSES) { const td = el('td', '', k[key]); if (selected && selected.userData.id === 'ICAO' + k.c) td.style.background = 'var(--accent-soft)'; tr.append(td); } tb.append(tr); }
-    t.append(tb); wrap.append(t); body.append(wrap);
-    body.append(el('div', 'hint', 'Merkhilfe: Von A nach G nimmt die Kontrolle ab. A bis D: Freigabe für alle. E: nur IFR braucht Freigabe. F und G: unkontrolliert. Staffelung aller Flüge nur in A und B.'));
+    for (const key of ROWKEYS) { const tr = document.createElement('tr'); tr.append(el('td', '', T('rows')[key])); for (const k of CLASSES()) { const td = el('td', '', k[key]); if (selected && selected.userData.id === 'ICAO' + k.c) td.style.background = 'var(--accent-soft)'; tr.append(td); } tb.append(tr); }
+    t.append(tb); wrap.append(t); body.append(wrap, el('div', 'hint', T('cmpMemo')));
   } else {
-    body.append(el('h2', '', 'Bedienung'), el('div', 'muted', 'iPad: ein Finger drehen, zwei Finger zoomen oder verschieben, kurz antippen wählt eine Zone. Rechner: linke Maustaste drehen, Mausrad zoomen, rechte Maustaste verschieben.'), el('div', 'muted', 'Oben links schaltest du zwischen der deutschen Struktur (DFS Schema 08/2016, Höhen 3-fach überhöht) und dem ICAO Stapel A bis G um.'), el('div', 'muted', 'Quellen: SERA.5001 und SERA.6001, ICAO Annex 2 und 11, AIP Germany. Werte vor der Prüfung gegenchecken.'));
+    body.append(el('h2', '', T('helpT')), el('div', 'muted', T('help1')), el('div', 'muted', T('help2')), el('div', 'muted', T('help3')));
   }
 }
 function focusOn(m) { const v = m.userData, c = m.position, size = Math.max(v.x[1]-v.x[0], ALT(v.y[1])-ALT(v.y[0]), v.z[1]-v.z[0]); const dist = Math.max(30, size * 1.6); flyTo([c.x - dist * .55, c.y + dist * .6, c.z + dist * .9], [c.x, c.y, c.z]); }
@@ -1428,56 +1651,52 @@ function setupPick() {
   const pick = ev => { const r = renderer.domElement.getBoundingClientRect(); ptr.x = ((ev.clientX - r.left) / r.width) * 2 - 1; ptr.y = -((ev.clientY - r.top) / r.height) * 2 + 1; ray.setFromCamera(ptr, camera); const hits = ray.intersectObjects(active().filter(m => m.visible), false); if (!hits.length) return null; hits.sort((a, b) => vol(a.object) - vol(b.object)); return hits[0].object; };
   renderer.domElement.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY, Date.now()]; });
   renderer.domElement.addEventListener('pointerup', e => { if (!downAt) return; const moved = Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]), dt = Date.now() - downAt[2]; downAt = null; if (moved > 8 || dt > 700) return; const m = pick(e); if (m) select(m, false); else if (selected) select(null); });
-  renderer.domElement.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const m = pick(e); renderer.domElement.style.cursor = m ? 'pointer' : 'grab'; if (m) { tip.textContent = m.userData.name; tip.style.left = e.clientX + 'px'; tip.style.top = e.clientY + 'px'; tip.style.opacity = 1; } else tip.style.opacity = 0; });
+  renderer.domElement.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const m = pick(e); renderer.domElement.style.cursor = m ? 'pointer' : 'grab'; if (m) { tip.textContent = volName(m.userData); tip.style.left = e.clientX + 'px'; tip.style.top = e.clientY + 'px'; tip.style.opacity = 1; } else tip.style.opacity = 0; });
 }
 function resize() { if (!renderer) return; const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h); }
 window.addEventListener('resize', resize);
 
 /* ---------- VMC Rechner (SERA.5001) ---------- */
 const vmcEl = $('#vmc');
-const vs = {cls:'G', alt:1500, ref:'amsl', spd:120, type:'aeroplane', night:false};
+const vs = {cls:'G', alt:1500, ref:'amsl', spd:120, type:'aeroplane'};
 function vmcCalc() {
   const {cls, alt, ref, spd, type} = vs;
-  if (cls === 'A') return {vis:null, note:'In Luftraum A ist VFR nicht erlaubt.'};
+  if (cls === 'A') return {vis:null};
   const aboveFL100 = alt >= 10000;
-  const low = ref === 'agl' ? alt <= 1000 : alt <= 3000; // unter 3000 ft AMSL oder 1000 ft AGL, was höher ist
-  if (aboveFL100) return {vis:8000, cloudH:1500, cloudV:1000, band:'Ab FL 100 (10 000 ft)', rule:'SERA.5001, alle Klassen'};
-  if (!low || !['F','G'].includes(cls)) return {vis:5000, cloudH:1500, cloudV:1000, band:low ? 'Unter 3000 ft AMSL / 1000 ft AGL, Klasse ' + cls : 'Unter FL 100 und über 3000 ft AMSL / 1000 ft AGL', rule:'SERA.5001'};
-  // F/G tief
+  const low = ref === 'agl' ? alt <= 1000 : alt <= 3000;
+  if (aboveFL100) return {vis:8000, band:T('bandFL'), rule:T('ruleAll')};
+  if (!low || !['F','G'].includes(cls)) return {vis:5000, band:low ? T('bandLow') + cls : T('bandMid'), rule:'SERA.5001'};
   let vis = 5000, extra = '';
-  if (type === 'helicopter') { vis = 800; extra = 'Hubschrauber: 800 m, wenn so langsam geflogen wird, dass anderer Verkehr und Hindernisse rechtzeitig erkannt werden.'; }
-  else if (spd <= 140) { vis = 1500; extra = 'Flugzeuge bis 140 kt IAS: 1500 m zulässig (Deutschland), wenn Verkehr und Hindernisse rechtzeitig erkannt werden können.'; }
-  return {vis, cloudH:0, cloudV:0, clear:true, band:'Unter 3000 ft AMSL / 1000 ft AGL, Klasse ' + cls, rule:'SERA.5001 mit nationaler Ausnahme', extra};
+  if (type === 'helicopter') { vis = 800; extra = T('heliX'); }
+  else if (spd <= 140) { vis = 1500; extra = T('slowX'); }
+  return {vis, clear:true, band:T('bandLow') + cls, rule:T('ruleNat'), extra};
 }
+const fmtVis = v => v >= 1000 ? (v/1000).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' km' : v + ' m';
 function renderVmc() {
   vmcEl.innerHTML = '';
-  vmcEl.append(el('div', 'eyebrow', 'Modul 2'), el('h2', '', 'VMC Minima Rechner'), el('p', 'muted', 'Sichtflugwetterbedingungen nach SERA.5001. Stell Luftraum, Höhe und Geschwindigkeit ein, die Minima und die Skizze passen sich an.'));
+  vmcEl.append(el('div', 'eyebrow', T('module') + ' 2'), el('h2', '', T('vmcT')), el('p', 'muted', T('vmcP')));
   const g = el('div', 'vmc'); const form = el('div', 'card'); form.style.gap = '14px';
-  const fcls = el('label', 'f', 'Luftraumklasse'); const sel = document.createElement('select'); for (const k of CLASSES) { const o = el('option', '', k.c + (k.de.startsWith('In Deutschland nicht') ? ' (nicht in DE)' : '')); o.value = k.c; o.selected = k.c === vs.cls; sel.append(o); } sel.onchange = () => { vs.cls = sel.value; renderVmc(); }; fcls.append(sel);
-  const falt = el('label', 'f', `Höhe: ${vs.alt.toLocaleString('de-DE')} ft ${vs.ref === 'agl' ? 'AGL' : 'AMSL'}`); const rng = document.createElement('input'); rng.type = 'range'; rng.min = 0; rng.max = 20000; rng.step = 100; rng.value = vs.alt; rng.oninput = () => { vs.alt = +rng.value; renderVmc(); }; falt.append(rng);
+  const fcls = el('label', 'f', T('fCls')); const s = document.createElement('select'); for (const k of CLASSES()) { const o = el('option', '', k.c + (k.de.startsWith('In Deutschland nicht') || k.de.startsWith('Not used') || k.de.startsWith('Non utilis') ? T('notDe') : '')); o.value = k.c; o.selected = k.c === vs.cls; s.append(o); } s.onchange = () => { vs.cls = s.value; renderVmc(); }; fcls.append(s);
+  const falt = el('label', 'f', `${T('fAlt')}: ${vs.alt.toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE')} ft ${vs.ref === 'agl' ? 'AGL' : 'AMSL'}`); const rng = document.createElement('input'); rng.type = 'range'; rng.min = 0; rng.max = 20000; rng.step = 100; rng.value = vs.alt; rng.oninput = () => { vs.alt = +rng.value; renderVmc(); }; falt.append(rng);
   const fref = el('div', 'seg'); for (const [v, l] of [['amsl','AMSL'],['agl','AGL']]) { const b = el('button', '', l); b.setAttribute('aria-pressed', vs.ref === v); b.onclick = () => { vs.ref = v; renderVmc(); }; fref.append(b); }
-  const fspd = el('label', 'f', `Geschwindigkeit: ${vs.spd} kt IAS`); const rs = document.createElement('input'); rs.type = 'range'; rs.min = 40; rs.max = 250; rs.step = 5; rs.value = vs.spd; rs.oninput = () => { vs.spd = +rs.value; renderVmc(); }; fspd.append(rs);
-  const ftype = el('div', 'seg'); for (const [v, l] of [['aeroplane','Flugzeug'],['helicopter','Hubschrauber']]) { const b = el('button', '', l); b.setAttribute('aria-pressed', vs.type === v); b.onclick = () => { vs.type = v; renderVmc(); }; ftype.append(b); }
+  const fspd = el('label', 'f', `${T('fSpd')}: ${vs.spd} kt IAS`); const rs = document.createElement('input'); rs.type = 'range'; rs.min = 40; rs.max = 250; rs.step = 5; rs.value = vs.spd; rs.oninput = () => { vs.spd = +rs.value; renderVmc(); }; fspd.append(rs);
+  const ftype = el('div', 'seg'); for (const [v, l] of [['aeroplane', T('aeroplane')],['helicopter', T('heli')]]) { const b = el('button', '', l); b.setAttribute('aria-pressed', vs.type === v); b.onclick = () => { vs.type = v; renderVmc(); }; ftype.append(b); }
   form.append(fcls, falt, fref, fspd, ftype); g.append(form);
   const out = el('div', 'card'); const r = vmcCalc();
-  if (r.vis == null) { out.append(el('h3', 'no', 'VFR nicht möglich'), el('div', 'muted', r.note)); }
+  if (r.vis == null) out.append(el('h3', 'no', T('noVfr')), el('div', 'muted', T('noVfrP')));
   else {
     out.append(el('div', 'eyebrow', r.band));
     const res = el('div', 'res');
-    const c1 = el('div', 'card'); c1.append(el('span', 'eyebrow', 'Flugsicht'), el('div', 'big', r.vis >= 1000 ? (r.vis/1000).toLocaleString('de-DE') + ' km' : r.vis + ' m'));
-    const c2 = el('div', 'card'); c2.append(el('span', 'eyebrow', 'Abstand zu Wolken'), el('div', 'big', r.clear ? 'frei' : '1500 m'), el('span', 'muted', r.clear ? 'von Wolken, Erdsicht' : 'horizontal, 1000 ft vertikal'));
+    const c1 = el('div', 'card'); c1.append(el('span', 'eyebrow', T('vis')), el('div', 'big', fmtVis(r.vis)));
+    const c2 = el('div', 'card'); c2.append(el('span', 'eyebrow', T('cloud')), el('div', 'big', r.clear ? T('free') : '1500 m'), el('span', 'muted', r.clear ? T('freeP') : T('cloudP')));
     res.append(c1, c2); out.append(res);
     if (r.extra) out.append(el('div', 'muted', r.extra));
-    out.append(vmcSvg(r), el('div', 'hint', 'Regel: ' + r.rule + '. Zusätzlich gilt in Kontrollzonen: Bodensicht mindestens 5 km und Hauptwolkenuntergrenze mindestens 1500 ft, sonst nur Sonder-VFR. Nacht-VFR: Deutschland verlangt Flugsicht 5 km und 1500 m / 1000 ft auch in G.'));
+    out.append(vmcSvg(r), el('div', 'hint', T('rule') + ': ' + r.rule + '. ' + T('vmcNote')));
   }
   g.append(out); vmcEl.append(g);
-  const memo = el('div', 'card'); memo.append(el('h3', '', 'Merktabelle SERA.5001'));
-  const tw = el('div', 'tablewrap'); tw.innerHTML = '<table><thead><tr><th>Höhenband</th><th>Klasse</th><th>Flugsicht</th><th>Wolkenabstand</th></tr></thead><tbody>' +
-    '<tr><td>ab FL 100</td><td>A bis G</td><td>8 km</td><td>1500 m / 1000 ft</td></tr>' +
-    '<tr><td>unter FL 100, über 3000 ft AMSL oder 1000 ft AGL</td><td>A bis G</td><td>5 km</td><td>1500 m / 1000 ft</td></tr>' +
-    '<tr><td>unter 3000 ft AMSL oder 1000 ft AGL</td><td>B bis E</td><td>5 km</td><td>1500 m / 1000 ft</td></tr>' +
-    '<tr><td>unter 3000 ft AMSL oder 1000 ft AGL</td><td>F und G</td><td>5 km (1,5 km bei ≤140 kt, Hubschrauber 800 m)</td><td>frei von Wolken, Erdsicht</td></tr></tbody></table>';
-  memo.append(tw); vmcEl.append(memo);
+  const memo = el('div', 'card'); memo.append(el('h3', '', T('memoT')));
+  const tw = el('div', 'tablewrap'); const tbl = document.createElement('table'); const th = document.createElement('tr'); for (const h of T('memoH')) th.append(el('th', '', h)); const thead = document.createElement('thead'); thead.append(th); tbl.append(thead);
+  const tb = document.createElement('tbody'); for (const row of T('memoR')) { const tr = document.createElement('tr'); for (const c of row) tr.append(el('td', '', c)); tb.append(tr); } tbl.append(tb); tw.append(tbl); memo.append(tw); vmcEl.append(memo);
 }
 function vmcSvg(r) {
   const W = 520, H = 220; const ns = 'http://www.w3.org/2000/svg';
@@ -1485,27 +1704,25 @@ function vmcSvg(r) {
   const add = (t, a, txt) => { const e = document.createElementNS(ns, t); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); if (txt) e.textContent = txt; s.append(e); return e; };
   add('rect', {x:0, y:0, width:W, height:H, rx:10, fill:'var(--sky)'});
   add('rect', {x:0, y:H-22, width:W, height:22, fill:'#b7873f'});
-  // Wolke
   const cx = 400, cy = 70; for (const [dx, dy, rr] of [[0,0,34],[-30,10,24],[30,12,26],[-10,-16,22],[18,-14,20]]) add('circle', {cx:cx+dx, cy:cy+dy, r:rr, fill:'#fff', opacity:.95});
-  // Flugzeug
   const px = 130, py = r.clear ? 110 : 150;
   add('path', {d:`M${px-30} ${py} l40 -6 l30 2 l12 4 l-12 4 l-30 2 z M${px-12} ${py} l-6 -16 l10 0 l6 14 z M${px-12} ${py} l-6 16 l10 0 l6 -14 z`, fill:'var(--fg)'});
-  // Sicht
   const visLen = Math.min(330, r.vis / 8000 * 330);
   add('line', {x1:px+25, y1:py, x2:px+25+visLen, y2:py, stroke:'var(--accent)', 'stroke-width':3, 'stroke-dasharray':'8 5'});
-  add('text', {x:px+25+visLen/2, y:py+18, 'text-anchor':'middle', 'font-size':13, fill:'var(--accent)', 'font-weight':600}, 'Flugsicht ' + (r.vis >= 1000 ? (r.vis/1000).toLocaleString('de-DE') + ' km' : r.vis + ' m'));
+  add('text', {x:px+25+visLen/2, y:py+18, 'text-anchor':'middle', 'font-size':13, fill:'var(--accent)', 'font-weight':600}, T('svgVis') + ' ' + fmtVis(r.vis));
   if (!r.clear) {
-    add('line', {x1:px+25, y1:py-30, x2:cx-40, y2:py-30, stroke:'var(--warn)', 'stroke-width':2}); add('text', {x:(px+25+cx-40)/2, y:py-36, 'text-anchor':'middle', 'font-size':12, fill:'var(--warn)', 'font-weight':600}, '1500 m horizontal');
-    add('line', {x1:cx, y1:cy+36, x2:cx, y2:py-8, stroke:'var(--warn)', 'stroke-width':2}); add('text', {x:cx+8, y:(cy+36+py)/2, 'font-size':12, fill:'var(--warn)', 'font-weight':600}, '1000 ft vertikal');
+    add('line', {x1:px+25, y1:py-30, x2:cx-40, y2:py-30, stroke:'var(--warn)', 'stroke-width':2}); add('text', {x:(px+25+cx-40)/2, y:py-36, 'text-anchor':'middle', 'font-size':12, fill:'var(--warn)', 'font-weight':600}, T('svgH'));
+    add('line', {x1:cx, y1:cy+36, x2:cx, y2:py-8, stroke:'var(--warn)', 'stroke-width':2}); add('text', {x:cx+8, y:(cy+36+py)/2, 'font-size':12, fill:'var(--warn)', 'font-weight':600}, T('svgV'));
   } else {
-    add('text', {x:cx, y:cy+60, 'text-anchor':'middle', 'font-size':12, fill:'var(--good)', 'font-weight':600}, 'frei von Wolken');
-    add('line', {x1:px, y1:py+20, x2:px, y2:H-24, stroke:'var(--good)', 'stroke-width':2, 'stroke-dasharray':'4 4'}); add('text', {x:px+6, y:H-30, 'font-size':12, fill:'var(--good)', 'font-weight':600}, 'Erdsicht');
+    add('text', {x:cx, y:cy+60, 'text-anchor':'middle', 'font-size':12, fill:'var(--good)', 'font-weight':600}, T('svgFree'));
+    add('line', {x1:px, y1:py+20, x2:px, y2:H-24, stroke:'var(--good)', 'stroke-width':2, 'stroke-dasharray':'4 4'}); add('text', {x:px+6, y:H-30, 'font-size':12, fill:'var(--good)', 'font-weight':600}, T('svgGround'));
   }
   return s;
 }
-renderVmc();
 
 /* ---------- Start ---------- */
+document.documentElement.lang = LANG;
+renderAll();
 const v0 = location.hash.slice(1);
 go(['home','air','vmc','soon'].includes(v0) ? v0 : 'home');
 })();
