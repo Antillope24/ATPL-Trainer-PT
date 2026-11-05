@@ -34,7 +34,7 @@ main{flex:1;min-height:0;position:relative}
 .wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0;text-align:left}
-.card.btn:hover{border-color:var(--accent)}
+.card.link{cursor:pointer}.card.link:hover,.card.link:focus-visible{border-color:var(--accent)}
 .card .num{font-family:var(--mono);font-size:.75rem;color:var(--accent)}
 .tag{display:inline-block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:999px;background:var(--surface2);color:var(--muted)}
 .btn{background:var(--accent);color:var(--accent-fg);border:0;border-radius:8px;padding:10px 14px;font-weight:600;min-height:42px}
@@ -1206,7 +1206,7 @@ const MODULES = [
   h.append(el('div', 'eyebrow', 'ATPL 010 Air Law'), el('h2', '', 'Nachschlagen, anschauen, verstehen'), el('p', 'muted', 'Die trockenen Teile von Air Law als interaktive Werkzeuge. Jedes Modul ist für das iPad gebaut und läuft offline. Zum Üben der passenden Fragen geht es in den ATPL Progress Trainer.'));
   const g = el('div', 'grid');
   for (const [v, n, title, desc, ready] of MODULES) {
-    const c = el('button', 'card btn'); c.append(el('span', 'num', 'Modul ' + n), el('h3', '', title), el('span', 'muted', desc), el('span', 'tag', ready ? 'verfügbar' : 'geplant'));
+    const c = el('button', 'card link'); c.append(el('span', 'num', 'Modul ' + n), el('h3', '', title), el('span', 'muted', desc), el('span', 'tag', ready ? 'verfügbar' : 'geplant'));
     c.onclick = () => go(v); if (!ready) c.style.opacity = .6; g.append(c);
   }
   h.append(g);
