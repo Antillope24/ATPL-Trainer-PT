@@ -1224,15 +1224,18 @@ runway(72.5, 7); runway(135.5, 5); runway(155, 2.5); runway(172.5, 3);
 function altLine(ft, label) {
   const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-100, ALT(ft), -40), new THREE.Vector3(100, ALT(ft), -40)]);
   const l = new THREE.Line(g, new THREE.LineDashedMaterial({color: 0x556677, dashSize: 2, gapSize: 1.5})); l.computeLineDistances(); scene.add(l);
-  scene.add(textSprite(label, 0x556677, 7).translateX(-104).translateY(ALT(ft)).translateZ(-40));
+  scene.add(textSprite(label, 0x556677, 6).translateX(-104).translateY(ALT(ft)).translateZ(-40));
 }
 function textSprite(text, color, size = 10) {
   const c = document.createElement('canvas'); const ctx = c.getContext('2d');
-  ctx.font = '600 48px Barlow Semi Condensed, Arial'; const w = ctx.measureText(text).width + 24; c.width = w; c.height = 64;
-  ctx.font = '600 48px Barlow Semi Condensed, Arial'; ctx.fillStyle = '#' + new THREE.Color(color).getHexString(); ctx.textBaseline = 'middle'; ctx.fillText(text, 12, 32);
+  ctx.font = '700 48px Barlow Semi Condensed, Arial'; const tw = ctx.measureText(text).width; const w = tw + 40, hh = 68; c.width = w; c.height = hh;
+  ctx.font = '700 48px Barlow Semi Condensed, Arial';
+  const col = '#' + new THREE.Color(color).getHexString();
+  ctx.fillStyle = 'rgba(255,255,255,0.93)'; ctx.strokeStyle = col; ctx.lineWidth = 6;
+  const r = 16; ctx.beginPath(); ctx.moveTo(r, 3); ctx.lineTo(w - r, 3); ctx.quadraticCurveTo(w - 3, 3, w - 3, r); ctx.lineTo(w - 3, hh - r); ctx.quadraticCurveTo(w - 3, hh - 3, w - r, hh - 3); ctx.lineTo(r, hh - 3); ctx.quadraticCurveTo(3, hh - 3, 3, hh - r); ctx.lineTo(3, r); ctx.quadraticCurveTo(3, 3, r, 3); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#17202b'; ctx.textBaseline = 'middle'; ctx.fillText(text, 20, hh / 2 + 2);
   const t = new THREE.CanvasTexture(c); t.minFilter = THREE.LinearFilter;
-  const s = new THREE.Sprite(new THREE.SpriteMaterial({map: t, transparent: true, depthTest: false}));
-  s.scale.set(size * w / 64, size, 1); return s;
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({map: t, transparent: true, depthTest: false})); s.scale.set(size * w / hh, size, 1); return s;
 }
 altLine(10000, 'FL 100'); altLine(66000, 'FL 660'); altLine(2500, '2500 ft AGL'); altLine(5000, '5000 ft AMSL');
 
