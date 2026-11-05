@@ -1,0 +1,1509 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no"><link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Air Law"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" href="icons/icon-192.png"><meta name="theme-color" content="#0b6e8f"><style>[hidden]{display:none!important}img{max-width:100%}</style></head><body><title>Air Law Explorer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: top bar with module chips; each module is a view. Airspace module = full-bleed 3D stage + drawer; VMC module = form left, diagram right (stacks on phone) */
+:root{
+  --bg:#eef2f6; --surface:#ffffff; --surface2:#e9edf3; --fg:#17202b; --muted:#5b6876; --line:#d3dae3; --accent:#0b6e8f; --accent-fg:#fff; --accent-soft:#dcedf3;
+  --good:#2a8a52; --bad:#c43f38; --warn:#b7791f; --sky:#dfe9f3;
+  --display:"Barlow Semi Condensed","Barlow",system-ui,sans-serif; --body:"Barlow",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f151c;--surface:#18212b;--surface2:#222d39;--fg:#e8edf2;--muted:#93a1b1;--line:#2d3a48;--accent:#4fb3d6;--accent-fg:#0b1218;--accent-soft:#163745;--good:#5ac589;--bad:#ef7b74;--warn:#e4b35a;--sky:#1a2634;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f151c;--surface:#18212b;--surface2:#222d39;--fg:#e8edf2;--muted:#93a1b1;--line:#2d3a48;--accent:#4fb3d6;--accent-fg:#0b1218;--accent-soft:#163745;--good:#5ac589;--bad:#ef7b74;--warn:#e4b35a;--sky:#1a2634;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 var(--body);display:flex;flex-direction:column;overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+h1{font-family:var(--display);font-size:1.2rem;margin:0;white-space:nowrap}
+h2{font-family:var(--display);font-size:1.5rem;margin:0;line-height:1.15;text-wrap:balance}
+h3{font-family:var(--display);font-size:1.15rem;margin:0}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono);font-size:.82em}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));flex:none}
+.bar{display:flex;align-items:center;gap:12px;min-height:54px;flex-wrap:wrap;padding-block:6px}
+nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1}
+nav::-webkit-scrollbar{display:none}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-weight:600;font-size:.88rem;white-space:nowrap;min-height:38px}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.chip.soon{opacity:.5}
+main{flex:1;min-height:0;position:relative}
+.view{position:absolute;inset:0;overflow:auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.view[hidden]{display:none}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0;text-align:left}
+.card.btn:hover{border-color:var(--accent)}
+.card .num{font-family:var(--mono);font-size:.75rem;color:var(--accent)}
+.tag{display:inline-block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:999px;background:var(--surface2);color:var(--muted)}
+.btn{background:var(--accent);color:var(--accent-fg);border:0;border-radius:8px;padding:10px 14px;font-weight:600;min-height:42px}
+.btn-s{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-weight:600;font-size:.88rem;min-height:40px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:8px 14px;font-weight:600;color:var(--muted);min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+/* 3D */
+#v-air{padding:0;overflow:hidden}
+#stage{position:absolute;inset:0;touch-action:none}
+canvas{display:block}
+.top{position:absolute;top:10px;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:8px;align-items:center;flex-wrap:wrap;pointer-events:none}
+.top>*{pointer-events:auto}
+.pill{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 6px;box-shadow:0 4px 14px rgba(0,0,0,.12);display:flex;gap:4px;align-items:center}
+.views{display:flex;gap:4px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+.views::-webkit-scrollbar{display:none}
+.drawer{position:absolute;top:64px;bottom:12px;right:max(12px,env(safe-area-inset-right,0px));width:min(400px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden;transition:transform .25s}
+.drawer.closed{transform:translateX(calc(100% + 24px))}
+.drawer .head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.drawer .head .tabs{display:flex;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none}
+.drawer .body{overflow:auto;padding:14px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch}
+.fab{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--accent);color:var(--accent-fg);border:0;border-radius:999px;padding:12px 18px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25);display:none}
+.drawer.closed ~ .fab{display:block}
+@media (max-width:760px){.drawer{top:auto;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));width:auto;height:55%;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.drawer.closed{transform:translateY(calc(100% + 24px))}}
+.zones{display:flex;flex-direction:column;gap:6px}
+.zone{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);text-align:left;min-height:44px}
+.zone.sel{border-color:var(--accent);background:var(--surface2)}
+.zone .n{flex:1;min-width:0;font-weight:600;line-height:1.2}
+.zone .cls{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.zone .eye{border:0;background:none;color:var(--muted);font-size:1rem;padding:6px}
+.zone .eye[aria-pressed="false"]{opacity:.35}
+.sw{width:16px;height:16px;border-radius:4px;border:1px solid rgba(0,0,0,.2);flex:none}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 12px;font-size:.93rem}
+dt{color:var(--muted);font-weight:500}
+dd{margin:0}
+.hint{font-size:.82rem;color:var(--muted)}
+.tip{position:absolute;pointer-events:none;background:var(--fg);color:var(--bg);padding:4px 8px;border-radius:6px;font-size:.8rem;transform:translate(-50%,-130%);white-space:nowrap;opacity:0;transition:opacity .15s}
+/* tables */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.82rem}
+.cmp td,.cmp th{padding:6px 8px;min-width:120px}
+.cmp td:first-child{min-width:110px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);position:sticky;top:0;background:var(--surface)}
+tr.hl td{background:var(--accent-soft)}
+td.c{font-family:var(--display);font-weight:700;font-size:1.1rem}
+.cmp td:first-child{position:sticky;left:0;background:var(--surface);font-weight:600}
+/* vmc */
+.vmc{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,1.4fr);gap:16px}
+@media (max-width:760px){.vmc{grid-template-columns:1fr}}
+label.f{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:.9rem}
+select,input[type=number]{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);min-height:42px}
+input[type=range]{width:100%}
+.big{font-family:var(--display);font-size:2.2rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.res .card{gap:4px}
+.ok{color:var(--good)}.no{color:var(--bad)}
+svg text{font-family:var(--body)}
+</style>
+
+<header><div class="bar">
+  <h1>Air Law Explorer</h1>
+  <nav id="nav">
+    <button class="chip" data-v="home">Start</button>
+    <button class="chip" data-v="air">Luftraumklassen</button>
+    <button class="chip" data-v="vmc">VMC Rechner</button>
+    <button class="chip soon" data-v="soon">Flugflächen</button>
+    <button class="chip soon" data-v="soon">Ausweichregeln</button>
+    <button class="chip soon" data-v="soon">Signale</button>
+    <button class="chip soon" data-v="soon">Lizenzen</button>
+    <button class="chip soon" data-v="soon">ICAO</button>
+  </nav>
+</div></header>
+<main>
+  <section class="view" id="v-home"><div class="wrap" id="home"></div></section>
+  <section class="view" id="v-air" hidden>
+    <div id="stage"></div><div class="tip" id="tip"></div>
+    <div class="top">
+      <div class="pill seg" id="mode"><button aria-pressed="true" data-m="de">Deutschland</button><button aria-pressed="false" data-m="icao">ICAO A bis G</button></div>
+      <div class="views" id="views"></div>
+    </div>
+    <div class="drawer" id="drawer">
+      <div class="head"><div class="tabs"><button class="chip" id="tab-list" aria-pressed="true">Zonen</button><button class="chip" id="tab-info" aria-pressed="false">Daten</button><button class="chip" id="tab-cmp" aria-pressed="false">Vergleich</button><button class="chip" id="tab-help" aria-pressed="false">Hilfe</button></div><button class="btn-s" id="btn-close" aria-label="Panel schließen">✕</button></div>
+      <div class="body" id="body"></div>
+    </div>
+    <button class="fab" id="fab">Zonen und Daten</button>
+  </section>
+  <section class="view" id="v-vmc" hidden><div class="wrap" id="vmc"></div></section>
+  <section class="view" id="v-soon" hidden><div class="wrap"><h2>Kommt als Nächstes</h2><p class="muted">Dieses Modul ist geplant. Reihenfolge: Flugflächen und Halbkreisregel, Ausweichregeln, Signale, Lizenzen und Fristen, ICAO Struktur.</p></div></section>
+</main>
+
+<script src="three.min.js"></script>
+<script>
+( function () {
+
+	// Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
+	//
+	//    Orbit - left mouse / touch: one-finger move
+	//    Zoom - middle mouse, or mousewheel / touch: two-finger spread or squish
+	//    Pan - right mouse, or left mouse + ctrl/meta/shiftKey, or arrow keys / touch: two-finger move
+
+	const _changeEvent = {
+		type: 'change'
+	};
+	const _startEvent = {
+		type: 'start'
+	};
+	const _endEvent = {
+		type: 'end'
+	};
+
+	class OrbitControls extends THREE.EventDispatcher {
+
+		constructor( object, domElement ) {
+
+			super();
+			if ( domElement === undefined ) console.warn( 'THREE.OrbitControls: The second parameter "domElement" is now mandatory.' );
+			if ( domElement === document ) console.error( 'THREE.OrbitControls: "document" should not be used as the target "domElement". Please use "renderer.domElement" instead.' );
+			this.object = object;
+			this.domElement = domElement; // Set to false to disable this control
+
+			this.enabled = true; // "target" sets the location of focus, where the object orbits around
+
+			this.target = new THREE.Vector3(); // How far you can dolly in and out ( PerspectiveCamera only )
+
+			this.minDistance = 0;
+			this.maxDistance = Infinity; // How far you can zoom in and out ( OrthographicCamera only )
+
+			this.minZoom = 0;
+			this.maxZoom = Infinity; // How far you can orbit vertically, upper and lower limits.
+			// Range is 0 to Math.PI radians.
+
+			this.minPolarAngle = 0; // radians
+
+			this.maxPolarAngle = Math.PI; // radians
+			// How far you can orbit horizontally, upper and lower limits.
+			// If set, the interval [ min, max ] must be a sub-interval of [ - 2 PI, 2 PI ], with ( max - min < 2 PI )
+
+			this.minAzimuthAngle = - Infinity; // radians
+
+			this.maxAzimuthAngle = Infinity; // radians
+			// Set to true to enable damping (inertia)
+			// If damping is enabled, you must call controls.update() in your animation loop
+
+			this.enableDamping = false;
+			this.dampingFactor = 0.05; // This option actually enables dollying in and out; left as "zoom" for backwards compatibility.
+			// Set to false to disable zooming
+
+			this.enableZoom = true;
+			this.zoomSpeed = 1.0; // Set to false to disable rotating
+
+			this.enableRotate = true;
+			this.rotateSpeed = 1.0; // Set to false to disable panning
+
+			this.enablePan = true;
+			this.panSpeed = 1.0;
+			this.screenSpacePanning = true; // if false, pan orthogonal to world-space direction camera.up
+
+			this.keyPanSpeed = 7.0; // pixels moved per arrow key push
+			// Set to true to automatically rotate around the target
+			// If auto-rotate is enabled, you must call controls.update() in your animation loop
+
+			this.autoRotate = false;
+			this.autoRotateSpeed = 2.0; // 30 seconds per orbit when fps is 60
+			// The four arrow keys
+
+			this.keys = {
+				LEFT: 'ArrowLeft',
+				UP: 'ArrowUp',
+				RIGHT: 'ArrowRight',
+				BOTTOM: 'ArrowDown'
+			}; // Mouse buttons
+
+			this.mouseButtons = {
+				LEFT: THREE.MOUSE.ROTATE,
+				MIDDLE: THREE.MOUSE.DOLLY,
+				RIGHT: THREE.MOUSE.PAN
+			}; // Touch fingers
+
+			this.touches = {
+				ONE: THREE.TOUCH.ROTATE,
+				TWO: THREE.TOUCH.DOLLY_PAN
+			}; // for reset
+
+			this.target0 = this.target.clone();
+			this.position0 = this.object.position.clone();
+			this.zoom0 = this.object.zoom; // the target DOM element for key events
+
+			this._domElementKeyEvents = null; //
+			// public methods
+			//
+
+			this.getPolarAngle = function () {
+
+				return spherical.phi;
+
+			};
+
+			this.getAzimuthalAngle = function () {
+
+				return spherical.theta;
+
+			};
+
+			this.listenToKeyEvents = function ( domElement ) {
+
+				domElement.addEventListener( 'keydown', onKeyDown );
+				this._domElementKeyEvents = domElement;
+
+			};
+
+			this.saveState = function () {
+
+				scope.target0.copy( scope.target );
+				scope.position0.copy( scope.object.position );
+				scope.zoom0 = scope.object.zoom;
+
+			};
+
+			this.reset = function () {
+
+				scope.target.copy( scope.target0 );
+				scope.object.position.copy( scope.position0 );
+				scope.object.zoom = scope.zoom0;
+				scope.object.updateProjectionMatrix();
+				scope.dispatchEvent( _changeEvent );
+				scope.update();
+				state = STATE.NONE;
+
+			}; // this method is exposed, but perhaps it would be better if we can make it private...
+
+
+			this.update = function () {
+
+				const offset = new THREE.Vector3(); // so camera.up is the orbit axis
+
+				const quat = new THREE.Quaternion().setFromUnitVectors( object.up, new THREE.Vector3( 0, 1, 0 ) );
+				const quatInverse = quat.clone().invert();
+				const lastPosition = new THREE.Vector3();
+				const lastQuaternion = new THREE.Quaternion();
+				const twoPI = 2 * Math.PI;
+				return function update() {
+
+					const position = scope.object.position;
+					offset.copy( position ).sub( scope.target ); // rotate offset to "y-axis-is-up" space
+
+					offset.applyQuaternion( quat ); // angle from z-axis around y-axis
+
+					spherical.setFromVector3( offset );
+
+					if ( scope.autoRotate && state === STATE.NONE ) {
+
+						rotateLeft( getAutoRotationAngle() );
+
+					}
+
+					if ( scope.enableDamping ) {
+
+						spherical.theta += sphericalDelta.theta * scope.dampingFactor;
+						spherical.phi += sphericalDelta.phi * scope.dampingFactor;
+
+					} else {
+
+						spherical.theta += sphericalDelta.theta;
+						spherical.phi += sphericalDelta.phi;
+
+					} // restrict theta to be between desired limits
+
+
+					let min = scope.minAzimuthAngle;
+					let max = scope.maxAzimuthAngle;
+
+					if ( isFinite( min ) && isFinite( max ) ) {
+
+						if ( min < - Math.PI ) min += twoPI; else if ( min > Math.PI ) min -= twoPI;
+						if ( max < - Math.PI ) max += twoPI; else if ( max > Math.PI ) max -= twoPI;
+
+						if ( min <= max ) {
+
+							spherical.theta = Math.max( min, Math.min( max, spherical.theta ) );
+
+						} else {
+
+							spherical.theta = spherical.theta > ( min + max ) / 2 ? Math.max( min, spherical.theta ) : Math.min( max, spherical.theta );
+
+						}
+
+					} // restrict phi to be between desired limits
+
+
+					spherical.phi = Math.max( scope.minPolarAngle, Math.min( scope.maxPolarAngle, spherical.phi ) );
+					spherical.makeSafe();
+					spherical.radius *= scale; // restrict radius to be between desired limits
+
+					spherical.radius = Math.max( scope.minDistance, Math.min( scope.maxDistance, spherical.radius ) ); // move target to panned location
+
+					if ( scope.enableDamping === true ) {
+
+						scope.target.addScaledVector( panOffset, scope.dampingFactor );
+
+					} else {
+
+						scope.target.add( panOffset );
+
+					}
+
+					offset.setFromSpherical( spherical ); // rotate offset back to "camera-up-vector-is-up" space
+
+					offset.applyQuaternion( quatInverse );
+					position.copy( scope.target ).add( offset );
+					scope.object.lookAt( scope.target );
+
+					if ( scope.enableDamping === true ) {
+
+						sphericalDelta.theta *= 1 - scope.dampingFactor;
+						sphericalDelta.phi *= 1 - scope.dampingFactor;
+						panOffset.multiplyScalar( 1 - scope.dampingFactor );
+
+					} else {
+
+						sphericalDelta.set( 0, 0, 0 );
+						panOffset.set( 0, 0, 0 );
+
+					}
+
+					scale = 1; // update condition is:
+					// min(camera displacement, camera rotation in radians)^2 > EPS
+					// using small-angle approximation cos(x/2) = 1 - x^2 / 8
+
+					if ( zoomChanged || lastPosition.distanceToSquared( scope.object.position ) > EPS || 8 * ( 1 - lastQuaternion.dot( scope.object.quaternion ) ) > EPS ) {
+
+						scope.dispatchEvent( _changeEvent );
+						lastPosition.copy( scope.object.position );
+						lastQuaternion.copy( scope.object.quaternion );
+						zoomChanged = false;
+						return true;
+
+					}
+
+					return false;
+
+				};
+
+			}();
+
+			this.dispose = function () {
+
+				scope.domElement.removeEventListener( 'contextmenu', onContextMenu );
+				scope.domElement.removeEventListener( 'pointerdown', onPointerDown );
+				scope.domElement.removeEventListener( 'wheel', onMouseWheel );
+				scope.domElement.removeEventListener( 'touchstart', onTouchStart );
+				scope.domElement.removeEventListener( 'touchend', onTouchEnd );
+				scope.domElement.removeEventListener( 'touchmove', onTouchMove );
+				scope.domElement.ownerDocument.removeEventListener( 'pointermove', onPointerMove );
+				scope.domElement.ownerDocument.removeEventListener( 'pointerup', onPointerUp );
+
+				if ( scope._domElementKeyEvents !== null ) {
+
+					scope._domElementKeyEvents.removeEventListener( 'keydown', onKeyDown );
+
+				} //scope.dispatchEvent( { type: 'dispose' } ); // should this be added here?
+
+			}; //
+			// internals
+			//
+
+
+			const scope = this;
+			const STATE = {
+				NONE: - 1,
+				ROTATE: 0,
+				DOLLY: 1,
+				PAN: 2,
+				TOUCH_ROTATE: 3,
+				TOUCH_PAN: 4,
+				TOUCH_DOLLY_PAN: 5,
+				TOUCH_DOLLY_ROTATE: 6
+			};
+			let state = STATE.NONE;
+			const EPS = 0.000001; // current position in spherical coordinates
+
+			const spherical = new THREE.Spherical();
+			const sphericalDelta = new THREE.Spherical();
+			let scale = 1;
+			const panOffset = new THREE.Vector3();
+			let zoomChanged = false;
+			const rotateStart = new THREE.Vector2();
+			const rotateEnd = new THREE.Vector2();
+			const rotateDelta = new THREE.Vector2();
+			const panStart = new THREE.Vector2();
+			const panEnd = new THREE.Vector2();
+			const panDelta = new THREE.Vector2();
+			const dollyStart = new THREE.Vector2();
+			const dollyEnd = new THREE.Vector2();
+			const dollyDelta = new THREE.Vector2();
+
+			function getAutoRotationAngle() {
+
+				return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
+
+			}
+
+			function getZoomScale() {
+
+				return Math.pow( 0.95, scope.zoomSpeed );
+
+			}
+
+			function rotateLeft( angle ) {
+
+				sphericalDelta.theta -= angle;
+
+			}
+
+			function rotateUp( angle ) {
+
+				sphericalDelta.phi -= angle;
+
+			}
+
+			const panLeft = function () {
+
+				const v = new THREE.Vector3();
+				return function panLeft( distance, objectMatrix ) {
+
+					v.setFromMatrixColumn( objectMatrix, 0 ); // get X column of objectMatrix
+
+					v.multiplyScalar( - distance );
+					panOffset.add( v );
+
+				};
+
+			}();
+
+			const panUp = function () {
+
+				const v = new THREE.Vector3();
+				return function panUp( distance, objectMatrix ) {
+
+					if ( scope.screenSpacePanning === true ) {
+
+						v.setFromMatrixColumn( objectMatrix, 1 );
+
+					} else {
+
+						v.setFromMatrixColumn( objectMatrix, 0 );
+						v.crossVectors( scope.object.up, v );
+
+					}
+
+					v.multiplyScalar( distance );
+					panOffset.add( v );
+
+				};
+
+			}(); // deltaX and deltaY are in pixels; right and down are positive
+
+
+			const pan = function () {
+
+				const offset = new THREE.Vector3();
+				return function pan( deltaX, deltaY ) {
+
+					const element = scope.domElement;
+
+					if ( scope.object.isPerspectiveCamera ) {
+
+						// perspective
+						const position = scope.object.position;
+						offset.copy( position ).sub( scope.target );
+						let targetDistance = offset.length(); // half of the fov is center to top of screen
+
+						targetDistance *= Math.tan( scope.object.fov / 2 * Math.PI / 180.0 ); // we use only clientHeight here so aspect ratio does not distort speed
+
+						panLeft( 2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix );
+						panUp( 2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix );
+
+					} else if ( scope.object.isOrthographicCamera ) {
+
+						// orthographic
+						panLeft( deltaX * ( scope.object.right - scope.object.left ) / scope.object.zoom / element.clientWidth, scope.object.matrix );
+						panUp( deltaY * ( scope.object.top - scope.object.bottom ) / scope.object.zoom / element.clientHeight, scope.object.matrix );
+
+					} else {
+
+						// camera neither orthographic nor perspective
+						console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - pan disabled.' );
+						scope.enablePan = false;
+
+					}
+
+				};
+
+			}();
+
+			function dollyOut( dollyScale ) {
+
+				if ( scope.object.isPerspectiveCamera ) {
+
+					scale /= dollyScale;
+
+				} else if ( scope.object.isOrthographicCamera ) {
+
+					scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom * dollyScale ) );
+					scope.object.updateProjectionMatrix();
+					zoomChanged = true;
+
+				} else {
+
+					console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
+					scope.enableZoom = false;
+
+				}
+
+			}
+
+			function dollyIn( dollyScale ) {
+
+				if ( scope.object.isPerspectiveCamera ) {
+
+					scale *= dollyScale;
+
+				} else if ( scope.object.isOrthographicCamera ) {
+
+					scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom / dollyScale ) );
+					scope.object.updateProjectionMatrix();
+					zoomChanged = true;
+
+				} else {
+
+					console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
+					scope.enableZoom = false;
+
+				}
+
+			} //
+			// event callbacks - update the object state
+			//
+
+
+			function handleMouseDownRotate( event ) {
+
+				rotateStart.set( event.clientX, event.clientY );
+
+			}
+
+			function handleMouseDownDolly( event ) {
+
+				dollyStart.set( event.clientX, event.clientY );
+
+			}
+
+			function handleMouseDownPan( event ) {
+
+				panStart.set( event.clientX, event.clientY );
+
+			}
+
+			function handleMouseMoveRotate( event ) {
+
+				rotateEnd.set( event.clientX, event.clientY );
+				rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( scope.rotateSpeed );
+				const element = scope.domElement;
+				rotateLeft( 2 * Math.PI * rotateDelta.x / element.clientHeight ); // yes, height
+
+				rotateUp( 2 * Math.PI * rotateDelta.y / element.clientHeight );
+				rotateStart.copy( rotateEnd );
+				scope.update();
+
+			}
+
+			function handleMouseMoveDolly( event ) {
+
+				dollyEnd.set( event.clientX, event.clientY );
+				dollyDelta.subVectors( dollyEnd, dollyStart );
+
+				if ( dollyDelta.y > 0 ) {
+
+					dollyOut( getZoomScale() );
+
+				} else if ( dollyDelta.y < 0 ) {
+
+					dollyIn( getZoomScale() );
+
+				}
+
+				dollyStart.copy( dollyEnd );
+				scope.update();
+
+			}
+
+			function handleMouseMovePan( event ) {
+
+				panEnd.set( event.clientX, event.clientY );
+				panDelta.subVectors( panEnd, panStart ).multiplyScalar( scope.panSpeed );
+				pan( panDelta.x, panDelta.y );
+				panStart.copy( panEnd );
+				scope.update();
+
+			}
+
+			function handleMouseUp( ) { // no-op
+			}
+
+			function handleMouseWheel( event ) {
+
+				if ( event.deltaY < 0 ) {
+
+					dollyIn( getZoomScale() );
+
+				} else if ( event.deltaY > 0 ) {
+
+					dollyOut( getZoomScale() );
+
+				}
+
+				scope.update();
+
+			}
+
+			function handleKeyDown( event ) {
+
+				let needsUpdate = false;
+
+				switch ( event.code ) {
+
+					case scope.keys.UP:
+						pan( 0, scope.keyPanSpeed );
+						needsUpdate = true;
+						break;
+
+					case scope.keys.BOTTOM:
+						pan( 0, - scope.keyPanSpeed );
+						needsUpdate = true;
+						break;
+
+					case scope.keys.LEFT:
+						pan( scope.keyPanSpeed, 0 );
+						needsUpdate = true;
+						break;
+
+					case scope.keys.RIGHT:
+						pan( - scope.keyPanSpeed, 0 );
+						needsUpdate = true;
+						break;
+
+				}
+
+				if ( needsUpdate ) {
+
+					// prevent the browser from scrolling on cursor keys
+					event.preventDefault();
+					scope.update();
+
+				}
+
+			}
+
+			function handleTouchStartRotate( event ) {
+
+				if ( event.touches.length == 1 ) {
+
+					rotateStart.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+
+				} else {
+
+					const x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
+					const y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
+					rotateStart.set( x, y );
+
+				}
+
+			}
+
+			function handleTouchStartPan( event ) {
+
+				if ( event.touches.length == 1 ) {
+
+					panStart.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+
+				} else {
+
+					const x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
+					const y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
+					panStart.set( x, y );
+
+				}
+
+			}
+
+			function handleTouchStartDolly( event ) {
+
+				const dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+				const dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+				const distance = Math.sqrt( dx * dx + dy * dy );
+				dollyStart.set( 0, distance );
+
+			}
+
+			function handleTouchStartDollyPan( event ) {
+
+				if ( scope.enableZoom ) handleTouchStartDolly( event );
+				if ( scope.enablePan ) handleTouchStartPan( event );
+
+			}
+
+			function handleTouchStartDollyRotate( event ) {
+
+				if ( scope.enableZoom ) handleTouchStartDolly( event );
+				if ( scope.enableRotate ) handleTouchStartRotate( event );
+
+			}
+
+			function handleTouchMoveRotate( event ) {
+
+				if ( event.touches.length == 1 ) {
+
+					rotateEnd.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+
+				} else {
+
+					const x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
+					const y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
+					rotateEnd.set( x, y );
+
+				}
+
+				rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( scope.rotateSpeed );
+				const element = scope.domElement;
+				rotateLeft( 2 * Math.PI * rotateDelta.x / element.clientHeight ); // yes, height
+
+				rotateUp( 2 * Math.PI * rotateDelta.y / element.clientHeight );
+				rotateStart.copy( rotateEnd );
+
+			}
+
+			function handleTouchMovePan( event ) {
+
+				if ( event.touches.length == 1 ) {
+
+					panEnd.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+
+				} else {
+
+					const x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
+					const y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
+					panEnd.set( x, y );
+
+				}
+
+				panDelta.subVectors( panEnd, panStart ).multiplyScalar( scope.panSpeed );
+				pan( panDelta.x, panDelta.y );
+				panStart.copy( panEnd );
+
+			}
+
+			function handleTouchMoveDolly( event ) {
+
+				const dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+				const dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+				const distance = Math.sqrt( dx * dx + dy * dy );
+				dollyEnd.set( 0, distance );
+				dollyDelta.set( 0, Math.pow( dollyEnd.y / dollyStart.y, scope.zoomSpeed ) );
+				dollyOut( dollyDelta.y );
+				dollyStart.copy( dollyEnd );
+
+			}
+
+			function handleTouchMoveDollyPan( event ) {
+
+				if ( scope.enableZoom ) handleTouchMoveDolly( event );
+				if ( scope.enablePan ) handleTouchMovePan( event );
+
+			}
+
+			function handleTouchMoveDollyRotate( event ) {
+
+				if ( scope.enableZoom ) handleTouchMoveDolly( event );
+				if ( scope.enableRotate ) handleTouchMoveRotate( event );
+
+			}
+
+			function handleTouchEnd( ) { // no-op
+			} //
+			// event handlers - FSM: listen for events and reset state
+			//
+
+
+			function onPointerDown( event ) {
+
+				if ( scope.enabled === false ) return;
+
+				switch ( event.pointerType ) {
+
+					case 'mouse':
+					case 'pen':
+						onMouseDown( event );
+						break;
+        // TODO touch
+
+				}
+
+			}
+
+			function onPointerMove( event ) {
+
+				if ( scope.enabled === false ) return;
+
+				switch ( event.pointerType ) {
+
+					case 'mouse':
+					case 'pen':
+						onMouseMove( event );
+						break;
+        // TODO touch
+
+				}
+
+			}
+
+			function onPointerUp( event ) {
+
+				switch ( event.pointerType ) {
+
+					case 'mouse':
+					case 'pen':
+						onMouseUp( event );
+						break;
+        // TODO touch
+
+				}
+
+			}
+
+			function onMouseDown( event ) {
+
+				// Prevent the browser from scrolling.
+				event.preventDefault(); // Manually set the focus since calling preventDefault above
+				// prevents the browser from setting it automatically.
+
+				scope.domElement.focus ? scope.domElement.focus() : window.focus();
+				let mouseAction;
+
+				switch ( event.button ) {
+
+					case 0:
+						mouseAction = scope.mouseButtons.LEFT;
+						break;
+
+					case 1:
+						mouseAction = scope.mouseButtons.MIDDLE;
+						break;
+
+					case 2:
+						mouseAction = scope.mouseButtons.RIGHT;
+						break;
+
+					default:
+						mouseAction = - 1;
+
+				}
+
+				switch ( mouseAction ) {
+
+					case THREE.MOUSE.DOLLY:
+						if ( scope.enableZoom === false ) return;
+						handleMouseDownDolly( event );
+						state = STATE.DOLLY;
+						break;
+
+					case THREE.MOUSE.ROTATE:
+						if ( event.ctrlKey || event.metaKey || event.shiftKey ) {
+
+							if ( scope.enablePan === false ) return;
+							handleMouseDownPan( event );
+							state = STATE.PAN;
+
+						} else {
+
+							if ( scope.enableRotate === false ) return;
+							handleMouseDownRotate( event );
+							state = STATE.ROTATE;
+
+						}
+
+						break;
+
+					case THREE.MOUSE.PAN:
+						if ( event.ctrlKey || event.metaKey || event.shiftKey ) {
+
+							if ( scope.enableRotate === false ) return;
+							handleMouseDownRotate( event );
+							state = STATE.ROTATE;
+
+						} else {
+
+							if ( scope.enablePan === false ) return;
+							handleMouseDownPan( event );
+							state = STATE.PAN;
+
+						}
+
+						break;
+
+					default:
+						state = STATE.NONE;
+
+				}
+
+				if ( state !== STATE.NONE ) {
+
+					scope.domElement.ownerDocument.addEventListener( 'pointermove', onPointerMove );
+					scope.domElement.ownerDocument.addEventListener( 'pointerup', onPointerUp );
+					scope.dispatchEvent( _startEvent );
+
+				}
+
+			}
+
+			function onMouseMove( event ) {
+
+				if ( scope.enabled === false ) return;
+				event.preventDefault();
+
+				switch ( state ) {
+
+					case STATE.ROTATE:
+						if ( scope.enableRotate === false ) return;
+						handleMouseMoveRotate( event );
+						break;
+
+					case STATE.DOLLY:
+						if ( scope.enableZoom === false ) return;
+						handleMouseMoveDolly( event );
+						break;
+
+					case STATE.PAN:
+						if ( scope.enablePan === false ) return;
+						handleMouseMovePan( event );
+						break;
+
+				}
+
+			}
+
+			function onMouseUp( event ) {
+
+				scope.domElement.ownerDocument.removeEventListener( 'pointermove', onPointerMove );
+				scope.domElement.ownerDocument.removeEventListener( 'pointerup', onPointerUp );
+				if ( scope.enabled === false ) return;
+				handleMouseUp( event );
+				scope.dispatchEvent( _endEvent );
+				state = STATE.NONE;
+
+			}
+
+			function onMouseWheel( event ) {
+
+				if ( scope.enabled === false || scope.enableZoom === false || state !== STATE.NONE && state !== STATE.ROTATE ) return;
+				event.preventDefault();
+				scope.dispatchEvent( _startEvent );
+				handleMouseWheel( event );
+				scope.dispatchEvent( _endEvent );
+
+			}
+
+			function onKeyDown( event ) {
+
+				if ( scope.enabled === false || scope.enablePan === false ) return;
+				handleKeyDown( event );
+
+			}
+
+			function onTouchStart( event ) {
+
+				if ( scope.enabled === false ) return;
+				event.preventDefault(); // prevent scrolling
+
+				switch ( event.touches.length ) {
+
+					case 1:
+						switch ( scope.touches.ONE ) {
+
+							case THREE.TOUCH.ROTATE:
+								if ( scope.enableRotate === false ) return;
+								handleTouchStartRotate( event );
+								state = STATE.TOUCH_ROTATE;
+								break;
+
+							case THREE.TOUCH.PAN:
+								if ( scope.enablePan === false ) return;
+								handleTouchStartPan( event );
+								state = STATE.TOUCH_PAN;
+								break;
+
+							default:
+								state = STATE.NONE;
+
+						}
+
+						break;
+
+					case 2:
+						switch ( scope.touches.TWO ) {
+
+							case THREE.TOUCH.DOLLY_PAN:
+								if ( scope.enableZoom === false && scope.enablePan === false ) return;
+								handleTouchStartDollyPan( event );
+								state = STATE.TOUCH_DOLLY_PAN;
+								break;
+
+							case THREE.TOUCH.DOLLY_ROTATE:
+								if ( scope.enableZoom === false && scope.enableRotate === false ) return;
+								handleTouchStartDollyRotate( event );
+								state = STATE.TOUCH_DOLLY_ROTATE;
+								break;
+
+							default:
+								state = STATE.NONE;
+
+						}
+
+						break;
+
+					default:
+						state = STATE.NONE;
+
+				}
+
+				if ( state !== STATE.NONE ) {
+
+					scope.dispatchEvent( _startEvent );
+
+				}
+
+			}
+
+			function onTouchMove( event ) {
+
+				if ( scope.enabled === false ) return;
+				event.preventDefault(); // prevent scrolling
+
+				switch ( state ) {
+
+					case STATE.TOUCH_ROTATE:
+						if ( scope.enableRotate === false ) return;
+						handleTouchMoveRotate( event );
+						scope.update();
+						break;
+
+					case STATE.TOUCH_PAN:
+						if ( scope.enablePan === false ) return;
+						handleTouchMovePan( event );
+						scope.update();
+						break;
+
+					case STATE.TOUCH_DOLLY_PAN:
+						if ( scope.enableZoom === false && scope.enablePan === false ) return;
+						handleTouchMoveDollyPan( event );
+						scope.update();
+						break;
+
+					case STATE.TOUCH_DOLLY_ROTATE:
+						if ( scope.enableZoom === false && scope.enableRotate === false ) return;
+						handleTouchMoveDollyRotate( event );
+						scope.update();
+						break;
+
+					default:
+						state = STATE.NONE;
+
+				}
+
+			}
+
+			function onTouchEnd( event ) {
+
+				if ( scope.enabled === false ) return;
+				handleTouchEnd( event );
+				scope.dispatchEvent( _endEvent );
+				state = STATE.NONE;
+
+			}
+
+			function onContextMenu( event ) {
+
+				if ( scope.enabled === false ) return;
+				event.preventDefault();
+
+			} //
+
+
+			scope.domElement.addEventListener( 'contextmenu', onContextMenu );
+			scope.domElement.addEventListener( 'pointerdown', onPointerDown );
+			scope.domElement.addEventListener( 'wheel', onMouseWheel, {
+				passive: false
+			} );
+			scope.domElement.addEventListener( 'touchstart', onTouchStart, {
+				passive: false
+			} );
+			scope.domElement.addEventListener( 'touchend', onTouchEnd );
+			scope.domElement.addEventListener( 'touchmove', onTouchMove, {
+				passive: false
+			} ); // force an update at start
+
+			this.update();
+
+		}
+
+	} // This set of controls performs orbiting, dollying (zooming), and panning.
+	// Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
+	// This is very similar to OrbitControls, another set of touch behavior
+	//
+	//    Orbit - right mouse, or left mouse + ctrl/meta/shiftKey / touch: two-finger rotate
+	//    Zoom - middle mouse, or mousewheel / touch: two-finger spread or squish
+	//    Pan - left mouse, or arrow keys / touch: one-finger move
+
+
+	class MapControls extends OrbitControls {
+
+		constructor( object, domElement ) {
+
+			super( object, domElement );
+			this.screenSpacePanning = false; // pan orthogonal to world-space direction camera.up
+
+			this.mouseButtons.LEFT = THREE.MOUSE.PAN;
+			this.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
+			this.touches.ONE = THREE.TOUCH.PAN;
+			this.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
+
+		}
+
+	}
+
+	THREE.MapControls = MapControls;
+	THREE.OrbitControls = OrbitControls;
+
+} )();
+
+
+</script>
+<script>
+(() => {
+'use strict';
+const $ = (s, el=document) => el.querySelector(s);
+const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
+const btn = (txt, fn, cls='btn-s') => { const b = el('button', cls, txt); b.onclick = fn; return b; };
+const TRAINER = 'https://antillope24.github.io/ATPL-Trainer-PT/';
+
+/* ---------- Routing ---------- */
+let view = 'home';
+function go(v) { view = v; location.hash = v; for (const b of $('#nav').children) b.setAttribute('aria-pressed', b.dataset.v === v); for (const s of document.querySelectorAll('.view')) s.hidden = s.id !== 'v-' + v; if (v === 'air') { initScene(); resize(); } }
+$('#nav').addEventListener('click', e => { const b = e.target.closest('button'); if (b) go(b.dataset.v); });
+window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (['home','air','vmc','soon'].includes(v) && v !== view) go(v); });
+
+/* ---------- Startseite ---------- */
+const MODULES = [
+  ['air', '1', 'Luftraumklassen A bis G', 'ICAO Klassen und deutsche Struktur in 3D, Vergleichstabelle mit Freigabe, Staffelung, Funk, Transponder und VMC.', true],
+  ['vmc', '2', 'VMC Minima Rechner', 'Luftraum, Höhe und Geschwindigkeit einstellen, Flugsicht und Wolkenabstand ablesen, mit Skizze.', true],
+  ['soon', '3', 'Flugflächen und Halbkreisregel', 'Kurs drehen, erlaubte Flugflächen sehen, Transition Altitude und Level, RVSM.', false],
+  ['soon', '4', 'Ausweichregeln', 'Szenen von oben: wer weicht aus? Mit Positionslichtern bei Nacht.', false],
+  ['soon', '5', 'Signale und Zeichen', 'Lichtsignale, Bodensignale, Abfangsignale, Marshalling.', false],
+  ['soon', '6', 'Lizenzen, Medical, Fristen', 'Zeitleiste mit Gültigkeiten und Recency nach Part-FCL und Part-MED.', false],
+  ['soon', '7', 'ICAO und Annexe', 'Chicago Convention, 19 Annexe, Freiheiten der Luft.', false],
+];
+(function renderHome() {
+  const h = $('#home');
+  h.append(el('div', 'eyebrow', 'ATPL 010 Air Law'), el('h2', '', 'Nachschlagen, anschauen, verstehen'), el('p', 'muted', 'Die trockenen Teile von Air Law als interaktive Werkzeuge. Jedes Modul ist für das iPad gebaut und läuft offline. Zum Üben der passenden Fragen geht es in den ATPL Progress Trainer.'));
+  const g = el('div', 'grid');
+  for (const [v, n, title, desc, ready] of MODULES) {
+    const c = el('button', 'card btn'); c.append(el('span', 'num', 'Modul ' + n), el('h3', '', title), el('span', 'muted', desc), el('span', 'tag', ready ? 'verfügbar' : 'geplant'));
+    c.onclick = () => go(v); if (!ready) c.style.opacity = .6; g.append(c);
+  }
+  h.append(g);
+  const a = el('a', 'btn', 'Zum ATPL Progress Trainer'); a.href = TRAINER; a.style.alignSelf = 'flex-start'; a.style.textDecoration = 'none'; h.append(a);
+})();
+
+/* ---------- Daten Luftraumklassen (SERA / ICAO Annex 11) ---------- */
+const CLASSES = [
+  {c:'A', color:0x3a4f6e, flights:'nur IFR', clr:'ja', sep:'alle Flüge voneinander', ti:'nicht nötig (alle gestaffelt)', radio:'ständig', tx:'ja', spd:'keine', vmc:'VFR nicht erlaubt', de:'In Deutschland nicht verwendet'},
+  {c:'B', color:0x4a6a94, flights:'IFR und VFR', clr:'ja', sep:'alle Flüge voneinander', ti:'nicht nötig', radio:'ständig', tx:'ja', spd:'keine', vmc:'8 km ab FL 100, sonst 5 km; 1500 m / 1000 ft', de:'In Deutschland nicht verwendet'},
+  {c:'C', color:0x5b7fa6, flights:'IFR und VFR', clr:'ja', sep:'IFR von IFR und VFR; VFR von IFR', ti:'VFR/VFR', radio:'ständig', tx:'ja', spd:'VFR 250 kt IAS unter FL 100', vmc:'8 km ab FL 100, sonst 5 km; 1500 m / 1000 ft', de:'Oberer Luftraum ab FL 100 (Alpen FL 130), um große Flughäfen'},
+  {c:'D', color:0xd9a06b, flights:'IFR und VFR', clr:'ja', sep:'IFR von IFR', ti:'IFR/VFR und VFR/VFR', radio:'ständig', tx:'ja', spd:'250 kt IAS unter FL 100', vmc:'5 km; 1500 m / 1000 ft (CTR: Bodensicht 5 km, Ceiling 1500 ft)', de:'Kontrollzonen, Teile um Flughäfen'},
+  {c:'E', color:0x7fa3c8, flights:'IFR und VFR', clr:'IFR ja, VFR nein', sep:'IFR von IFR', ti:'soweit möglich', radio:'IFR ständig, VFR nicht nötig', tx:'motorgetriebene VFR über 5000 ft AMSL / 3500 ft AGL', spd:'250 kt IAS unter FL 100', vmc:'8 km ab FL 100, sonst 5 km; 1500 m / 1000 ft', de:'Standard zwischen 2500 ft AGL (bzw. 1000/1700 ft) und FL 100'},
+  {c:'F', color:0xa0b4c6, flights:'IFR und VFR', clr:'nein (Flugverkehrsberatung)', sep:'IFR von IFR, soweit möglich (advisory)', ti:'Fluginformation', radio:'IFR ständig, VFR nicht nötig', tx:'nein', spd:'250 kt IAS unter FL 100', vmc:'wie G', de:'In Deutschland nicht verwendet'},
+  {c:'G', color:0xc8d2dc, flights:'IFR und VFR', clr:'nein', sep:'keine', ti:'Fluginformation soweit möglich', radio:'nicht nötig (außer RMZ)', tx:'nein (außer TMZ)', spd:'250 kt IAS unter FL 100', vmc:'ab FL 100: 8 km; über 3000 ft AMSL / 1000 ft AGL: 5 km, 1500 m / 1000 ft; darunter: 5 km (1,5 km bei ≤140 kt), frei von Wolken, Erdsicht', de:'Vom Boden bis 2500 ft AGL (bzw. 1000/1700 ft)'},
+];
+const ROWS = [['flights','Flugarten'],['clr','Freigabe'],['sep','Staffelung'],['ti','Verkehrsinformation'],['radio','Funk'],['tx','Transponder'],['spd','Geschwindigkeit'],['vmc','VMC Minima'],['de','In Deutschland']];
+const ICAO_VOLS = CLASSES.map((k, i) => ({id:'ICAO'+k.c, name:'Luftraumklasse ' + k.c, cls:k.c, color:k.color, op:.28, x:[-60 + i*0, 60], y:[0, 0], z:[-30,30], layer:'ICAO', icao:true,
+  data:{Flugarten:k.flights, Freigabe:k.clr, Staffelung:k.sep, Verkehrsinformation:k.ti, Funk:k.radio, Transponder:k.tx, Geschwindigkeit:k.spd, VMC:k.vmc, 'In Deutschland':k.de}}));
+// Stapel: G unten, A oben, jede Klasse 9000 ft hoch (Schema, nicht maßstäblich)
+ICAO_VOLS.forEach((v, i) => { const lvl = 6 - i; v.x = [-60, 60]; v.y = [lvl*9000, lvl*9000 + 8500]; });
+
+const VMC = {
+  gLow: 'Flugsicht 1,5 km (bei >140 kt: 5 km), frei von Wolken, Erdsicht',
+  gHigh: 'Flugsicht 5 km, Wolkenabstand 1500 m horizontal / 1000 ft vertikal',
+  e: 'Flugsicht 5 km (ab FL 100: 8 km), Wolkenabstand 1500 m horizontal / 1000 ft vertikal',
+  c: 'Flugsicht 8 km (unter FL 100: 5 km), Wolkenabstand 1500 m horizontal / 1000 ft vertikal',
+  d: 'Flugsicht 5 km, Wolkenabstand 1500 m / 1000 ft; CTR zusätzlich Bodensicht 5 km und Hauptwolkenuntergrenze 1500 ft (sonst Sonder-VFR)'
+};
+// x in km (0 = Küste links, 200 = Alpen rechts), y in ft, z in km Tiefe
+const VOLS = [
+  {id:'C', name:'Luftraum C (oberer Luftraum)', cls:'C', color:0x5b7fa6, op:.22, x:[0,200], y:[10000,66000], z:[-40,40], layer:'C',
+   data:{Untergrenze:'FL 100 (über Alpen FL 130)', Obergrenze:'FL 660', Freigabe:'Ja, Freigabe erforderlich', Staffelung:'IFR/IFR, IFR/VFR, VFR/VFR', Transponder:'Pflicht', VMC:VMC.c, Hinweis:'Über FL 100 gilt 8 km Flugsicht. Zwischen FL 100 und FL 130 über den Alpen ist Luftraum E (siehe rechts).'}},
+  {id:'E', name:'Luftraum E (kontrolliert, ohne Freigabe für VFR)', cls:'E', color:0x7fa3c8, op:.18, x:[0,200], y:[2500,10000], z:[-40,40], layer:'E',
+   data:{Untergrenze:'2500 ft AGL (stellenweise 1000 ft oder 1700 ft AGL)', Obergrenze:'FL 100', Freigabe:'VFR: nein. IFR: ja', Staffelung:'IFR/IFR, Verkehrsinformation soweit möglich', Transponder:'Pflicht für motorgetriebene VFR-Flüge über 5000 ft AMSL bzw. 3500 ft AGL (Code 7000)', VMC:VMC.e, Hinweis:'Höchstgeschwindigkeit unter FL 100: 250 kt IAS.'}},
+  {id:'E2', name:'Luftraum E über den Alpen', cls:'E', color:0x7fa3c8, op:.18, x:[172,200], y:[10000,13000], z:[-40,40], layer:'E',
+   data:{Untergrenze:'FL 100', Obergrenze:'FL 130', Freigabe:'VFR: nein', Transponder:'Pflicht (Code 7000)', VMC:'Flugsicht 8 km, Wolkenabstand 1500 m / 1000 ft', Hinweis:'Im Alpenraum beginnt Luftraum C erst bei FL 130.'}},
+  {id:'CD1', name:'Luftraum C/D um den Verkehrsflughafen (oberer Teil)', cls:'C/D', color:0x6b6bb0, op:.3, x:[40,105], y:[5000,10000], z:[-20,20], layer:'CD',
+   data:{Untergrenze:'5000 ft AMSL (Beispiel)', Obergrenze:'FL 100', Freigabe:'Ja, Freigabe erforderlich', Staffelung:'C: IFR/VFR. D: nur IFR/IFR, Verkehrsinformation', Transponder:'Pflicht', VMC:'C: '+VMC.c+'. D: '+VMC.d, Hinweis:'Umgekehrter Hochzeitskuchen: nach oben breiter, damit IFR-An- und Abflüge geschützt sind.'}},
+  {id:'CD2', name:'Luftraum C/D um den Verkehrsflughafen (unterer Teil)', cls:'C/D', color:0x6b6bb0, op:.3, x:[48,98], y:[2500,5000], z:[-14,14], layer:'CD',
+   data:{Untergrenze:'2500 ft AGL (Beispiel)', Obergrenze:'5000 ft AMSL', Freigabe:'Ja, Freigabe erforderlich', Transponder:'Pflicht', VMC:'C: '+VMC.c+'. D: '+VMC.d, Hinweis:'Schließt direkt an die Kontrollzone an.'}},
+  {id:'CTR1', name:'Kontrollzone D (CTR) Verkehrsflughafen', cls:'D', color:0xd9a06b, op:.45, x:[62,83], y:[0,2500], z:[-9,9], layer:'CTR',
+   data:{Untergrenze:'GND', Obergrenze:'2500 ft AGL (Beispiel, je nach Platz 1500 bis 2500 ft)', Freigabe:'Ja, Freigabe erforderlich', Transponder:'Pflicht', VMC:VMC.d, Hinweis:'Bodensicht unter 5 km oder Hauptwolkenuntergrenze unter 1500 ft: nur Sonder-VFR mit Freigabe.'}},
+  {id:'CTR2', name:'Kontrollzone D (CTR) Regionalflughafen', cls:'D', color:0xd9a06b, op:.45, x:[128,143], y:[0,2500], z:[-7,7], layer:'CTR',
+   data:{Untergrenze:'GND', Obergrenze:'2500 ft AGL (Beispiel)', Freigabe:'Ja, Freigabe erforderlich', Transponder:'Pflicht', VMC:VMC.d, Hinweis:'Liegt hier innerhalb einer TMZ.'}},
+  {id:'TMZ', name:'TMZ (Transponder Mandatory Zone)', cls:'TMZ', color:0x3b4a5c, op:.12, x:[123,148], y:[2500,5000], z:[-12,12], layer:'TMZ', wire:true,
+   data:{Untergrenze:'Hier: Oberkante CTR (2500 ft)', Obergrenze:'5000 ft AMSL bzw. 3500 ft AGL', Freigabe:'Nein (Luftraum E)', Transponder:'Pflicht für ALLE VFR-Flüge, Code 7000 (auch Segelflug, Ballon)', VMC:VMC.e, Hinweis:'Darüber greift ohnehin die allgemeine Transponderpflicht für motorgetriebene VFR-Flüge.'}},
+  {id:'G1', name:'Luftraum G (unkontrolliert), Flachland', cls:'G', color:0xc8d2dc, op:.25, x:[0,200], y:[0,2500], z:[-40,40], layer:'G',
+   data:{Untergrenze:'GND', Obergrenze:'2500 ft AGL (stellenweise 1000 ft oder 1700 ft AGL)', Freigabe:'Nein', Staffelung:'Keine, Fluginformationsdienst', Transponder:'Nicht vorgeschrieben (außer TMZ)', VMC:'Bis 3000 ft AMSL bzw. 1000 ft AGL: '+VMC.gLow+'. Darüber: '+VMC.gHigh, Hinweis:'Hubschrauber bis 800 m Flugsicht mit entsprechend reduzierter Geschwindigkeit. Höchstgeschwindigkeit 250 kt IAS.'}},
+  {id:'ATZ', name:'ATZ (Aerodrome Traffic Zone)', cls:'ATZ', color:0x2f6f9f, op:.15, x:[150,160], y:[0,1500], z:[-5,5], layer:'ATZ', wire:true,
+   data:{Untergrenze:'GND', Obergrenze:'je Platz, oft 1500 bis 2000 ft', Freigabe:'Nein, aber Platzrunde und Flugleiter beachten', Transponder:'Nicht vorgeschrieben', VMC:'Wie Luftraum G', Hinweis:'Schutzraum des Flugplatzverkehrs an unkontrollierten Plätzen.'}},
+  {id:'RMZ', name:'RMZ (Radio Mandatory Zone)', cls:'RMZ', color:0x2f6f9f, op:.15, x:[165,180], y:[0,2500], z:[-7,7], layer:'ATZ', wire:true,
+   data:{Untergrenze:'GND', Obergrenze:'je Platz, meist 1000 bis 2500 ft', Freigabe:'Nein', Transponder:'Nicht vorgeschrieben', Funk:'Pflicht: Hörbereitschaft und Meldung vor Einflug (Kennung, Typ, Position, Höhe, Absicht)', VMC:'Wie Luftraum G', Hinweis:'Typisch an Plätzen mit IFR-Verfahren ohne Kontrollzone.'}},
+  {id:'EDR1', name:'Flugbeschränkungsgebiet ED-R', cls:'ED-R', color:0xc0392b, op:.2, x:[14,28], y:[0,8000], z:[-6,6], layer:'R', wire:true,
+   data:{Untergrenze:'GND', Obergrenze:'je Gebiet (hier bis FL 80)', Freigabe:'Einflug verboten oder nur mit Genehmigung', Transponder:'je Gebiet', Hinweis:'Zum Beispiel Schießgebiete, Kernkraftwerke, Regierungsviertel. Zeiten im AIP und NOTAM.'}},
+  {id:'EDR2', name:'ED-R (TRA) im oberen Luftraum', cls:'ED-R', color:0xc0392b, op:.2, x:[112,134], y:[8000,40000], z:[-10,10], layer:'R', wire:true,
+   data:{Untergrenze:'FL 80 (Beispiel)', Obergrenze:'FL 400 (Beispiel)', Freigabe:'Nur mit Genehmigung, zeitlich aktiviert', Hinweis:'TRA = Temporary Reserved Area für militärische Übungen, Aktivierung per NOTAM oder AUP/UUP.'}},
+  {id:'EDD', name:'Gefahrengebiet ED-D', cls:'ED-D', color:0xc0392b, op:.12, x:[4,16], y:[6000,30000], z:[-6,6], layer:'R', wire:true,
+   data:{Untergrenze:'FL 60 (Beispiel)', Obergrenze:'FL 300 (Beispiel)', Freigabe:'Einflug nicht verboten, aber Gefahr (z. B. Schießübungen, Raketen)', Hinweis:'Eigenverantwortung, Aktivität über FIS erfragen.'}},
+  {id:'MIL', name:'Militärischer Tiefflug', cls:'Mil', color:0x8f9aa5, op:.25, x:[18,42], y:[1000,2000], z:[-40,40], layer:'MIL',
+   data:{Untergrenze:'1000 ft AGL (Strahlflugzeuge), Hubschrauber ab 250 ft AGL', Obergrenze:'2000 ft AGL', Freigabe:'Nein, aber erhöhte Aufmerksamkeit', Hinweis:'Tiefflugzeiten Montag bis Freitag, Infos über FIS. Hubschrauber-Tiefflug zwischen 250 und 500 ft AGL (gestrichelt in der Grafik).'}},
+  {id:'MIL2', name:'Militärischer Tiefflug (Hubschrauber)', cls:'Mil', color:0x8f9aa5, op:.25, x:[108,120], y:[250,500], z:[-40,40], layer:'MIL',
+   data:{Untergrenze:'250 ft AGL', Obergrenze:'500 ft AGL', Hinweis:'Hubschrauberstrecken, besonders im Osten Deutschlands.'}},
+];
+const LAYERS = [['C','Luftraum C',0x5b7fa6],['E','Luftraum E',0x7fa3c8],['CD','C/D Flughafen',0x6b6bb0],['CTR','Kontrollzonen D',0xd9a06b],['TMZ','TMZ',0x3b4a5c],['G','Luftraum G',0xc8d2dc],['ATZ','ATZ / RMZ',0x2f6f9f],['R','ED-R / ED-D',0xc0392b],['MIL','Mil. Tiefflug',0x8f9aa5]];
+
+const ALT = ft => ft / 2000 * 3;
+const X = km => km - 100;
+
+/* ---------- 3D Szene ---------- */
+let scene, camera, renderer, controls, meshes = [], byLayer = {}, sceneReady = false, mode = 'de', deGroup, icaoGroup;
+const stage = $('#stage');
+function initScene() {
+  if (sceneReady) return; sceneReady = true;
+  if (!window.THREE) { $('#body').innerHTML = '<h2>3D Bibliothek nicht geladen</h2><div class="muted">Internetverbindung prüfen und neu laden.</div>'; return; }
+  scene = new THREE.Scene();
+  const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  scene.background = new THREE.Color(cssVar('--sky') || '#dfe9f3');
+  scene.fog = new THREE.Fog(scene.background, 250, 600);
+  camera = new THREE.PerspectiveCamera(45, 1, 0.5, 2000);
+  renderer = new THREE.WebGLRenderer({antialias: true});
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+  stage.appendChild(renderer.domElement);
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; controls.dampingFactor = .08; controls.maxPolarAngle = Math.PI / 2.02; controls.minDistance = 15; controls.maxDistance = 450; controls.rotateSpeed = .7;
+  camera.position.set(-60, 120, 210); controls.target.set(0, 25, 0); controls.update();
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x667788, 0.9));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.7); sun.position.set(-80, 150, 80); scene.add(sun);
+  deGroup = new THREE.Group(); icaoGroup = new THREE.Group(); scene.add(deGroup, icaoGroup);
+  buildTerrain(); buildVols(VOLS, deGroup); buildVols(ICAO_VOLS, icaoGroup);
+  icaoGroup.visible = false;
+  // Hoehenlinien
+  for (const [ft, lbl] of [[10000,'FL 100'],[66000,'FL 660'],[2500,'2500 ft AGL'],[5000,'5000 ft AMSL']]) altLine(ft, lbl, deGroup);
+  renderBody(); setupPick();
+  (function loop() { requestAnimationFrame(loop); if (!renderer) return;
+    if (flight) { const t = Math.min(1, (performance.now() - flight.s) / 900), e = t < .5 ? 2*t*t : -1 + (4 - 2*t) * t; camera.position.lerpVectors(flight.p0, flight.p1, e); controls.target.lerpVectors(flight.t0, flight.t1, e); if (t >= 1) flight = null; }
+    controls.update(); renderer.render(scene, camera); })();
+}
+function buildTerrain() {
+  const geo = new THREE.PlaneGeometry(220, 100, 120, 40); geo.rotateX(-Math.PI / 2);
+  const pos = geo.attributes.position, colors = [];
+  const gc = new THREE.Color(0xb7873f), sc = new THREE.Color(0x4a8db8), mc = new THREE.Color(0x8a7a66), snow = new THREE.Color(0xe8ecef);
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i) + 100, z = pos.getZ(i); let y = 0;
+    if (x < 8) y = -0.3;
+    if (x > 160) { const t = (x - 160) / 60; y = t * t * 24 + Math.sin(x * 1.3 + z * 0.7) * t * 3 + Math.sin(z * 0.9) * t * 2; }
+    else if (x > 8) y = Math.sin(x * 0.4) * 0.3 + Math.sin(z * 0.6) * 0.2;
+    pos.setY(i, y); const c = x < 8 ? sc : y > 18 ? snow : y > 8 ? mc : gc; colors.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3)); geo.computeVertexNormals();
+  deGroup.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({vertexColors: true})));
+  for (const [xkm, len] of [[72.5, 7], [135.5, 5], [155, 2.5], [172.5, 3]]) { const m = new THREE.Mesh(new THREE.BoxGeometry(len, 0.2, 0.9), new THREE.MeshLambertMaterial({color: 0x444a52})); m.position.set(X(xkm), 0.3, 0); deGroup.add(m); }
+  // ICAO: flacher Boden
+  const g2 = new THREE.Mesh(new THREE.PlaneGeometry(160, 90), new THREE.MeshLambertMaterial({color: 0xb7873f})); g2.rotateX(-Math.PI / 2); icaoGroup.add(g2);
+}
+function altLine(ft, label, group) {
+  const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-100, ALT(ft), -40), new THREE.Vector3(100, ALT(ft), -40)]);
+  const l = new THREE.Line(g, new THREE.LineDashedMaterial({color: 0x556677, dashSize: 2, gapSize: 1.5})); l.computeLineDistances(); group.add(l);
+  group.add(textSprite(label, 0x556677, 7).translateX(-104).translateY(ALT(ft)).translateZ(-40));
+}
+function textSprite(text, color, size = 10) {
+  const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+  ctx.font = '600 48px Barlow Semi Condensed, Arial'; const w = ctx.measureText(text).width + 24; c.width = w; c.height = 64;
+  ctx.font = '600 48px Barlow Semi Condensed, Arial'; ctx.fillStyle = '#' + new THREE.Color(color).getHexString(); ctx.textBaseline = 'middle'; ctx.fillText(text, 12, 32);
+  const t = new THREE.CanvasTexture(c); t.minFilter = THREE.LinearFilter;
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({map: t, transparent: true, depthTest: false})); s.scale.set(size * w / 64, size, 1); return s;
+}
+function buildVols(list, group) {
+  for (const v of list) {
+    const w = v.x[1] - v.x[0], hgt = ALT(v.y[1]) - ALT(v.y[0]), d = v.z[1] - v.z[0];
+    const g = new THREE.BoxGeometry(w, hgt, d);
+    const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({color: v.color, transparent: true, opacity: v.op, depthWrite: false}));
+    m.position.set(v.icao ? 0 : X((v.x[0] + v.x[1]) / 2), (ALT(v.y[0]) + ALT(v.y[1])) / 2, (v.z[0] + v.z[1]) / 2);
+    m.userData = v; m.renderOrder = 1;
+    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({color: v.color, transparent: true, opacity: v.wire ? .9 : .5})));
+    const lbl = textSprite(v.cls, v.color, v.icao ? 12 : v.cls.length > 3 ? 7 : 10); lbl.position.set(v.icao ? -w/2 + 8 : 0, v.icao ? 0 : hgt / 2 - 2, d / 2 + 0.5); m.add(lbl);
+    group.add(m); meshes.push(m); (byLayer[v.layer] = byLayer[v.layer] || []).push(m);
+  }
+}
+function setMode(m) {
+  mode = m; for (const b of $('#mode').children) b.setAttribute('aria-pressed', b.dataset.m === m);
+  if (!sceneReady || !deGroup) { renderViews(); return; }
+  deGroup.visible = m === 'de'; icaoGroup.visible = m === 'icao';
+  select(null); tab = 'list'; renderBody();
+  if (m === 'icao') flyTo([-120, 110, 170], [0, 45, 0]); else flyTo(VIEWS[0][1], VIEWS[0][2]);
+  renderViews();
+}
+$('#mode').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.m); });
+const active = () => meshes.filter(m => (mode === 'icao') === !!m.userData.icao);
+
+/* ---------- Kamera ---------- */
+const VIEWS = [['Übersicht', [-60, 120, 210], [0, 25, 0]], ['Von vorn', [0, 60, 230], [0, 30, 0]], ['Flughafen', [-10, 45, 90], [X(72), 12, 0]], ['TMZ + CTR', [20, 35, 70], [X(136), 8, 0]], ['Alpen', [40, 60, 90], [X(185), 20, 0]], ['Von oben', [0, 320, 1], [0, 0, 0]]];
+const VIEWS_ICAO = [['Übersicht', [-120, 110, 170], [0, 45, 0]], ['Von vorn', [0, 50, 230], [0, 45, 0]], ['Unten (E bis G)', [-60, 40, 120], [0, 12, 0]], ['Oben (A bis C)', [-60, 100, 120], [0, 75, 0]]];
+let flight = null;
+function flyTo(pos, target) { flight = {p0: camera.position.clone(), t0: controls.target.clone(), p1: new THREE.Vector3(...pos), t1: new THREE.Vector3(...target), s: performance.now()}; }
+function renderViews() {
+  const ve = $('#views'); ve.innerHTML = '';
+  (mode === 'icao' ? VIEWS_ICAO : VIEWS).forEach(([name, p, t], k) => { const b = el('button', 'chip', name); b.setAttribute('aria-pressed', k === 0); b.onclick = () => { for (const c of ve.children) c.setAttribute('aria-pressed', c === b); flyTo(p, t); }; ve.append(b); });
+}
+renderViews();
+
+/* ---------- Drawer ---------- */
+const drawer = $('#drawer'), body = $('#body'), tip = $('#tip');
+let tab = 'list', selected = null;
+for (const id of ['list', 'info', 'cmp', 'help']) $('#tab-' + id).onclick = () => { tab = id; renderBody(); };
+$('#btn-close').onclick = () => drawer.classList.add('closed');
+$('#fab').onclick = () => drawer.classList.remove('closed');
+if (window.innerWidth < 760) drawer.classList.add('closed');
+function renderBody() {
+  for (const id of ['list', 'info', 'cmp', 'help']) $('#tab-' + id).setAttribute('aria-pressed', tab === id);
+  body.innerHTML = '';
+  if (tab === 'list') {
+    body.append(el('div', 'hint', mode === 'icao' ? 'Die sieben ICAO Klassen als Stapel, A oben, G unten (schematisch, nicht maßstäblich). Antippen zeigt die Regeln.' : 'Antippen zeigt die Daten und fliegt die Kamera hin. Das Auge blendet die Zone aus.'));
+    if (mode === 'de') { const row = el('div', 'row'); row.append(btn('Alle einblenden', () => { active().forEach(m => { m.visible = true; }); renderBody(); }), btn('Nur Bodenzonen', () => { active().forEach(m => { m.visible = !['C','E','G'].includes(m.userData.layer); }); renderBody(); })); body.append(row); }
+    const list = el('div', 'zones');
+    for (const m of active()) {
+      const v = m.userData; const z = el('button', 'zone' + (m === selected ? ' sel' : '')); const sw = el('span', 'sw'); sw.style.background = '#' + new THREE.Color(v.color).getHexString();
+      const n = el('span', 'n', v.name); n.append(el('span', 'cls', ' ' + v.cls));
+      const eye = el('button', 'eye', m.visible ? '👁' : '🚫'); eye.setAttribute('aria-pressed', m.visible);
+      eye.onclick = ev => { ev.stopPropagation(); m.visible = !m.visible; eye.textContent = m.visible ? '👁' : '🚫'; eye.setAttribute('aria-pressed', m.visible); };
+      z.append(sw, n, eye); z.onclick = () => select(m, true); list.append(z);
+    }
+    body.append(list);
+  } else if (tab === 'info') {
+    if (!selected) { body.append(el('h2', '', 'Keine Zone gewählt'), el('div', 'muted', 'Tippe im 3D Bild auf ein Volumen oder wähle eine Zone aus der Liste.')); return; }
+    const v = selected.userData; const h2 = el('h2'); const sw = el('span', 'sw'); sw.style.background = '#' + new THREE.Color(v.color).getHexString(); h2.append(sw, v.name);
+    body.append(el('div', 'eyebrow', 'Luftraumklasse ' + v.cls), h2);
+    const dl = document.createElement('dl'); for (const [k, val] of Object.entries(v.data)) dl.append(el('dt', '', k), el('dd', '', val)); body.append(dl);
+    const row = el('div', 'row'); row.append(btn('Kamera hinfliegen', () => focusOn(selected)), btn('Vergleich', () => { tab = 'cmp'; renderBody(); }), btn('Auswahl aufheben', () => { select(null); tab = 'list'; renderBody(); }));
+    const a = el('a', 'btn-s', 'Dazu üben im Trainer'); a.href = TRAINER; a.style.textDecoration = 'none'; row.append(a); body.append(row);
+  } else if (tab === 'cmp') {
+    body.append(el('div', 'hint', 'Alle sieben Klassen nach SERA / ICAO Annex 11. Spalte antippen markiert sie im 3D Bild (ICAO Ansicht).'));
+    const wrap = el('div', 'tablewrap'); const t = document.createElement('table'); t.className = 'cmp';
+    const thead = document.createElement('thead'); const hr = document.createElement('tr'); hr.append(el('th', '', ''));
+    for (const k of CLASSES) { const th = el('th', '', k.c); th.style.cursor = 'pointer'; th.onclick = () => { if (mode !== 'icao') setMode('icao'); const m = meshes.find(x => x.userData.id === 'ICAO' + k.c); select(m, true); tab = 'cmp'; renderBody(); }; hr.append(th); }
+    thead.append(hr); t.append(thead);
+    const tb = document.createElement('tbody');
+    for (const [key, label] of ROWS) { const tr = document.createElement('tr'); tr.append(el('td', '', label)); for (const k of CLASSES) { const td = el('td', '', k[key]); if (selected && selected.userData.id === 'ICAO' + k.c) td.style.background = 'var(--accent-soft)'; tr.append(td); } tb.append(tr); }
+    t.append(tb); wrap.append(t); body.append(wrap);
+    body.append(el('div', 'hint', 'Merkhilfe: Von A nach G nimmt die Kontrolle ab. A bis D: Freigabe für alle. E: nur IFR braucht Freigabe. F und G: unkontrolliert. Staffelung aller Flüge nur in A und B.'));
+  } else {
+    body.append(el('h2', '', 'Bedienung'), el('div', 'muted', 'iPad: ein Finger drehen, zwei Finger zoomen oder verschieben, kurz antippen wählt eine Zone. Rechner: linke Maustaste drehen, Mausrad zoomen, rechte Maustaste verschieben.'), el('div', 'muted', 'Oben links schaltest du zwischen der deutschen Struktur (DFS Schema 08/2016, Höhen 3-fach überhöht) und dem ICAO Stapel A bis G um.'), el('div', 'muted', 'Quellen: SERA.5001 und SERA.6001, ICAO Annex 2 und 11, AIP Germany. Werte vor der Prüfung gegenchecken.'));
+  }
+}
+function focusOn(m) { const v = m.userData, c = m.position, size = Math.max(v.x[1]-v.x[0], ALT(v.y[1])-ALT(v.y[0]), v.z[1]-v.z[0]); const dist = Math.max(30, size * 1.6); flyTo([c.x - dist * .55, c.y + dist * .6, c.z + dist * .9], [c.x, c.y, c.z]); }
+function select(m, fly) {
+  if (selected) { selected.material.opacity = selected.userData.op; selected.material.emissive.setHex(0); }
+  selected = m;
+  if (m) { m.material.opacity = Math.min(.8, m.userData.op + .35); m.material.emissive.setHex(0x333333); if (fly) focusOn(m); tab = 'info'; drawer.classList.remove('closed'); }
+  renderBody();
+}
+function setupPick() {
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(); let downAt = null;
+  const vol = m => { const v = m.userData; return (v.x[1]-v.x[0]) * (v.y[1]-v.y[0]) * (v.z[1]-v.z[0]); };
+  const pick = ev => { const r = renderer.domElement.getBoundingClientRect(); ptr.x = ((ev.clientX - r.left) / r.width) * 2 - 1; ptr.y = -((ev.clientY - r.top) / r.height) * 2 + 1; ray.setFromCamera(ptr, camera); const hits = ray.intersectObjects(active().filter(m => m.visible), false); if (!hits.length) return null; hits.sort((a, b) => vol(a.object) - vol(b.object)); return hits[0].object; };
+  renderer.domElement.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY, Date.now()]; });
+  renderer.domElement.addEventListener('pointerup', e => { if (!downAt) return; const moved = Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]), dt = Date.now() - downAt[2]; downAt = null; if (moved > 8 || dt > 700) return; const m = pick(e); if (m) select(m, false); else if (selected) select(null); });
+  renderer.domElement.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const m = pick(e); renderer.domElement.style.cursor = m ? 'pointer' : 'grab'; if (m) { tip.textContent = m.userData.name; tip.style.left = e.clientX + 'px'; tip.style.top = e.clientY + 'px'; tip.style.opacity = 1; } else tip.style.opacity = 0; });
+}
+function resize() { if (!renderer) return; const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h); }
+window.addEventListener('resize', resize);
+
+/* ---------- VMC Rechner (SERA.5001) ---------- */
+const vmcEl = $('#vmc');
+const vs = {cls:'G', alt:1500, ref:'amsl', spd:120, type:'aeroplane', night:false};
+function vmcCalc() {
+  const {cls, alt, ref, spd, type} = vs;
+  if (cls === 'A') return {vis:null, note:'In Luftraum A ist VFR nicht erlaubt.'};
+  const aboveFL100 = alt >= 10000;
+  const low = ref === 'agl' ? alt <= 1000 : alt <= 3000; // unter 3000 ft AMSL oder 1000 ft AGL, was höher ist
+  if (aboveFL100) return {vis:8000, cloudH:1500, cloudV:1000, band:'Ab FL 100 (10 000 ft)', rule:'SERA.5001, alle Klassen'};
+  if (!low || !['F','G'].includes(cls)) return {vis:5000, cloudH:1500, cloudV:1000, band:low ? 'Unter 3000 ft AMSL / 1000 ft AGL, Klasse ' + cls : 'Unter FL 100 und über 3000 ft AMSL / 1000 ft AGL', rule:'SERA.5001'};
+  // F/G tief
+  let vis = 5000, extra = '';
+  if (type === 'helicopter') { vis = 800; extra = 'Hubschrauber: 800 m, wenn so langsam geflogen wird, dass anderer Verkehr und Hindernisse rechtzeitig erkannt werden.'; }
+  else if (spd <= 140) { vis = 1500; extra = 'Flugzeuge bis 140 kt IAS: 1500 m zulässig (Deutschland), wenn Verkehr und Hindernisse rechtzeitig erkannt werden können.'; }
+  return {vis, cloudH:0, cloudV:0, clear:true, band:'Unter 3000 ft AMSL / 1000 ft AGL, Klasse ' + cls, rule:'SERA.5001 mit nationaler Ausnahme', extra};
+}
+function renderVmc() {
+  vmcEl.innerHTML = '';
+  vmcEl.append(el('div', 'eyebrow', 'Modul 2'), el('h2', '', 'VMC Minima Rechner'), el('p', 'muted', 'Sichtflugwetterbedingungen nach SERA.5001. Stell Luftraum, Höhe und Geschwindigkeit ein, die Minima und die Skizze passen sich an.'));
+  const g = el('div', 'vmc'); const form = el('div', 'card'); form.style.gap = '14px';
+  const fcls = el('label', 'f', 'Luftraumklasse'); const sel = document.createElement('select'); for (const k of CLASSES) { const o = el('option', '', k.c + (k.de.startsWith('In Deutschland nicht') ? ' (nicht in DE)' : '')); o.value = k.c; o.selected = k.c === vs.cls; sel.append(o); } sel.onchange = () => { vs.cls = sel.value; renderVmc(); }; fcls.append(sel);
+  const falt = el('label', 'f', `Höhe: ${vs.alt.toLocaleString('de-DE')} ft ${vs.ref === 'agl' ? 'AGL' : 'AMSL'}`); const rng = document.createElement('input'); rng.type = 'range'; rng.min = 0; rng.max = 20000; rng.step = 100; rng.value = vs.alt; rng.oninput = () => { vs.alt = +rng.value; renderVmc(); }; falt.append(rng);
+  const fref = el('div', 'seg'); for (const [v, l] of [['amsl','AMSL'],['agl','AGL']]) { const b = el('button', '', l); b.setAttribute('aria-pressed', vs.ref === v); b.onclick = () => { vs.ref = v; renderVmc(); }; fref.append(b); }
+  const fspd = el('label', 'f', `Geschwindigkeit: ${vs.spd} kt IAS`); const rs = document.createElement('input'); rs.type = 'range'; rs.min = 40; rs.max = 250; rs.step = 5; rs.value = vs.spd; rs.oninput = () => { vs.spd = +rs.value; renderVmc(); }; fspd.append(rs);
+  const ftype = el('div', 'seg'); for (const [v, l] of [['aeroplane','Flugzeug'],['helicopter','Hubschrauber']]) { const b = el('button', '', l); b.setAttribute('aria-pressed', vs.type === v); b.onclick = () => { vs.type = v; renderVmc(); }; ftype.append(b); }
+  form.append(fcls, falt, fref, fspd, ftype); g.append(form);
+  const out = el('div', 'card'); const r = vmcCalc();
+  if (r.vis == null) { out.append(el('h3', 'no', 'VFR nicht möglich'), el('div', 'muted', r.note)); }
+  else {
+    out.append(el('div', 'eyebrow', r.band));
+    const res = el('div', 'res');
+    const c1 = el('div', 'card'); c1.append(el('span', 'eyebrow', 'Flugsicht'), el('div', 'big', r.vis >= 1000 ? (r.vis/1000).toLocaleString('de-DE') + ' km' : r.vis + ' m'));
+    const c2 = el('div', 'card'); c2.append(el('span', 'eyebrow', 'Abstand zu Wolken'), el('div', 'big', r.clear ? 'frei' : '1500 m'), el('span', 'muted', r.clear ? 'von Wolken, Erdsicht' : 'horizontal, 1000 ft vertikal'));
+    res.append(c1, c2); out.append(res);
+    if (r.extra) out.append(el('div', 'muted', r.extra));
+    out.append(vmcSvg(r), el('div', 'hint', 'Regel: ' + r.rule + '. Zusätzlich gilt in Kontrollzonen: Bodensicht mindestens 5 km und Hauptwolkenuntergrenze mindestens 1500 ft, sonst nur Sonder-VFR. Nacht-VFR: Deutschland verlangt Flugsicht 5 km und 1500 m / 1000 ft auch in G.'));
+  }
+  g.append(out); vmcEl.append(g);
+  const memo = el('div', 'card'); memo.append(el('h3', '', 'Merktabelle SERA.5001'));
+  const tw = el('div', 'tablewrap'); tw.innerHTML = '<table><thead><tr><th>Höhenband</th><th>Klasse</th><th>Flugsicht</th><th>Wolkenabstand</th></tr></thead><tbody>' +
+    '<tr><td>ab FL 100</td><td>A bis G</td><td>8 km</td><td>1500 m / 1000 ft</td></tr>' +
+    '<tr><td>unter FL 100, über 3000 ft AMSL oder 1000 ft AGL</td><td>A bis G</td><td>5 km</td><td>1500 m / 1000 ft</td></tr>' +
+    '<tr><td>unter 3000 ft AMSL oder 1000 ft AGL</td><td>B bis E</td><td>5 km</td><td>1500 m / 1000 ft</td></tr>' +
+    '<tr><td>unter 3000 ft AMSL oder 1000 ft AGL</td><td>F und G</td><td>5 km (1,5 km bei ≤140 kt, Hubschrauber 800 m)</td><td>frei von Wolken, Erdsicht</td></tr></tbody></table>';
+  memo.append(tw); vmcEl.append(memo);
+}
+function vmcSvg(r) {
+  const W = 520, H = 220; const ns = 'http://www.w3.org/2000/svg';
+  const s = document.createElementNS(ns, 'svg'); s.setAttribute('viewBox', `0 0 ${W} ${H}`); s.style.width = '100%'; s.style.maxWidth = '560px';
+  const add = (t, a, txt) => { const e = document.createElementNS(ns, t); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); if (txt) e.textContent = txt; s.append(e); return e; };
+  add('rect', {x:0, y:0, width:W, height:H, rx:10, fill:'var(--sky)'});
+  add('rect', {x:0, y:H-22, width:W, height:22, fill:'#b7873f'});
+  // Wolke
+  const cx = 400, cy = 70; for (const [dx, dy, rr] of [[0,0,34],[-30,10,24],[30,12,26],[-10,-16,22],[18,-14,20]]) add('circle', {cx:cx+dx, cy:cy+dy, r:rr, fill:'#fff', opacity:.95});
+  // Flugzeug
+  const px = 130, py = r.clear ? 110 : 150;
+  add('path', {d:`M${px-30} ${py} l40 -6 l30 2 l12 4 l-12 4 l-30 2 z M${px-12} ${py} l-6 -16 l10 0 l6 14 z M${px-12} ${py} l-6 16 l10 0 l6 -14 z`, fill:'var(--fg)'});
+  // Sicht
+  const visLen = Math.min(330, r.vis / 8000 * 330);
+  add('line', {x1:px+25, y1:py, x2:px+25+visLen, y2:py, stroke:'var(--accent)', 'stroke-width':3, 'stroke-dasharray':'8 5'});
+  add('text', {x:px+25+visLen/2, y:py+18, 'text-anchor':'middle', 'font-size':13, fill:'var(--accent)', 'font-weight':600}, 'Flugsicht ' + (r.vis >= 1000 ? (r.vis/1000).toLocaleString('de-DE') + ' km' : r.vis + ' m'));
+  if (!r.clear) {
+    add('line', {x1:px+25, y1:py-30, x2:cx-40, y2:py-30, stroke:'var(--warn)', 'stroke-width':2}); add('text', {x:(px+25+cx-40)/2, y:py-36, 'text-anchor':'middle', 'font-size':12, fill:'var(--warn)', 'font-weight':600}, '1500 m horizontal');
+    add('line', {x1:cx, y1:cy+36, x2:cx, y2:py-8, stroke:'var(--warn)', 'stroke-width':2}); add('text', {x:cx+8, y:(cy+36+py)/2, 'font-size':12, fill:'var(--warn)', 'font-weight':600}, '1000 ft vertikal');
+  } else {
+    add('text', {x:cx, y:cy+60, 'text-anchor':'middle', 'font-size':12, fill:'var(--good)', 'font-weight':600}, 'frei von Wolken');
+    add('line', {x1:px, y1:py+20, x2:px, y2:H-24, stroke:'var(--good)', 'stroke-width':2, 'stroke-dasharray':'4 4'}); add('text', {x:px+6, y:H-30, 'font-size':12, fill:'var(--good)', 'font-weight':600}, 'Erdsicht');
+  }
+  return s;
+}
+renderVmc();
+
+/* ---------- Start ---------- */
+const v0 = location.hash.slice(1);
+go(['home','air','vmc','soon'].includes(v0) ? v0 : 'home');
+})();
+</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(r=>{r.update();const show=()=>{if(document.getElementById('upd'))return;const t=document.createElement('div');t.id='upd';t.style.cssText='position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#17202b;color:#fff;padding:10px 14px;border-radius:8px;z-index:50;display:flex;gap:12px;align-items:center;font:600 14px Barlow,system-ui';const s=document.createElement('span');s.textContent='Update geladen.';const b=document.createElement('button');b.textContent='Jetzt aktualisieren';b.style.cssText='font:inherit;padding:6px 10px;border-radius:6px;border:0;background:#4fb3d6;color:#0b1218';b.onclick=()=>{if(r.waiting)r.waiting.postMessage('skip');location.reload();};t.append(s,b);document.body.append(t);};if(r.waiting)show();r.addEventListener('updatefound',()=>{const w=r.installing;w&&w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)show();});});});}</script></body></html>
