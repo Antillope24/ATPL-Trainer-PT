@@ -132,6 +132,10 @@ label.chk{display:flex;gap:8px;align-items:center;font-weight:500}
 .goal{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .searchbox{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
 .pace{font-size:.8rem}
+.pics{display:flex;gap:10px;flex-wrap:wrap}
+.pics img{max-width:100%;max-height:260px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:zoom-in}
+.modal-bg.zoom{align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
+.modal-bg.zoom img{max-width:100%;max-height:100%;border-radius:8px;background:#fff}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:500;z-index:20;max-width:90vw}
 @media (prefers-reduced-motion:no-preference){.card.btn:active{transform:scale(.99)}}
 </style>
@@ -216,7 +220,7 @@ function renderNav() {
   $('#hdr-count').textContent = DATA ? DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ' + T('questions') : '';
 }
 
-const VERSION = '2026.11.04-1059';
+const VERSION = '2026.11.10-1415';
 $('#ver').textContent = 'v' + VERSION;
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
@@ -322,6 +326,14 @@ function streak() {
   return n;
 }
 function qkey(tid, n) { return tid + '#' + n; }
+function pics(q) {
+  if (!q.pics || !q.pics.length) return q.img ? h('div', {class:'img'}, T('imgnote') + q.img) : null;
+  return h('div', {class:'pics'}, q.pics.map(f => h('img', {src: 'img/' + f, alt: q.key, loading: 'lazy', onclick: () => zoom('img/' + f)})));
+}
+function zoom(src) {
+  const bg = h('div', {class:'modal-bg zoom', onclick: () => bg.remove()}, h('img', {src, alt: ''}));
+  document.body.append(bg);
+}
 function cardStats(code, questions) {
   let learned = 0, started = 0, due = 0, marked = 0; const now = Date.now();
   for (const q of questions) {
@@ -458,7 +470,7 @@ function renderExam() {
         h('span', {class:'eyebrow'}, T('qof', {i: ex.i+1, n: ex.items.length}), ' · ', h('span', {class:'mono'}, qkey(ex.t.id, q.n))),
         h('div', {class:'row'}, it.multi && showCount && h('span', {class:'tag multi'}, T('correctN', {n: q.a.length})), h('button', {class:'btn-g', onclick: () => { it.flag = !it.flag; toggleMark(ex.s.code, q.key); render(); }}, it.flag ? T('marked1') : T('mark')))),
       h('div', {class:'text'}, q.q),
-      q.img && h('div', {class:'img'}, T('imgnote') + q.img),
+      pics(q),
       h('div', {class:'opts'}, optBtns)),
     h('div', {class:'row', style:'justify-content:space-between'},
       h('button', {class:'btn-s', disabled: ex.i === 0, onclick: () => { ex.i--; render(); }}, T('prev')),
@@ -508,7 +520,7 @@ function showItem(it, k) {
         h('span', {class:'eyebrow'}, T('q', {n: k+1}), ' · ', h('span', {class:'mono'}, q.key)),
         h('span', {class:'tag ' + (it.ok ? 'pass' : 'fail')}, it.ok ? T('ok') : T('wrong'))),
       h('div', {class:'text'}, q.q),
-      q.img && h('div', {class:'img'}, T('img') + q.img),
+      pics(q),
       h('div', {}, h('div', {class:'lbl yours' + (it.ok ? ' ok' : '')}, T('yours')), h('div', {class:'ans yours' + (it.ok ? ' ok' : '')}, fmt(chosen))),
       !it.ok && h('div', {}, h('div', {class:'lbl corr'}, T('correctA')), h('div', {class:'ans corr'}, fmt(q.a))),
       h('div', {class:'opts'}, it.order.map((oi, pos) => {
@@ -641,7 +653,7 @@ function showQuestion(q) {
       h('span', {class:'eyebrow'}, s.name, ' · ', h('span', {class:'mono'}, q.key)),
       e && (e[2] || e[3]) ? h('span', {class:'tag'}, `${e[3]} ${T('errors')} · ${e[2]} ${T('correctS')}`) : null),
     h('div', {class:'text'}, q.q),
-    q.img && h('div', {class:'img'}, T('img') + q.img),
+    pics(q),
     mc && h('div', {class:'opts'}, q.o.map((o, i) => h('div', {class:'opt' + (q.a.includes(i) ? ' ok' : '')}, h('span', {class:'l'}, LET[i] + ')'), h('span', {}, o)))),
     !mc && h('div', {}, h('div', {class:'lbl corr'}, T('correctA')), h('div', {class:'ans corr'}, q.o[q.a[0]])),
     h('div', {class:'row'}, markBtn, h('button', {class:'btn-p', onclick: () => bg.remove()}, T('close')))));
@@ -719,7 +731,7 @@ function renderCards() {
           h('span', {class:'tag'}, started ? T('box', {b: e[0]}) : T('new')),
           h('button', {class:'btn-g', onclick: () => { toggleMark(se.s.code, q.key); render(); }}, isMarked(se.s.code, q.key) ? T('marked1') : T('mark')))),
       h('div', {class:'text'}, q.q),
-      q.img && h('div', {class:'img'}, T('imgnote') + q.img),
+      pics(q),
       mc && h('div', {class:'opts'}, optEls),
       !se.open
         ? h('button', {class:'btn-p', style:'align-self:flex-start', disabled: answerMode && se.sel.size === 0, onclick: () => { se.open = true; render(); }}, answerMode ? T('check') : T('reveal'))
