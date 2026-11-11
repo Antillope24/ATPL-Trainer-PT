@@ -133,6 +133,7 @@ label.chk{display:flex;gap:8px;align-items:center;font-weight:500}
 .searchbox{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
 .pace{font-size:.8rem}
 .pics{display:flex;gap:10px;flex-wrap:wrap}
+.pics.thumbs img{max-height:110px}
 .pics img{max-width:100%;max-height:260px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:zoom-in}
 .modal-bg.zoom{align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
 .modal-bg.zoom img{max-width:100%;max-height:100%;border-radius:8px;background:#fff}
@@ -220,7 +221,7 @@ function renderNav() {
   $('#hdr-count').textContent = DATA ? DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ' + T('questions') : '';
 }
 
-const VERSION = '2026.11.11-0848';
+const VERSION = '2026.11.11-0856';
 $('#ver').textContent = 'v' + VERSION;
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
@@ -649,7 +650,8 @@ function renderSearch() {
     const code = qq.key.split('-')[0].replace(/\d+$/, '');
     out.append(h('button', {class:'card btn', style:'gap:4px', onclick: () => showQuestion(qq)},
       h('div', {class:'row', style:'justify-content:space-between'}, h('span', {class:'mono'}, qq.key), isMarked(subjectOf(qq).code, qq.key) && h('span', {class:'tag flag'}, '★')),
-      h('div', {}, qq.q.length > 160 ? qq.q.slice(0, 157) + '…' : qq.q)));
+      h('div', {}, qq.q.length > 160 ? qq.q.slice(0, 157) + '…' : qq.q),
+      qq.pics && qq.pics.length ? h('div', {class:'pics thumbs'}, qq.pics.map(f => h('img', {src: 'img/' + f, alt: '', loading: 'lazy'}))) : null));
   }
 }
 function subjectOf(q) { return DATA.subjects.find(s => s.tests.some(t => t.id === q.tid)); }
