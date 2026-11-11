@@ -83,6 +83,34 @@ th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mu
 tr.hl td{background:var(--accent-soft)}
 td.c{font-family:var(--display);font-weight:700;font-size:1.1rem}
 .cmp td:first-child{position:sticky;left:0;background:var(--surface);font-weight:600}
+/* flight levels */
+.flgrid{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,1.3fr);gap:16px;align-items:start}
+@media (max-width:760px){.flgrid{grid-template-columns:1fr}}
+.f{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:.9rem}
+.compass{width:100%;max-width:280px;align-self:center;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.compass .half{fill:var(--surface2);transition:fill .2s}
+.compass .half.e.on{fill:var(--accent-soft)}.compass .half.w.on{fill:color-mix(in srgb,var(--warn) 22%,var(--surface))}
+.lbl{fill:var(--muted);opacity:.55;transition:opacity .2s}.lbl.on{opacity:1}.lbl.e.on{fill:var(--accent)}.lbl.w.on{fill:var(--warn)}
+.needle line{stroke:var(--fg)}.needle path,.needle circle{fill:var(--bad)}
+.flhead{border-left:4px solid var(--accent);padding-left:12px}.flhead.w{border-color:var(--warn)}
+.flhead.e .big{color:var(--accent)}.flhead.w .big{color:var(--warn)}
+.flrow{display:flex;flex-direction:column;gap:4px}
+.flchips{display:flex;flex-wrap:wrap;gap:5px}
+.fl{font-family:var(--mono);font-size:.78rem;font-weight:600;padding:4px 8px;border-radius:6px;background:var(--surface2);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.ladder{width:100%;max-width:380px;align-self:center}
+.rung{stroke:var(--muted);opacity:.3}.rung.e.on{stroke:var(--accent);opacity:1}.rung.w.on{stroke:var(--warn);opacity:1}
+.band{fill:var(--accent);opacity:.1}.bandt{fill:var(--muted);font-weight:600}
+.bul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:.93rem;font-weight:400}
+.chk{display:flex;gap:8px;align-items:center;font-weight:600;font-size:.9rem}
+.chk input{width:18px;height:18px;accent-color:var(--accent)}
+.big.acc{color:var(--accent)}
+#fl .res{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}#fl .res .big{font-size:1.6rem}#fl .res .eyebrow{overflow-wrap:anywhere}
+#fl .seg{align-self:flex-start}
+.fqq{font-size:1.1rem;font-weight:600}
+.fqopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.fqopts .btn-s{font-family:var(--mono);min-height:46px}
+.fqopts .good{background:var(--good);color:#fff;border-color:var(--good);opacity:1}
+.fqopts .bad{background:var(--bad);color:#fff;border-color:var(--bad);opacity:1}
 /* vmc */
 .vmc{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,1.4fr);gap:16px}
 @media (max-width:760px){.vmc{grid-template-columns:1fr}}
@@ -115,6 +143,7 @@ svg text{font-family:var(--body)}
     <button class="fab" id="fab"></button>
   </section>
   <section class="view" id="v-vmc" hidden><div class="wrap" id="vmc"></div></section>
+  <section class="view" id="v-fl" hidden><div class="wrap" id="fl"></div></section>
   <section class="view" id="v-soon" hidden><div class="wrap" id="soon"></div></section>
 </main>
 
@@ -1172,7 +1201,7 @@ svg text{font-family:var(--body)}
 const I18N = {
 de: {
   lang:'Deutsch', title:'Air Law Explorer', start:'Start', mAir:'Luftraumklassen', mVmc:'VMC Rechner', mFl:'Flugflächen', mRow:'Ausweichregeln', mSig:'Signale', mLic:'Lizenzen', mIcao:'ICAO',
-  soonT:'Kommt als Nächstes', soonP:'Dieses Modul ist geplant. Reihenfolge: Flugflächen und Halbkreisregel, Ausweichregeln, Signale, Lizenzen und Fristen, ICAO Struktur.',
+  soonT:'Kommt als Nächstes', soonP:'Dieses Modul ist geplant. Reihenfolge: Ausweichregeln, Signale, Lizenzen und Fristen, ICAO Struktur.',
   homeEyebrow:'ATPL 010 Air Law', homeT:'Nachschlagen, anschauen, verstehen', homeP:'Die trockenen Teile von Air Law als interaktive Werkzeuge. Jedes Modul ist für das iPad gebaut und läuft offline. Zum Üben der passenden Fragen geht es in den ATPL Progress Trainer.',
   module:'Modul', ready:'verfügbar', planned:'geplant', toTrainer:'Zum ATPL Progress Trainer',
   mod:[['Luftraumklassen A bis G','ICAO Klassen und deutsche Struktur in 3D, Vergleichstabelle mit Freigabe, Staffelung, Funk, Transponder und VMC.'],['VMC Minima Rechner','Luftraum, Höhe und Geschwindigkeit einstellen, Flugsicht und Wolkenabstand ablesen, mit Skizze.'],['Flugflächen und Halbkreisregel','Kurs drehen, erlaubte Flugflächen sehen, Transition Altitude und Level, RVSM.'],['Ausweichregeln','Szenen von oben: wer weicht aus? Mit Positionslichtern bei Nacht.'],['Signale und Zeichen','Lichtsignale, Bodensignale, Abfangsignale, Marshalling.'],['Lizenzen, Medical, Fristen','Zeitleiste mit Gültigkeiten und Recency nach Part-FCL und Part-MED.'],['ICAO und Annexe','Chicago Convention, 19 Annexe, Freiheiten der Luft.']],
@@ -1198,7 +1227,7 @@ de: {
 },
 en: {
   lang:'English', title:'Air Law Explorer', start:'Home', mAir:'Airspace classes', mVmc:'VMC calculator', mFl:'Flight levels', mRow:'Right of way', mSig:'Signals', mLic:'Licences', mIcao:'ICAO',
-  soonT:'Coming next', soonP:'This module is planned. Order: flight levels and semicircular rule, right of way, signals, licences and validity, ICAO structure.',
+  soonT:'Coming next', soonP:'This module is planned. Order: right of way, signals, licences and validity, ICAO structure.',
   homeEyebrow:'ATPL 010 Air Law', homeT:'Look it up, see it, understand it', homeP:'The dry parts of Air Law as interactive tools. Every module is built for the iPad and works offline. To practise the matching questions, go to the ATPL Progress Trainer.',
   module:'Module', ready:'available', planned:'planned', toTrainer:'Open ATPL Progress Trainer',
   mod:[['Airspace classes A to G','ICAO classes and the German structure in 3D, comparison table with clearance, separation, radio, transponder and VMC.'],['VMC minima calculator','Set airspace, altitude and speed, read flight visibility and cloud clearance, with a sketch.'],['Flight levels and semicircular rule','Turn the heading, see the allowed flight levels, transition altitude and level, RVSM.'],['Right of way','Scenes from above: who gives way? With navigation lights at night.'],['Signals','Light signals, ground signals, interception signals, marshalling.'],['Licences, medical, validity','Timeline with validity periods and recency under Part-FCL and Part-MED.'],['ICAO and annexes','Chicago Convention, 19 annexes, freedoms of the air.']],
@@ -1224,7 +1253,7 @@ en: {
 },
 fr: {
   lang:'Français', title:'Air Law Explorer', start:'Accueil', mAir:'Classes d’espace', mVmc:'Calculateur VMC', mFl:'Niveaux de vol', mRow:'Priorités', mSig:'Signaux', mLic:'Licences', mIcao:'OACI',
-  soonT:'À venir', soonP:'Ce module est prévu. Ordre : niveaux de vol et règle semi-circulaire, priorités, signaux, licences et validités, structure OACI.',
+  soonT:'À venir', soonP:'Ce module est prévu. Ordre : priorités, signaux, licences et validités, structure OACI.',
   homeEyebrow:'ATPL 010 Air Law', homeT:'Consulter, visualiser, comprendre', homeP:'Les parties arides du droit aérien sous forme d’outils interactifs. Chaque module est conçu pour l’iPad et fonctionne hors ligne. Pour s’entraîner sur les questions, direction l’ATPL Progress Trainer.',
   module:'Module', ready:'disponible', planned:'prévu', toTrainer:'Ouvrir l’ATPL Progress Trainer',
   mod:[['Classes d’espace A à G','Classes OACI et structure allemande en 3D, tableau comparatif : clairance, séparation, radio, transpondeur et VMC.'],['Calculateur de minima VMC','Régler l’espace, l’altitude et la vitesse, lire la visibilité en vol et la distance aux nuages, avec schéma.'],['Niveaux de vol et règle semi-circulaire','Tourner le cap, voir les niveaux autorisés, altitude et niveau de transition, RVSM.'],['Règles de priorité','Scènes vues de dessus : qui s’écarte ? Avec feux de navigation la nuit.'],['Signaux','Signaux lumineux, signaux au sol, interception, signaux de guidage au sol.'],['Licences, médical, validités','Frise avec validités et expérience récente selon Part-FCL et Part-MED.'],['OACI et annexes','Convention de Chicago, 19 annexes, libertés de l’air.']],
@@ -1388,20 +1417,20 @@ const sel = $('#lang');
 for (const [k, v] of Object.entries(I18N)) { const o = el('option', '', v.lang); o.value = k; o.selected = k === LANG; sel.append(o); }
 sel.onchange = () => { LANG = sel.value; try { localStorage.setItem('airlaw-lang', LANG); } catch (e) {} document.documentElement.lang = LANG; renderAll(); };
 let view = 'home';
-const NAV = [['home','start'],['air','mAir'],['vmc','mVmc'],['soon','mFl'],['soon','mRow'],['soon','mSig'],['soon','mLic'],['soon','mIcao']];
+const NAV = [['home','start'],['air','mAir'],['vmc','mVmc'],['fl','mFl'],['soon','mRow'],['soon','mSig'],['soon','mLic'],['soon','mIcao']];
 function renderNav() {
   const n = $('#nav'); n.innerHTML = '';
-  NAV.forEach(([v, k], i) => { const b = el('button', 'chip' + (v === 'soon' ? ' soon' : ''), T(k)); b.dataset.v = v; b.setAttribute('aria-pressed', v === view && (v !== 'soon' || i === 3)); b.onclick = () => go(v); n.append(b); });
+  NAV.forEach(([v, k], i) => { const b = el('button', 'chip' + (v === 'soon' ? ' soon' : ''), T(k)); b.dataset.v = v; b.setAttribute('aria-pressed', v === view && (v !== 'soon' || i === 4)); b.onclick = () => go(v); n.append(b); });
 }
 function go(v) { view = v; location.hash = v; for (const b of $('#nav').children) b.setAttribute('aria-pressed', b.dataset.v === v && v !== 'soon'); for (const s of document.querySelectorAll('.view')) s.hidden = s.id !== 'v-' + v; if (v === 'air') { initScene(); resize(); } }
-window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (['home','air','vmc','soon'].includes(v) && v !== view) go(v); });
+window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (['home','air','vmc','fl','soon'].includes(v) && v !== view) go(v); });
 
 function renderHome() {
   const h = $('#home'); h.innerHTML = '';
   h.append(el('div', 'eyebrow', T('homeEyebrow')), el('h2', '', T('homeT')), el('p', 'muted', T('homeP')));
   const g = el('div', 'grid');
   T('mod').forEach(([title, desc], i) => {
-    const v = NAV[i+1][0], ready = i < 2;
+    const v = NAV[i+1][0], ready = i < 3;
     const c = el('button', 'card link'); c.append(el('span', 'num', T('module') + ' ' + (i+1)), el('h3', '', title), el('span', 'muted', desc), el('span', 'tag', ready ? T('ready') : T('planned')));
     c.onclick = () => go(v); if (!ready) c.style.opacity = .6; g.append(c);
   });
@@ -1410,7 +1439,7 @@ function renderHome() {
   const so = $('#soon'); so.innerHTML = ''; so.append(el('h2', '', T('soonT')), el('p', 'muted', T('soonP')));
 }
 function renderAll() {
-  renderNav(); renderHome(); renderVmc();
+  renderNav(); renderHome(); renderVmc(); renderFl();
   const m = $('#mode'); m.children[0].textContent = T('germany'); m.children[1].textContent = T('icao');
   $('#tab-list').textContent = T('zones'); $('#tab-info').textContent = T('data'); $('#tab-cmp').textContent = T('compare'); $('#tab-help').textContent = T('help'); $('#fab').textContent = T('fab'); $('#btn-close').setAttribute('aria-label', T('close'));
   renderViews(); if (sceneReady) renderBody();
@@ -1657,6 +1686,199 @@ function resize() { if (!renderer) return; const w = stage.clientWidth, h = stag
 window.addEventListener('resize', resize);
 
 /* ---------- VMC Rechner (SERA.5001) ---------- */
+/* ---------- Modul 3: Flugflaechen und Halbkreisregel ---------- */
+Object.assign(I18N.de, {
+  flT:'Flugflächen und Halbkreisregel', flP:'Dreh den Kurs über Grund und sieh sofort, welche Reiseflughöhen passen. Nach SERA.5020 und SERA.5025 mit der Tabelle aus SERA Anhang 3 (ICAO Annex 2).',
+  flTrk:'Missweisender Kurs über Grund', flRule:'Flugregeln', flSys:'Staffelung oberhalb FL 290', flRvsm:'RVSM', flNon:'ohne RVSM',
+  flEast:'Ostwärts', flWest:'Westwärts', flEastR:'000° bis 179°', flWestR:'180° bis 359°',
+  flOddI:'Ungerade Tausender', flEvenI:'Gerade Tausender', flOddV:'Ungerade Tausender plus 500 ft', flEvenV:'Gerade Tausender plus 500 ft',
+  flAllowed:'Passende Flugflächen', flLow:'bis FL 290', flRv:'FL 290 bis FL 410', flHigh:'oberhalb FL 410', flNone:'keine',
+  flDrag:'Nadel ziehen oder Regler nutzen', flLadder:'Höhenleiter', flBand:'RVSM Band',
+  flMemoT:'Merken', flMemo:['Entscheidend ist der missweisende Kurs über Grund (magnetic track), nicht das Heading.','000° bis 179° heißt ungerade, 180° bis 359° heißt gerade. Merkhilfe: Ost ungerade, West gerade.','IFR fliegt auf vollen Tausendern (FL 70, FL 80), VFR 500 ft darüber (FL 75, FL 85).','Bis FL 290 beträgt der Abstand zwischen IFR Flugflächen 1000 ft. Darüber ohne RVSM 2000 ft, mit RVSM zwischen FL 290 und FL 410 weiterhin 1000 ft. Oberhalb FL 410 immer 2000 ft.','Im RVSM Luftraum gibt es keine VFR Flugflächen. In Europa ist VFR oberhalb FL 195 nur mit besonderer Genehmigung möglich.','VFR Reiseflughöhen gelten nach SERA.5005(g) oberhalb 3000 ft über Grund oder Wasser, sofern die Behörde keinen höheren Wert festlegt. Deutschland: oberhalb 5000 ft AMSL bzw. 2000 ft AGL, der höhere Wert zählt.','Flugverkehrskontrolle kann abweichende Flugflächen zuweisen, die Freigabe geht vor.'],
+  tlT:'Transition Altitude und Transition Level', tlP:'Unterhalb der Transition Altitude fliegst du nach QNH (Altitude), ab dem Transition Level nach 1013,25 hPa (Flight Level). Dazwischen liegt die Übergangsschicht.',
+  tlTa:'Transition Altitude', tlQnh:'QNH', tlK:'Druckstufe', tlMin:'Übergangsschicht mindestens 1000 ft (wie in Deutschland)', tlPa:'Druckhöhe der TA', tlTl:'Transition Level', tlLayer:'Übergangsschicht',
+  tlHow:'Rechnung: (1013 minus QNH) mal Druckstufe ergibt die Korrektur. TA plus Korrektur ist die Druckhöhe der TA. Das Transition Level ist die nächste nutzbare Flugfläche darüber.',
+  tlRules:['Steigflug: beim Durchfliegen der Transition Altitude auf 1013,25 hPa umstellen, Höhe als Flight Level angeben.','Sinkflug: beim Durchfliegen des Transition Level auf QNH umstellen, Höhe als Altitude angeben.','In der Übergangsschicht findet kein Reiseflug statt.','Das Transition Level liegt immer über der Transition Altitude. Bei niedrigem QNH rückt es nach oben.','Deutschland: TA 5000 ft, die Übergangsschicht ist mindestens 1000 ft dick. Je nach QNH ergibt das FL 60, FL 70 oder FL 80. Die genauen QNH Grenzen stehen in der AIP (ENR 1.7).'],
+  tlSvgAlt:'Altitude (QNH)', tlSvgFl:'Flight Level (1013)', tlSvgLayer:'Übergangsschicht',
+  fqT:'Kurz üben', fqQ:'Kurs {t}°, {r}{s}. Welche Flugfläche passt?', fqNext:'Nächste Frage', fqOk:'Richtig.', fqNo:'Nicht ganz.', fqScore:'{r} von {n} richtig',
+  fqWhyE:'{t}° liegt zwischen 000° und 179°, also ungerade.', fqWhyW:'{t}° liegt zwischen 180° und 359°, also gerade.'
+});
+Object.assign(I18N.en, {
+  flT:'Flight levels and semicircular rule', flP:'Turn the track and see which cruising levels fit. Based on SERA.5020 and SERA.5025 with the table of SERA Appendix 3 (ICAO Annex 2).',
+  flTrk:'Magnetic track', flRule:'Flight rules', flSys:'Separation above FL 290', flRvsm:'RVSM', flNon:'non RVSM',
+  flEast:'Eastbound', flWest:'Westbound', flEastR:'000° to 179°', flWestR:'180° to 359°',
+  flOddI:'Odd thousands', flEvenI:'Even thousands', flOddV:'Odd thousands plus 500 ft', flEvenV:'Even thousands plus 500 ft',
+  flAllowed:'Suitable flight levels', flLow:'up to FL 290', flRv:'FL 290 to FL 410', flHigh:'above FL 410', flNone:'none',
+  flDrag:'Drag the needle or use the slider', flLadder:'Level ladder', flBand:'RVSM band',
+  flMemoT:'Remember', flMemo:['The magnetic track counts, not the heading.','000° to 179° means odd, 180° to 359° means even. East odd, west even.','IFR uses full thousands (FL 70, FL 80), VFR is 500 ft above (FL 75, FL 85).','Up to FL 290 IFR levels are 1000 ft apart. Above that 2000 ft without RVSM, still 1000 ft with RVSM between FL 290 and FL 410. Above FL 410 always 2000 ft.','There are no VFR levels in RVSM airspace. In Europe VFR above FL 195 needs a special authorisation.','VFR cruising levels apply per SERA.5005(g) above 3000 ft above ground or water unless the authority sets a higher datum. Germany: above 5000 ft AMSL or 2000 ft AGL, whichever is higher.','ATC may assign other levels, the clearance prevails.'],
+  tlT:'Transition altitude and transition level', tlP:'Below the transition altitude you fly on QNH (altitude), from the transition level upwards on 1013.25 hPa (flight level). The transition layer lies in between.',
+  tlTa:'Transition altitude', tlQnh:'QNH', tlK:'Pressure step', tlMin:'Transition layer at least 1000 ft (as in Germany)', tlPa:'Pressure altitude of TA', tlTl:'Transition level', tlLayer:'Transition layer',
+  tlHow:'Calculation: (1013 minus QNH) times the pressure step gives the correction. TA plus correction is the pressure altitude of the TA. The transition level is the next usable flight level above.',
+  tlRules:['Climbing: set 1013.25 hPa when passing the transition altitude and report flight levels.','Descending: set QNH when passing the transition level and report altitudes.','No cruising within the transition layer.','The transition level is always above the transition altitude. With low QNH it moves up.','Germany: TA 5000 ft, the transition layer is at least 1000 ft deep. Depending on QNH this gives FL 60, FL 70 or FL 80. The exact QNH limits are in the AIP (ENR 1.7).'],
+  tlSvgAlt:'Altitude (QNH)', tlSvgFl:'Flight level (1013)', tlSvgLayer:'Transition layer',
+  fqT:'Quick practice', fqQ:'Track {t}°, {r}{s}. Which flight level fits?', fqNext:'Next question', fqOk:'Correct.', fqNo:'Not quite.', fqScore:'{r} of {n} correct',
+  fqWhyE:'{t}° lies between 000° and 179°, so odd.', fqWhyW:'{t}° lies between 180° and 359°, so even.'
+});
+Object.assign(I18N.fr, {
+  flT:'Niveaux de vol et règle semi-circulaire', flP:'Tourne la route et vois quels niveaux de croisière conviennent. Selon SERA.5020 et SERA.5025 avec le tableau de l’appendice 3 du SERA (Annexe 2 OACI).',
+  flTrk:'Route magnétique', flRule:'Règles de vol', flSys:'Séparation au-dessus du FL 290', flRvsm:'RVSM', flNon:'hors RVSM',
+  flEast:'Vers l’est', flWest:'Vers l’ouest', flEastR:'000° à 179°', flWestR:'180° à 359°',
+  flOddI:'Milliers impairs', flEvenI:'Milliers pairs', flOddV:'Milliers impairs plus 500 ft', flEvenV:'Milliers pairs plus 500 ft',
+  flAllowed:'Niveaux de vol adaptés', flLow:'jusqu’au FL 290', flRv:'FL 290 à FL 410', flHigh:'au-dessus du FL 410', flNone:'aucun',
+  flDrag:'Fais glisser l’aiguille ou utilise le curseur', flLadder:'Échelle des niveaux', flBand:'Bande RVSM',
+  flMemoT:'À retenir', flMemo:['C’est la route magnétique qui compte, pas le cap.','000° à 179° : impair. 180° à 359° : pair.','L’IFR vole sur des milliers entiers (FL 70, FL 80), le VFR 500 ft au-dessus (FL 75, FL 85).','Jusqu’au FL 290, les niveaux IFR sont espacés de 1000 ft. Au-dessus, 2000 ft hors RVSM, toujours 1000 ft en RVSM entre FL 290 et FL 410. Au-dessus du FL 410 toujours 2000 ft.','Pas de niveaux VFR en espace RVSM. En Europe, le VFR au-dessus du FL 195 exige une autorisation particulière.','Les niveaux de croisière VFR s’appliquent selon SERA.5005(g) au-dessus de 3000 ft au-dessus du sol ou de l’eau, sauf valeur plus élevée fixée par l’autorité. Allemagne : au-dessus de 5000 ft AMSL ou 2000 ft AGL, la valeur la plus haute.','L’ATC peut attribuer d’autres niveaux, la clairance prime.'],
+  tlT:'Altitude et niveau de transition', tlP:'Sous l’altitude de transition on vole au QNH (altitude), à partir du niveau de transition à 1013,25 hPa (niveau de vol). Entre les deux se trouve la couche de transition.',
+  tlTa:'Altitude de transition', tlQnh:'QNH', tlK:'Échelon de pression', tlMin:'Couche de transition d’au moins 1000 ft (comme en Allemagne)', tlPa:'Altitude-pression de la TA', tlTl:'Niveau de transition', tlLayer:'Couche de transition',
+  tlHow:'Calcul : (1013 moins QNH) fois l’échelon de pression donne la correction. TA plus correction donne l’altitude-pression de la TA. Le niveau de transition est le premier niveau utilisable au-dessus.',
+  tlRules:['En montée : afficher 1013,25 hPa en passant l’altitude de transition et annoncer des niveaux de vol.','En descente : afficher le QNH en passant le niveau de transition et annoncer des altitudes.','Pas de croisière dans la couche de transition.','Le niveau de transition est toujours au-dessus de l’altitude de transition. Avec un QNH bas il monte.','Allemagne : TA 5000 ft, la couche de transition fait au moins 1000 ft. Selon le QNH cela donne FL 60, FL 70 ou FL 80. Les limites exactes de QNH figurent dans l’AIP (ENR 1.7).'],
+  tlSvgAlt:'Altitude (QNH)', tlSvgFl:'Niveau de vol (1013)', tlSvgLayer:'Couche de transition',
+  fqT:'Entraînement rapide', fqQ:'Route {t}°, {r}{s}. Quel niveau de vol convient ?', fqNext:'Question suivante', fqOk:'Correct.', fqNo:'Pas tout à fait.', fqScore:'{r} sur {n} correctes',
+  fqWhyE:'{t}° se situe entre 000° et 179°, donc impair.', fqWhyW:'{t}° se situe entre 180° et 359°, donc pair.'
+});
+const flEl = $('#fl');
+const fs = {trk: 87, rule: 'ifr', rvsm: true, ta: 5000, qnh: 1013, k: 27, min: true, quiz: null, score: [0, 0]};
+const NS = 'http://www.w3.org/2000/svg';
+const svgEl = (t, a = {}, txt) => { const e = document.createElementNS(NS, t); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); if (txt != null) e.textContent = txt; return e; };
+const range = (a, b, st) => { const o = []; for (let i = a; i <= b; i += st) o.push(i); return o; };
+// SERA Anhang 3 / ICAO Annex 2 Anhang 3, Tabellen a (RVSM) und b (ohne RVSM)
+function flLevels(east, rule, rvsm) {
+  if (rule === 'ifr') return east
+    ? [...range(10, 290, 20), ...(rvsm ? [...range(310, 410, 20), 450, 490] : [330, 370, 410, 450, 490])]
+    : [...range(20, 280, 20), ...(rvsm ? [...range(300, 400, 20), 430, 470, 510] : [310, 350, 390, 430, 470, 510])];
+  return east ? [...range(35, 275, 20), ...(rvsm ? [] : [300, 340, 380, 420, 460, 500])] : [...range(45, 285, 20), ...(rvsm ? [] : [320, 360, 400, 440, 480, 520])];
+}
+const f3 = n => String(n).padStart(3, '0');
+const tpl = (k, v) => T(k).replace(/\{(\w+)\}/g, (_, n) => v[n]);
+const segBtn = (items, get, set) => { const s = el('div', 'seg'); const draw = () => { s.innerHTML = ''; for (const [v, l] of items) { const b = el('button', '', l); b.setAttribute('aria-pressed', get() === v); b.onclick = () => { set(v); draw(); }; s.append(b); } }; draw(); return s; };
+function renderFl() {
+  flEl.innerHTML = '';
+  flEl.append(el('div', 'eyebrow', T('module') + ' 3'), el('h2', '', T('flT')), el('p', 'muted', T('flP')));
+  /* --- Halbkreisregel --- */
+  const g = el('div', 'flgrid');
+  const left = el('div', 'card'); left.style.gap = '14px';
+  const lab = el('label', 'f'); const rng = document.createElement('input'); rng.type = 'range'; rng.min = 0; rng.max = 359; rng.step = 1; rng.value = fs.trk;
+  const compass = svgEl('svg', {viewBox: '0 0 240 240', class: 'compass'});
+  const out = el('div', 'card'); out.style.gap = '12px';
+  const upd = () => {
+    const east = fs.trk < 180;
+    lab.firstChild.textContent = `${T('flTrk')}: ${f3(fs.trk)}°`;
+    rng.value = fs.trk;
+    drawCompass(compass, east);
+    out.innerHTML = '';
+    const lv = flLevels(east, fs.rule, fs.rvsm);
+    const head = el('div', 'flhead' + (east ? ' e' : ' w'));
+    head.append(el('div', 'big', east ? T('flEast') : T('flWest')), el('div', 'muted', (east ? T('flEastR') : T('flWestR')) + ' · ' + T(fs.rule === 'ifr' ? (east ? 'flOddI' : 'flEvenI') : (east ? 'flOddV' : 'flEvenV'))));
+    out.append(head, el('div', 'eyebrow', T('flAllowed')));
+    for (const [k, f] of [['flLow', x => x <= 290], ['flRv', x => x > 290 && x <= 410], ['flHigh', x => x > 410]]) {
+      const row = el('div', 'flrow'); row.append(el('span', 'hint', T(k)));
+      const chips = el('div', 'flchips'); const part = lv.filter(f);
+      if (!part.length) chips.append(el('span', 'muted', T('flNone'))); else for (const x of part) chips.append(el('span', 'fl', 'FL ' + f3(x)));
+      row.append(chips); out.append(row);
+    }
+    out.append(el('div', 'eyebrow', T('flLadder')), flLadder(east));
+  };
+  lab.append(document.createTextNode(''), rng); rng.oninput = () => { fs.trk = +rng.value; upd(); };
+  const drag = e => { const r = compass.getBoundingClientRect(); const a = Math.atan2(e.clientX - (r.left + r.width / 2), -(e.clientY - (r.top + r.height / 2))) * 180 / Math.PI; fs.trk = Math.round((a + 360) % 360) % 360; upd(); };
+  compass.addEventListener('pointerdown', e => { compass.setPointerCapture(e.pointerId); compass.dataset.drag = 1; drag(e); });
+  compass.addEventListener('pointermove', e => { if (compass.dataset.drag) drag(e); });
+  for (const ev of ['pointerup', 'pointercancel']) compass.addEventListener(ev, () => { delete compass.dataset.drag; });
+  const fr = el('div', 'f'); fr.append(el('span', '', T('flRule')), segBtn([['ifr', 'IFR'], ['vfr', 'VFR']], () => fs.rule, v => { fs.rule = v; upd(); }));
+  const fy = el('div', 'f'); fy.append(el('span', '', T('flSys')), segBtn([[true, T('flRvsm')], [false, T('flNon')]], () => fs.rvsm, v => { fs.rvsm = v; upd(); }));
+  left.append(compass, el('div', 'hint', T('flDrag')), lab, fr, fy);
+  g.append(left, out); flEl.append(g); upd();
+  const memo = el('div', 'card'); memo.append(el('h3', '', T('flMemoT'))); const ul = el('ul', 'bul'); for (const m of T('flMemo')) ul.append(el('li', '', m)); memo.append(ul); flEl.append(memo);
+  flEl.append(flQuiz());
+  /* --- Transition --- */
+  const tc = el('div', 'card'); tc.style.gap = '14px'; tc.append(el('h3', '', T('tlT')), el('p', 'muted', T('tlP')));
+  const tg = el('div', 'flgrid'); const tf = el('div', ''); tf.style.cssText = 'display:flex;flex-direction:column;gap:14px'; const to = el('div', ''); to.style.cssText = 'display:flex;flex-direction:column;gap:10px';
+  const lta = el('label', 'f', T('tlTa')); const sta = document.createElement('select'); for (const v of [3000, 4000, 5000, 6000, 7000, 10000, 18000]) { const o = el('option', '', v + ' ft'); o.value = v; o.selected = v === fs.ta; sta.append(o); } lta.append(sta);
+  const lq = el('label', 'f'); const rq = document.createElement('input'); rq.type = 'range'; rq.min = 950; rq.max = 1050; rq.step = 1; rq.value = fs.qnh; lq.append(document.createTextNode(''), rq);
+  const fk = el('div', 'f'); fk.append(el('span', '', T('tlK')), segBtn([[27, '27 ft/hPa'], [30, '30 ft/hPa']], () => fs.k, v => { fs.k = v; updT(); }));
+  const lm = el('label', 'chk'); const cm = document.createElement('input'); cm.type = 'checkbox'; cm.checked = fs.min; lm.append(cm, document.createTextNode(' ' + T('tlMin')));
+  const updT = () => {
+    lq.firstChild.textContent = `${T('tlQnh')}: ${fs.qnh} hPa`;
+    const pa = Math.round(fs.ta + (1013 - fs.qnh) * fs.k);
+    let tl = Math.ceil((pa + (fs.min ? 1000 : 0)) / 1000) * 10; if (!fs.min && tl * 100 <= pa) tl += 10;
+    const layer = tl * 100 - pa;
+    to.innerHTML = '';
+    const res = el('div', 'res');
+    for (const [k, v] of [['tlPa', pa.toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ft'], ['tlTl', 'FL ' + f3(tl)], ['tlLayer', layer.toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ft']]) { const c = el('div', 'card'); c.append(el('span', 'eyebrow', T(k)), el('div', 'big', v)); if (k === 'tlTl') c.lastChild.classList.add('acc'); res.append(c); }
+    to.append(res, tlSvg(pa, tl), el('div', 'hint', T('tlHow') + ` (1013 − ${fs.qnh}) × ${fs.k} = ${(1013 - fs.qnh) * fs.k} ft.`));
+  };
+  sta.onchange = () => { fs.ta = +sta.value; updT(); }; rq.oninput = () => { fs.qnh = +rq.value; updT(); }; cm.onchange = () => { fs.min = cm.checked; updT(); };
+  tf.append(lta, lq, fk, lm); const ul2 = el('ul', 'bul'); for (const m of T('tlRules')) ul2.append(el('li', '', m)); tf.append(ul2);
+  tg.append(tf, to); tc.append(tg); flEl.append(tc); updT();
+}
+function drawCompass(s, east) {
+  s.innerHTML = '';
+  const c = 120, R = 98, pt = (deg, r) => [c + r * Math.sin(deg * Math.PI / 180), c - r * Math.cos(deg * Math.PI / 180)];
+  s.append(svgEl('path', {d: `M${c} ${c - R} A${R} ${R} 0 0 1 ${c} ${c + R} Z`, class: 'half e' + (east ? ' on' : '')}), svgEl('path', {d: `M${c} ${c + R} A${R} ${R} 0 0 1 ${c} ${c - R} Z`, class: 'half w' + (east ? '' : ' on')}));
+  s.append(svgEl('circle', {cx: c, cy: c, r: R, fill: 'none', stroke: 'var(--line)', 'stroke-width': 2}));
+  for (let d = 0; d < 360; d += 10) { const [x1, y1] = pt(d, R), [x2, y2] = pt(d, R - (d % 30 ? 5 : 10)); s.append(svgEl('line', {x1, y1, x2, y2, stroke: 'var(--muted)', 'stroke-width': d % 30 ? 1 : 2})); }
+  for (const [d, l] of [[0, 'N'], [90, 'E'], [180, 'S'], [270, 'W']]) { const [x, y] = pt(d, R + 12); s.append(svgEl('text', {x, y: y + 4, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: 'var(--fg)'}, l)); }
+  for (const d of [30, 60, 120, 150, 210, 240, 300, 330]) { const [x, y] = pt(d, R - 22); s.append(svgEl('text', {x, y: y + 4, 'text-anchor': 'middle', 'font-size': 10, fill: 'var(--muted)'}, f3(d))); }
+  s.append(svgEl('text', {x: c + 48, y: c + 4, 'text-anchor': 'middle', 'font-size': 11, 'font-weight': 700, class: 'lbl e' + (east ? ' on' : '')}, fs.rule === 'ifr' ? '1 3 5 7' : '35 55 75'), svgEl('text', {x: c - 48, y: c + 4, 'text-anchor': 'middle', 'font-size': 11, 'font-weight': 700, class: 'lbl w' + (east ? '' : ' on')}, fs.rule === 'ifr' ? '2 4 6 8' : '45 65 85'));
+  const n = svgEl('g', {transform: `rotate(${fs.trk} ${c} ${c})`, class: 'needle'});
+  n.append(svgEl('line', {x1: c, y1: c + 26, x2: c, y2: c - R + 14, 'stroke-width': 4, 'stroke-linecap': 'round'}), svgEl('path', {d: `M${c} ${c - R + 2} l9 18 l-18 0 z`}), svgEl('circle', {cx: c, cy: c, r: 6}));
+  s.append(n);
+}
+function flLadder(east) {
+  const W = 340, H = 470, top = 14, bot = 14, y = f => H - bot - f / 520 * (H - top - bot);
+  const s = svgEl('svg', {viewBox: `0 0 ${W} ${H}`, class: 'ladder'});
+  if (fs.rvsm) { s.append(svgEl('rect', {x: 0, y: y(410), width: W, height: y(290) - y(410), class: 'band'}), svgEl('text', {x: W / 2, y: y(410) - 4, 'text-anchor': 'middle', 'font-size': 9, class: 'bandt'}, T('flBand'))); }
+  s.append(svgEl('line', {x1: W / 2, y1: top, x2: W / 2, y2: H - bot, stroke: 'var(--line)', 'stroke-width': 2}));
+  s.append(svgEl('text', {x: W / 2 + 60, y: 10, 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 700, class: 'lbl e' + (east ? ' on' : '')}, T('flEast') + ' →'), svgEl('text', {x: W / 2 - 60, y: 10, 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 700, class: 'lbl w' + (east ? '' : ' on')}, '← ' + T('flWest')));
+  for (const side of [true, false]) {
+    const on = side === east, dir = side ? 1 : -1;
+    for (const f of flLevels(side, fs.rule, fs.rvsm)) {
+      const yy = y(f);
+      s.append(svgEl('line', {x1: W / 2 + dir * 4, y1: yy, x2: W / 2 + dir * 46, y2: yy, class: 'rung ' + (side ? 'e' : 'w') + (on ? ' on' : ''), 'stroke-width': on ? 3 : 2, 'stroke-linecap': 'round'}));
+      s.append(svgEl('text', {x: W / 2 + dir * 52, y: yy + 3, 'text-anchor': side ? 'start' : 'end', 'font-size': 9, class: 'lbl ' + (side ? 'e' : 'w') + (on ? ' on' : '')}, 'FL ' + f3(f)));
+    }
+  }
+  return s;
+}
+function tlSvg(pa, tl) {
+  const W = 520, H = 230, s = svgEl('svg', {viewBox: `0 0 ${W} ${H}`}); s.style.width = '100%';
+  const lo = Math.max(0, pa - 2500), hi = tl * 100 + 1800, y = v => H - 24 - (v - lo) / (hi - lo) * (H - 44);
+  s.append(svgEl('rect', {x: 0, y: 0, width: W, height: H, rx: 10, fill: 'var(--sky)'}));
+  s.append(svgEl('rect', {x: 0, y: y(tl * 100), width: W, height: y(pa) - y(tl * 100), class: 'band'}));
+  s.append(svgEl('line', {x1: 0, y1: y(pa), x2: W, y2: y(pa), stroke: 'var(--warn)', 'stroke-width': 2}), svgEl('text', {x: 10, y: y(pa) + 15, 'font-size': 12, 'font-weight': 700, fill: 'var(--warn)'}, `TA ${fs.ta} ft`));
+  s.append(svgEl('line', {x1: 0, y1: y(tl * 100), x2: W, y2: y(tl * 100), stroke: 'var(--accent)', 'stroke-width': 2}), svgEl('text', {x: 10, y: y(tl * 100) - 6, 'font-size': 12, 'font-weight': 700, fill: 'var(--accent)'}, 'TL  FL ' + f3(tl)));
+  s.append(svgEl('text', {x: W / 2, y: (y(pa) + y(tl * 100)) / 2 + 4, 'text-anchor': 'middle', 'font-size': 11, class: 'bandt'}, `${T('tlSvgLayer')} ${tl * 100 - pa} ft`));
+  s.append(svgEl('text', {x: W - 10, y: H - 8, 'text-anchor': 'end', 'font-size': 12, fill: 'var(--muted)'}, T('tlSvgAlt') + ' ' + fs.qnh + ' hPa'), svgEl('text', {x: W - 10, y: 16, 'text-anchor': 'end', 'font-size': 12, fill: 'var(--muted)'}, T('tlSvgFl')));
+  s.append(svgEl('path', {d: `M${W * .2} ${H - 30} L${W * .8} ${22}`, stroke: 'var(--fg)', 'stroke-width': 1.5, 'stroke-dasharray': '5 5', fill: 'none', opacity: .5}));
+  return s;
+}
+function flQuiz() {
+  const box = el('div', 'card'); box.style.gap = '12px';
+  const next = () => {
+    const trk = Math.floor(Math.random() * 360), rule = Math.random() < .65 ? 'ifr' : 'vfr', rvsm = Math.random() < .6, east = trk < 180;
+    const pick = (a, n) => a.slice().sort(() => Math.random() - .5).slice(0, n);
+    const good = pick(flLevels(east, rule, rvsm).filter(x => x >= 50), 1)[0];
+    const near = x => Math.abs(x - good) <= 90 && x !== good;
+    const wrongPool = [...flLevels(!east, rule, rvsm), ...flLevels(east, rule === 'ifr' ? 'vfr' : 'ifr', false), ...flLevels(!east, rule === 'ifr' ? 'vfr' : 'ifr', false), ...flLevels(east, rule, !rvsm)].filter(x => !flLevels(east, rule, rvsm).includes(x));
+    const opp = pick(flLevels(!east, rule, rvsm).filter(near), 2);
+    const wrong = [...opp, ...pick([...new Set(wrongPool.filter(near))].filter(x => !opp.includes(x)), 3 - opp.length)];
+    fs.quiz = {trk, rule, rvsm, east, good, opts: pick([good, ...wrong], 4), sel: null};
+    draw();
+  };
+  const draw = () => {
+    const q = fs.quiz; box.innerHTML = '';
+    const hd = el('div', ''); hd.style.cssText = 'display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap'; hd.append(el('h3', '', T('fqT')), el('span', 'hint', tpl('fqScore', {r: fs.score[0], n: fs.score[1]}))); box.append(hd);
+    box.append(el('div', 'fqq', tpl('fqQ', {t: f3(q.trk), r: q.rule.toUpperCase(), s: ', ' + (q.rvsm ? T('flRvsm') : T('flNon'))})));
+    const row = el('div', 'fqopts');
+    for (const o of q.opts) { const b = el('button', 'btn-s', 'FL ' + f3(o)); if (q.sel != null) { b.disabled = true; if (o === q.good) b.classList.add('good'); else if (o === q.sel) b.classList.add('bad'); } b.onclick = () => { q.sel = o; fs.score[1]++; if (o === q.good) fs.score[0]++; draw(); }; row.append(b); }
+    box.append(row);
+    if (q.sel != null) {
+      const ok = q.sel === q.good; const fb = el('div', ok ? 'ok' : 'no'); fb.style.fontWeight = 600; fb.textContent = (ok ? T('fqOk') : T('fqNo')) + ' ' + tpl(q.east ? 'fqWhyE' : 'fqWhyW', {t: f3(q.trk)}) + ' ' + T(q.rule === 'ifr' ? (q.east ? 'flOddI' : 'flEvenI') : (q.east ? 'flOddV' : 'flEvenV')) + ': FL ' + f3(q.good) + '.';
+      const nb = el('button', 'btn', T('fqNext')); nb.style.alignSelf = 'flex-start'; nb.onclick = next; box.append(fb, nb);
+    }
+  };
+  if (fs.quiz) draw(); else next();
+  return box;
+}
+
 const vmcEl = $('#vmc');
 const vs = {cls:'G', alt:1500, ref:'amsl', spd:120, type:'aeroplane'};
 function vmcCalc() {
@@ -1724,7 +1946,7 @@ function vmcSvg(r) {
 document.documentElement.lang = LANG;
 renderAll();
 const v0 = location.hash.slice(1);
-go(['home','air','vmc','soon'].includes(v0) ? v0 : 'home');
+go(['home','air','vmc','fl','soon'].includes(v0) ? v0 : 'home');
 })();
 </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(r=>{r.update();const show=()=>{if(document.getElementById('upd'))return;const t=document.createElement('div');t.id='upd';t.style.cssText='position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#17202b;color:#fff;padding:10px 14px;border-radius:8px;z-index:50;display:flex;gap:12px;align-items:center;font:600 14px Barlow,system-ui';const s=document.createElement('span');s.textContent='Update geladen.';const b=document.createElement('button');b.textContent='Jetzt aktualisieren';b.style.cssText='font:inherit;padding:6px 10px;border-radius:6px;border:0;background:#4fb3d6;color:#0b1218';b.onclick=()=>{if(r.waiting)r.waiting.postMessage('skip');location.reload();};t.append(s,b);document.body.append(t);};if(r.waiting)show();r.addEventListener('updatefound',()=>{const w=r.installing;w&&w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)show();});});});}</script></body></html>
+<script>if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)location.reload();});navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update().catch(()=>{});}).catch(()=>{});}</script></body></html>
