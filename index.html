@@ -157,6 +157,17 @@ label.chk{display:flex;gap:8px;align-items:center;font-weight:500}
 .zoomer .x{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:12px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:1.3rem;line-height:1;display:grid;place-items:center}
 .zoomer .hint{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));text-align:center;color:rgba(255,255,255,.6);font-size:.78rem;pointer-events:none}
 @media (prefers-reduced-motion:reduce){.fig,.fig img,.fig::before,.zoomer,.zoomer img{transition:none;animation:none}}
+.builder{gap:14px;border-left:4px solid var(--accent)}
+.builder .line{display:flex;gap:8px 12px;flex-wrap:wrap;align-items:center}
+.builder .lab{flex:0 0 74px;font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.builder .chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:999px;padding:7px 13px;font-size:.88rem;font-weight:600;transition:background .15s,border-color .15s,color .15s,transform .1s;-webkit-tap-highlight-color:transparent}
+.chip:active{transform:scale(.96)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.chip small{font-family:var(--mono);font-weight:500;opacity:.75;margin-left:5px}
+.builder .foot{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding-top:12px}
+@media (max-width:560px){.builder .lab{flex-basis:100%}.builder .foot .btn-p{width:100%}}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:500;z-index:20;max-width:90vw}
 @media (prefers-reduced-motion:no-preference){.card.btn:active{transform:scale(.99)}}
 </style>
@@ -228,6 +239,10 @@ ksh: { weak:'Schwachstelle', weakHint:'De Froore met de miehste Fähler en däm 
  nothing:'Nix dran. All Kaate he sin en Arbeit un noch nit widder fällich.', whole:'Janze Fach', done:'Rund eröm', good:'Joot', hard:'Schwer', again:'Nochens', nextrun:'Nächste Rund', endrun:'Rund beende', cardof:'Kaat {i} vun {n}', box:'Kaste {b}', new:'neu', reveal:'Antwoot zeije', answer:'Antwoot', today:'hück widder', stays:'Kaste bliev', learnedS:'jelernt', inDays:'en {d} {u}', day:'Daach', days:'Dääch',
  statsTitle:'Zahle', statsSub:'{l} vun {t} Kaate jelernt (Kaste 3 oder höher)', subject:'Fach', inwork:'En Arbeit', tests:'Tesse', avg:'Ø Erjebnis', best:'Bess', lasttests:'Letzte Tesse', date:'Datum', notests:'Noch keine Tess jemaat. Maach e Fach op un fang ene Tess us enem PT aan.', passed:'bestande', failed:'nit bestande', pt:'PT'}
 };
+Object.assign(I18N.de, {custom:'Eigener Test', customHint:'Stell dir deinen Durchgang selbst zusammen: Progress Tests, Filter, Anzahl und Modus.', cbFrom:'Aus', cbAllPt:'Alle PTs', cbFilter:'Fragen', cbAll:'Alle', cbPic:'Mit Bild', cbMarked:'★ Markiert', cbWrong:'Mit Fehlern', cbNew:'Neu', cbCount:'Anzahl', cbMode:'Modus', cbTest:'Test', cbCards:'Karteikarten', cbStartT:'Test starten ({n} Fragen)', cbStartC:'Karten starten ({n})', cbMatch:'{n} Fragen passen', cbMcOnly:', davon {m} Multiple Choice für den Testmodus', cbNone:'Keine Frage passt zu dieser Auswahl.', customPt:'{c} Eigener Test', picN:'{n} mit Bild', picQuick:'Nur Bildfragen ({n})'});
+Object.assign(I18N.en, {custom:'Custom test', customHint:'Build your own run: progress tests, filters, number of questions and mode.', cbFrom:'From', cbAllPt:'All PTs', cbFilter:'Questions', cbAll:'All', cbPic:'With figure', cbMarked:'★ Flagged', cbWrong:'With mistakes', cbNew:'New', cbCount:'Number', cbMode:'Mode', cbTest:'Test', cbCards:'Flashcards', cbStartT:'Start test ({n} questions)', cbStartC:'Start cards ({n})', cbMatch:'{n} questions match', cbMcOnly:', {m} of them multiple choice for test mode', cbNone:'No question matches this selection.', customPt:'{c} Custom test', picN:'{n} with figure', picQuick:'Figure questions only ({n})'});
+Object.assign(I18N.fr, {custom:'Test personnalisé', customHint:'Compose ta propre série : progress tests, filtres, nombre de questions et mode.', cbFrom:'Source', cbAllPt:'Tous les PT', cbFilter:'Questions', cbAll:'Toutes', cbPic:'Avec figure', cbMarked:'★ Marquées', cbWrong:'Avec erreurs', cbNew:'Nouvelles', cbCount:'Nombre', cbMode:'Mode', cbTest:'Test', cbCards:'Cartes', cbStartT:'Lancer le test ({n} questions)', cbStartC:'Lancer les cartes ({n})', cbMatch:'{n} questions correspondent', cbMcOnly:', dont {m} à choix multiple pour le mode test', cbNone:'Aucune question ne correspond.', customPt:'{c} Test perso', picN:'{n} avec figure', picQuick:'Seulement les figures ({n})'});
+if (I18N.ksh) Object.assign(I18N.ksh, {custom:'Ding eije Tess', customHint:'Bau der dinge Durchjang selver zosamme: Tesse, Filter, Aanzahl un Aat.', cbFrom:'Us', cbAllPt:'All PTs', cbFilter:'Froore', cbAll:'All', cbPic:'Met Bildche', cbMarked:'★ Markeet', cbWrong:'Met Fähler', cbNew:'Neu', cbCount:'Aanzahl', cbMode:'Aat', cbTest:'Tess', cbCards:'Kaate', cbStartT:'Tess aanfange ({n} Froore)', cbStartC:'Kaate aanfange ({n})', cbMatch:'{n} Froore passe', cbMcOnly:', dovun {m} zom Aankrütze för dä Tess', cbNone:'Kein Froch pass dobei.', customPt:'{c} Eije Tess', picN:'{n} met Bildche', picQuick:'Nor Bildche ({n})'});
 let LANG = 'de';
 try { LANG = localStorage.getItem('atpl-lang') || (navigator.language.startsWith('fr') ? 'fr' : navigator.language.startsWith('de') ? 'de' : 'en'); } catch (e) {}
 if (!I18N[LANG]) LANG = 'de';
@@ -241,7 +256,7 @@ function renderNav() {
   $('#hdr-count').textContent = DATA ? DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ' + T('questions') : '';
 }
 
-const VERSION = '2026.11.11-0856';
+const VERSION = '2026.11.11-1000';
 $('#ver').textContent = 'v' + VERSION;
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
@@ -472,6 +487,7 @@ function renderSubject() {
           h('div', {class:'row', style:'justify-content:space-between'}, h('span', {class:'mono'}, q.key), h('span', {class:'tag fail'}, `${e[3]} ${T('errors')} · ${e[2]} ${T('correctS')}`)),
           h('div', {style:'font-size:.95rem'}, q.q.length > 140 ? q.q.slice(0, 137) + '…' : q.q)); })) : null);
     })(),
+    customBuilder(s),
     h('h3', {}, T('pts')),
     h('div', {class:'pt-list'}, s.tests.map(t => {
       const mc = t.q.filter(q => q.o.length > 1).length;
@@ -480,7 +496,7 @@ function renderSubject() {
       return h('div', {class:'pt'},
         h('div', {class:'info'},
           h('div', {class:'name'}, t.id),
-          h('div', {class:'stats'}, h('span', {}, h('strong', {}, t.q.length), ' ' + T('questions')), h('span', {}, h('strong', {}, mc), ' ' + T('mc')), h('span', {}, h('strong', {}, ts.learned), ' ' + T('learned')), h('span', {}, h('strong', {}, ts.due), ' ' + T('due')),
+          h('div', {class:'stats'}, h('span', {}, h('strong', {}, t.q.length), ' ' + T('questions')), h('span', {}, h('strong', {}, mc), ' ' + T('mc')), (np => np ? h('span', {}, '🖼 ', T('picN', {n: np})) : null)(t.q.filter(q => q.pics && q.pics.length).length), h('span', {}, h('strong', {}, ts.learned), ' ' + T('learned')), h('span', {}, h('strong', {}, ts.due), ' ' + T('due')),
             last && h('span', {}, T('lasttest') + ' ', h('strong', {style: last.pct >= PASS ? 'color:var(--good)' : 'color:var(--bad)'}, Math.round(last.pct) + ' %')))),
         h('div', {class:'acts'},
           h('button', {class:'btn-p', disabled: mc === 0, onclick: () => startExam(s, t)}, T('test', {n: Math.min(TEST_N, mc)})),
@@ -489,10 +505,46 @@ function renderSubject() {
     h('p', {class:'note'}, T('testhint')));
 }
 
+/* ---------- Eigener Test ---------- */
+let cb = null;
+function customBuilder(s) {
+  if (!cb || cb.code !== s.code) cb = {code: s.code, pts: new Set(), pic: false, status: 'all', n: 20, mode: 'test'};
+  const box = h('div', {class:'card builder'});
+  const draw = () => {
+    const started = q => { const e = entry(s.code, q.key); return e && (e[0] > 0 || e[2] > 0 || e[3] > 0); };
+    const inPt = s.all.filter(q => !cb.pts.size || cb.pts.has(q.tid));
+    const byStatus = {all: () => true, marked: q => isMarked(s.code, q.key), wrong: q => { const e = entry(s.code, q.key); return e && e[3] > 0; }, fresh: q => !started(q)};
+    const base = inPt.filter(q => !cb.pic || (q.pics && q.pics.length));
+    const pool = base.filter(byStatus[cb.status]);
+    const mc = pool.filter(q => q.o.length > 1);
+    const usable = cb.mode === 'test' ? mc : pool;
+    const n = cb.n === 0 ? usable.length : Math.min(cb.n, usable.length);
+    const chip = (label, on, fn, extra, dis) => h('button', {class:'chip', 'aria-pressed': on, disabled: dis, onclick: () => { fn(); draw(); }}, label, extra != null ? h('small', {}, extra) : null);
+    const line = (lab, ...kids) => h('div', {class:'line'}, h('span', {class:'lab'}, lab), h('div', {class:'chips'}, kids.flat()));
+    box.replaceChildren(
+      h('div', {}, h('h3', {}, T('custom')), h('div', {class:'note'}, T('customHint'))),
+      line(T('cbFrom'), chip(T('cbAllPt'), !cb.pts.size, () => cb.pts.clear()),
+        s.tests.map(t => chip(t.id.replace(s.code + '-', ''), cb.pts.has(t.id), () => { cb.pts.has(t.id) ? cb.pts.delete(t.id) : cb.pts.add(t.id); if (cb.pts.size === s.tests.length) cb.pts.clear(); }, cb.pic ? t.q.filter(q => q.pics && q.pics.length).length : t.q.length))),
+      line(T('cbFilter'),
+        chip('🖼 ' + T('cbPic'), cb.pic, () => { cb.pic = !cb.pic; }, inPt.filter(q => q.pics && q.pics.length).length),
+        [['all', T('cbAll')], ['marked', T('cbMarked')], ['wrong', T('cbWrong')], ['fresh', T('cbNew')]].map(([k, l]) => chip(l, cb.status === k, () => { cb.status = k; }, base.filter(byStatus[k]).length))),
+      line(T('cbCount'), [10, 20, 45, 0].map(k => chip(k === 0 ? T('cbAll') : String(k), cb.n === k, () => { cb.n = k; }))),
+      line(T('cbMode'), chip(T('cbTest'), cb.mode === 'test', () => { cb.mode = 'test'; }), chip(T('cbCards'), cb.mode === 'cards', () => { cb.mode = 'cards'; })),
+      h('div', {class:'foot'},
+        h('span', {class:'note'}, pool.length ? T('cbMatch', {n: pool.length}) + (cb.mode === 'test' && mc.length !== pool.length ? T('cbMcOnly', {m: mc.length}) : '') : T('cbNone')),
+        h('button', {class:'btn-p', disabled: n === 0, onclick: () => {
+          if (cb.mode === 'test') startExam(s, {id: T('customPt', {c: s.code}), q: mc, n, custom: true});
+          else startCards(s, pool, T('custom'), 'all', n);
+        }}, T(cb.mode === 'test' ? 'cbStartT' : 'cbStartC', {n}))));
+  };
+  draw();
+  return box;
+}
+
 /* ---------- Testmodus ---------- */
 let exam = null;
 function startExam(s, t) {
-  const pool = shuffle(t.q.filter(q => q.o.length > 1)).slice(0, TEST_N);
+  const pool = shuffle(t.q.filter(q => q.o.length > 1)).slice(0, t.n || TEST_N);
   const items = pool.map(q => {
     const order = shuffle(q.o.map((_, i) => i));
     return {q, order, sel: new Set(), flag: isMarked(s.code, q.key), multi: q.a.length > 1};
@@ -737,7 +789,7 @@ try { showCount = localStorage.getItem('atpl-showcount') !== '0'; } catch (e) {}
 function setShowCount(v) { showCount = v; try { localStorage.setItem('atpl-showcount', v ? '1' : '0'); } catch (e) {} render(); }
 let cardMode = 'reveal';
 try { cardMode = localStorage.getItem('atpl-cardmode') || 'reveal'; } catch (e) {}
-function startCards(s, questions, label, filter = 'due') {
+function startCards(s, questions, label, filter = 'due', limit = 40) {
   const now = Date.now();
   const started = q => { const e = entry(s.code, q.key); return e && (e[0] > 0 || e[2] > 0 || e[3] > 0); };
   let queue;
@@ -750,7 +802,7 @@ function startCards(s, questions, label, filter = 'due') {
     const fresh = shuffle(questions.filter(q => !started(q)));
     queue = [...due, ...fresh];
   }
-  queue = queue.slice(0, 40);
+  queue = queue.slice(0, limit);
   if (!queue.length) { toast(T('nothing')); return; }
   sess = {s, label, queue, src: questions, filter, i: 0, open: false, sel: new Set(), grades: [0,0,0], order: null, done: false};
   go('cards');
