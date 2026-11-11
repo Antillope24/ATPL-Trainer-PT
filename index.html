@@ -220,7 +220,7 @@ function renderNav() {
   $('#hdr-count').textContent = DATA ? DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ' + T('questions') : '';
 }
 
-const VERSION = '2026.11.10-1415';
+const VERSION = '2026.11.11-0848';
 $('#ver').textContent = 'v' + VERSION;
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
@@ -626,13 +626,22 @@ function renderSearch() {
   const out = $('#search-out'); if (!out) return;
   out.innerHTML = '';
   const q = searchQ.trim(); if (q.length < 2) return;
-  const idm = q.toUpperCase().replace(/\s+/g, '').match(/^([A-Z0-9]+-PT\d+)#?(\d+)?$/);
+  // Nummernsuche: "MET-PT02 #67", "met pt2 67", "PT02 67", "LAW PT3"
+  const idm = q.toUpperCase().match(/^\s*([A-Z]{2,5})?\s*-?\s*(?:PT|P)\s*-?\s*0*(\d{1,2})\s*(?:[#\s.:]\s*0*(\d{1,3}))?\s*$/);
   let hits = [];
   if (idm) {
-    for (const [k, qq] of QBYKEY) if (k.startsWith(idm[1] + '#') && (!idm[2] || k === idm[1] + '#' + idm[2])) hits.push(qq);
+    const sub = idm[1] ? (idm[1] === 'INST' ? 'INST1' : idm[1] === 'PF' ? 'POF' : idm[1]) : null;
+    const pt = 'PT' + String(idm[2]).padStart(2, '0');
+    for (const [k, qq] of QBYKEY) {
+      const [tid, num] = k.split('#');
+      if (!tid.endsWith('-' + pt)) continue;
+      if (sub && !tid.startsWith(sub + '-')) continue;
+      if (idm[3] && num !== idm[3]) continue;
+      hits.push(qq);
+    }
   } else {
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
-    for (const qq of QBYKEY.values()) { const t = (qq.q + ' ' + qq.o.join(' ')).toLowerCase(); if (words.every(w => t.includes(w))) hits.push(qq); }
+    for (const qq of QBYKEY.values()) { const t = (qq.key + ' ' + qq.q + ' ' + qq.o.join(' ')).toLowerCase(); if (words.every(w => t.includes(w))) hits.push(qq); }
   }
   hits.sort((a, b) => a.key.localeCompare(b.key, undefined, {numeric: true}));
   out.append(h('div', {class:'note'}, hits.length ? T('results', {n: hits.length}) + (hits.length > 30 ? ', ' + T('showMore') : '') : T('noresults')));
