@@ -168,6 +168,14 @@ label.chk{display:flex;gap:8px;align-items:center;font-weight:500}
 .chip small{font-family:var(--mono);font-weight:500;opacity:.75;margin-left:5px}
 .builder .foot{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding-top:12px}
 @media (max-width:560px){.builder .lab{flex-basis:100%}.builder .foot .btn-p{width:100%}}
+.party{position:fixed;inset:0;width:100%;height:100%;z-index:60;pointer-events:none}
+.party-word{position:fixed;left:50%;top:38%;z-index:61;pointer-events:none;font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,11vw,6rem);letter-spacing:.03em;line-height:1;text-align:center;white-space:nowrap;color:#fff;-webkit-text-stroke:2px #c8102e;text-shadow:0 4px 0 #c8102e,0 10px 30px rgba(0,0,0,.45);transform:translate(-50%,-50%) scale(.3) rotate(-8deg);opacity:0;animation:pop 1.5s cubic-bezier(.2,1.4,.4,1) forwards}
+.party-word.big{font-size:clamp(3rem,14vw,8rem)}
+@media (max-width:560px){.party-word{white-space:normal;width:92vw}}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-8deg)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.08) rotate(-4deg)}30%{transform:translate(-50%,-50%) scale(1) rotate(-4deg)}75%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-4deg)}100%{opacity:0;transform:translate(-50%,-60%) scale(1.05) rotate(-4deg)}}
+@media (prefers-reduced-motion:reduce){.party-word{animation:popr 1.5s forwards;transform:translate(-50%,-50%)}@keyframes popr{0%,100%{opacity:0}15%,80%{opacity:1}}}
+.fest{background:var(--warn-soft);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-weight:600;display:flex;gap:10px;align-items:center}
+.fest span:first-child{font-size:1.4rem}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:500;z-index:20;max-width:90vw}
 @media (prefers-reduced-motion:no-preference){.card.btn:active{transform:scale(.99)}}
 </style>
@@ -256,7 +264,7 @@ function renderNav() {
   $('#hdr-count').textContent = DATA ? DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ' + T('questions') : '';
 }
 
-const VERSION = '2026.11.11-1000';
+const VERSION = '2026.11.11-1111';
 $('#ver').textContent = 'v' + VERSION;
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
@@ -441,8 +449,10 @@ function render() {
 
 function renderHome() {
   const total = DATA.subjects.reduce((n, s) => n + s.all.length, 0);
+  const fest = festive();
   app.append(
     greeting(),
+    fest && h('div', {class:'fest'}, h('span', {}, fest.emo[0]), h('span', {}, fest.note)),
     h('div', {class:'row', style:'justify-content:space-between'},
       h('div', {}, h('h2', {}, T('subjects')), h('div', {class:'note'}, T('qfrom', {n: total.toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE'), t: DATA.subjects.reduce((n,s)=>n+s.tests.length,0)}))),
       h('div', {class:'sync', id:'sync'})),
@@ -608,6 +618,7 @@ function finishExam() {
   const res = {ts: Date.now(), code: ex.s.code, pt: ex.t.id, n: ex.items.length, right, pct: right / ex.items.length * 100, dur: Math.round((Date.now() - ex.start) / 1000), wrong: ex.items.filter(it => !it.ok).map(it => it.q.key)};
   store.tests.push(res); if (store.tests.length > 300) store.tests = store.tests.slice(-300); store.save('tests'); logActivity(ex.items.length);
   ctx = {res}; view = 'result'; render(); window.scrollTo(0, 0);
+  if (res.pct >= PASS) celebrate(true);
 }
 function renderResult() {
   const ex = exam, r = ctx.res, pass = r.pct >= PASS;
@@ -859,7 +870,7 @@ function renderCards() {
       pics(q),
       mc && h('div', {class:'opts'}, optEls),
       !se.open
-        ? h('button', {class:'btn-p', style:'align-self:flex-start', disabled: answerMode && se.sel.size === 0, onclick: () => { se.open = true; render(); }}, answerMode ? T('check') : T('reveal'))
+        ? h('button', {class:'btn-p', style:'align-self:flex-start', disabled: answerMode && se.sel.size === 0, onclick: () => { se.open = true; render(); if (answerMode && q.a.join(',') === [...se.sel].sort((a,b)=>a-b).join(',')) celebrate(); }}, answerMode ? T('check') : T('reveal'))
         : h('div', {class:'answer'},
             h('div', {class:'row'}, h('span', {class:'eyebrow'}, T('answer')), correct != null && h('span', {class:'tag ' + (correct ? 'pass' : 'fail')}, correct ? T('ok') : T('wrong'))),
             h('div', {class:'a'}, mc ? q.a.map(ai => LET[se.order.indexOf(ai)] + ') ' + q.o[ai]).join('\n') : q.o[q.a[0]]),
@@ -867,7 +878,7 @@ function renderCards() {
               h('button', {class:'r0' + (correct === false ? ' suggest' : ''), onclick: () => grade(0)}, T('again'), h('small', {}, T('today'))),
               h('button', {class:'r1', onclick: () => grade(1)}, T('hard'), h('small', {}, T('stays'))),
               h('button', {class:'r2' + (correct === true ? ' suggest' : ''), onclick: () => grade(2)}, T('good'), h('small', {}, nextIn(started ? e : null)))))));
-  function grade(g) { rate(se.s.code, q.key, g); se.grades[g]++; if (g === 0) se.queue.push(q); se.i++; se.open = false; se.order = null; se.sel = new Set(); render(); window.scrollTo(0,0); }
+  function grade(g) { if (g === 2 && !answerMode) celebrate(); rate(se.s.code, q.key, g); se.grades[g]++; if (g === 0) se.queue.push(q); se.i++; se.open = false; se.order = null; se.sel = new Set(); render(); window.scrollTo(0,0); }
 }
 function setCardMode(m) { cardMode = m; try { localStorage.setItem('atpl-cardmode', m); } catch (e) {} sess.sel = new Set(); render(); }
 function nextIn(e) { const b = Math.min(MAXBOX, (e ? e[0] : 0) + 1); return b >= LEARNED ? T('learnedS') + ', ' + T('inDays', {d: INTERVALS[b], u: T('days')}) : T('inDays', {d: INTERVALS[b], u: INTERVALS[b] === 1 ? T('day') : T('days')}); }
@@ -899,6 +910,51 @@ function practiseWrong(t) {
   if (!qs.length) return;
   sess = {s, label: T('mistakesOf', {t: t.pt}), queue: shuffle(qs.slice()), src: qs, filter: 'all', i: 0, open: false, sel: new Set(), grades: [0,0,0], order: null, done: false};
   go('cards');
+}
+/* ---------- Feiertage: Konfetti bei richtigen Antworten ---------- */
+function easter(y) { const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), hh = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - hh - k) % 7, m = Math.floor((a + 11 * hh + 22 * l) / 451), mo = Math.floor((hh + l - 7 * m + 114) / 31), da = (hh + l - 7 * m + 114) % 31 + 1; return new Date(y, mo - 1, da); }
+function festive(now = new Date()) {
+  const d = now.getDate(), m = now.getMonth() + 1, day = new Date(now.getFullYear(), m - 1, d);
+  const off = Math.round((day - easter(now.getFullYear())) / DAY); // Tage relativ zu Ostersonntag
+  const L = (de, en, fr) => LANG === 'en' ? en : LANG === 'fr' ? fr : de;
+  if ((d === 11 && m === 11) || (off >= -52 && off <= -47)) return {id:'karneval', word:'ALAAF!', emo:['🎉','🤡','🎺','🎊'], col:['#e30613','#ffffff','#ffd500','#00963f','#0a5cff'], note: L('Kölle Alaaf! Heute regnet es Konfetti für jede richtige Antwort.', 'Kölle Alaaf! Carnival in Cologne: confetti for every correct answer today.', 'Kölle Alaaf ! Carnaval de Cologne : des confettis pour chaque bonne réponse.')};
+  if (d === 31 && m === 10) return {id:'halloween', word:'BOO!', emo:['🎃','👻','🦇','🕸️'], col:['#ff7a00','#6b2fbf','#111111','#9be564'], note: L('Happy Halloween! Richtige Antworten werden heute gruselig gefeiert.', 'Happy Halloween! Correct answers get a spooky party today.', 'Joyeux Halloween ! Les bonnes réponses sont fêtées aujourd’hui.')};
+  if (d === 6 && m === 12) return {id:'nikolaus', word:'HO HO HO!', emo:['🎅','🍫','🥾','⭐'], col:['#d4202a','#ffffff','#f2c230','#1f7a3d'], note: L('Nikolaus! Für richtige Antworten gibt es heute etwas in den Stiefel.', 'St Nicholas Day! Correct answers get a treat today.', 'Saint-Nicolas ! Une surprise pour chaque bonne réponse.')};
+  if (m === 12 && d >= 24 && d <= 26) return {id:'xmas', word: L('FROHE WEIHNACHTEN!', 'MERRY CHRISTMAS!', 'JOYEUX NOËL !'), emo:['🎄','❄️','⭐','🎁'], col:['#d4202a','#1f7a3d','#f2c230','#ffffff'], snow: true, note: L('Frohe Weihnachten! Heute schneit es bei jeder richtigen Antwort.', 'Merry Christmas! It snows for every correct answer today.', 'Joyeux Noël ! Il neige à chaque bonne réponse.')};
+  if (m === 12 && d === 31) return {id:'silvester', word: L('GUTEN RUTSCH!', 'HAPPY NEW YEAR!', 'BONNE ANNÉE !'), emo:['🎆','🥂','✨','🎇'], col:['#f2c230','#ffffff','#c0c7d1','#ff5ea8'], note: L('Silvester! Feuerwerk für jede richtige Antwort.', 'New Year’s Eve! Fireworks for every correct answer.', 'Saint-Sylvestre ! Un feu d’artifice pour chaque bonne réponse.')};
+  if (m === 1 && d === 1) return {id:'neujahr', word: L('FROHES NEUES!', 'HAPPY NEW YEAR!', 'BONNE ANNÉE !'), emo:['🎆','🥂','✨','🍀'], col:['#f2c230','#ffffff','#c0c7d1','#3fb37f'], note: L('Frohes neues Jahr! Der erste Lerntag wird gefeiert.', 'Happy New Year! The first study day gets a party.', 'Bonne année ! Le premier jour de révision se fête.')};
+  if (off === 0 || off === 1) return {id:'ostern', word: L('FROHE OSTERN!', 'HAPPY EASTER!', 'JOYEUSES PÂQUES !'), emo:['🐣','🥚','🐰','🌷'], col:['#ffd166','#9be7c4','#f7a8c8','#a8c8ff','#ffffff'], note: L('Frohe Ostern! Heute sind die richtigen Antworten versteckt wie Ostereier.', 'Happy Easter! Find the correct answers like Easter eggs.', 'Joyeuses Pâques ! Trouve les bonnes réponses comme des œufs.')};
+  return null;
+}
+let lastParty = 0;
+function celebrate(big) {
+  const f = festive(); if (!f) return;
+  const now = Date.now(); if (now - lastParty < 500) return; lastParty = now;
+  const word = h('div', {class:'party-word' + (big ? ' big' : '')}, f.word); document.body.append(word); setTimeout(() => word.remove(), 1500);
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv = h('canvas', {class:'party'}); document.body.append(cv);
+  const dpr = Math.min(2, window.devicePixelRatio || 1), W = innerWidth, H = innerHeight; cv.width = W * dpr; cv.height = H * dpr;
+  const c = cv.getContext('2d'); c.scale(dpr, dpr);
+  const n = big ? 220 : 120, P = [];
+  for (let i = 0; i < n; i++) {
+    const side = i % 2, emo = Math.random() < .12;
+    P.push(f.snow
+      ? {x: Math.random() * W, y: -20 - Math.random() * H * .5, vx: (Math.random() - .5) * 1.2, vy: 2 + Math.random() * 3, g: .01, r: Math.random() * 6, vr: (Math.random() - .5) * .2, s: emo ? 20 + Math.random() * 12 : 3 + Math.random() * 5, col: f.col[i % f.col.length], emo: emo ? f.emo[i % f.emo.length] : null, round: true}
+      : {x: side ? W + 10 : -10, y: H * (.55 + Math.random() * .35), vx: (side ? -1 : 1) * (5 + Math.random() * 13) * Math.max(.6, W / 900), vy: -(9 + Math.random() * 13), g: .38, r: Math.random() * 6, vr: (Math.random() - .5) * .5, s: emo ? 20 + Math.random() * 14 : 6 + Math.random() * 7, col: f.col[i % f.col.length], emo: emo ? f.emo[i % f.emo.length] : null, round: Math.random() < .3});
+  }
+  const t0 = performance.now(), dur = big ? 3200 : 2300;
+  (function frame(t) {
+    const k = (t - t0) / dur; if (k >= 1 || !cv.isConnected) { cv.remove(); return; }
+    c.clearRect(0, 0, W, H); c.globalAlpha = k > .75 ? (1 - k) / .25 : 1;
+    for (const p of P) {
+      p.vy += p.g; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      c.save(); c.translate(p.x, p.y); c.rotate(p.r);
+      if (p.emo) { c.font = p.s + 'px serif'; c.textAlign = 'center'; c.fillText(p.emo, 0, 0); }
+      else { c.fillStyle = p.col; if (p.round) { c.beginPath(); c.arc(0, 0, p.s / 2, 0, 7); c.fill(); } else c.fillRect(-p.s / 2, -p.s / 4 * Math.abs(Math.cos(p.r * 2)) - 1, p.s, p.s / 2 * Math.abs(Math.cos(p.r * 2)) + 2); }
+      c.restore();
+    }
+    requestAnimationFrame(frame);
+  })(t0);
 }
 function toast(msg) { const t = h('div', {class:'toast'}, msg); document.body.append(t); setTimeout(() => t.remove(), 3500); }
 
