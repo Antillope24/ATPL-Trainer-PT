@@ -122,6 +122,20 @@ input[type=range]{width:100%}
 .res .card{gap:4px}
 .ok{color:var(--good)}.no{color:var(--bad)}
 svg text{font-family:var(--body)}
+.hstage{position:relative;width:100%;height:min(420px,55vh);border-radius:12px;overflow:hidden;background:var(--sky);border:1px solid var(--line);touch-action:none}
+.hstage canvas{display:block}
+.vmode{position:fixed;inset:0;z-index:40;background:var(--sky)}
+.vmode[hidden]{display:none}
+.vmode .vst{position:absolute;inset:0;height:auto;border:0;border-radius:0}
+.vhud{position:absolute;top:max(12px,env(safe-area-inset-top,0px));left:16px;right:16px;font:600 clamp(14px,1.6vw,20px)/1.3 var(--display);color:var(--fg);background:rgba(255,255,255,.85);border-radius:10px;padding:8px 14px;pointer-events:none;width:max-content;max-width:calc(100% - 32px)}
+:root[data-theme="dark"] .vhud{background:rgba(24,33,43,.85)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .vhud{background:rgba(24,33,43,.85)}}
+.vcap{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(112px + env(safe-area-inset-bottom,0px));width:min(1100px,calc(100% - 32px));background:rgba(23,32,43,.88);color:#fff;border-radius:14px;padding:16px 22px;font:500 clamp(18px,2.4vw,30px)/1.3 var(--body);pointer-events:none;text-wrap:pretty}
+.vcap .vnum{display:block;font:700 .55em/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:#9fd8ea;margin-bottom:8px}
+.vbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 24px);opacity:0;transition:opacity .25s;pointer-events:none}
+.vbar.show{opacity:1;pointer-events:auto}
+body.video-on header,body.video-on main{visibility:hidden}
+
 </style>
 <header><div class="bar">
   <h1 id="h-title">Air Law Explorer</h1>
@@ -144,6 +158,7 @@ svg text{font-family:var(--body)}
   </section>
   <section class="view" id="v-vmc" hidden><div class="wrap" id="vmc"></div></section>
   <section class="view" id="v-fl" hidden><div class="wrap" id="fl"></div></section>
+  <section class="view" id="v-hold" hidden><div class="wrap" id="hold"></div></section>
   <section class="view" id="v-soon" hidden><div class="wrap" id="soon"></div></section>
 </main>
 
@@ -1200,11 +1215,11 @@ svg text{font-family:var(--body)}
 <script>
 const I18N = {
 de: {
-  lang:'Deutsch', title:'Air Law Explorer', start:'Start', mAir:'Luftraumklassen', mVmc:'VMC Rechner', mFl:'Flugflächen', mRow:'Ausweichregeln', mSig:'Signale', mLic:'Lizenzen', mIcao:'ICAO',
+  lang:'Deutsch', title:'Air Law Explorer', start:'Start', mAir:'Luftraumklassen', mVmc:'VMC Rechner', mFl:'Flugflächen', mHold:'Holding', mRow:'Ausweichregeln', mSig:'Signale', mLic:'Lizenzen', mIcao:'ICAO',
   soonT:'Kommt als Nächstes', soonP:'Dieses Modul ist geplant. Reihenfolge: Ausweichregeln, Signale, Lizenzen und Fristen, ICAO Struktur.',
   homeEyebrow:'ATPL 010 Air Law', homeT:'Nachschlagen, anschauen, verstehen', homeP:'Die trockenen Teile von Air Law als interaktive Werkzeuge. Jedes Modul ist für das iPad gebaut und läuft offline. Zum Üben der passenden Fragen geht es in den ATPL Progress Trainer.',
   module:'Modul', ready:'verfügbar', planned:'geplant', toTrainer:'Zum ATPL Progress Trainer',
-  mod:[['Luftraumklassen A bis G','ICAO Klassen und deutsche Struktur in 3D, Vergleichstabelle mit Freigabe, Staffelung, Funk, Transponder und VMC.'],['VMC Minima Rechner','Luftraum, Höhe und Geschwindigkeit einstellen, Flugsicht und Wolkenabstand ablesen, mit Skizze.'],['Flugflächen und Halbkreisregel','Kurs drehen, erlaubte Flugflächen sehen, Transition Altitude und Level, RVSM.'],['Ausweichregeln','Szenen von oben: wer weicht aus? Mit Positionslichtern bei Nacht.'],['Signale und Zeichen','Lichtsignale, Bodensignale, Abfangsignale, Marshalling.'],['Lizenzen, Medical, Fristen','Zeitleiste mit Gültigkeiten und Recency nach Part-FCL und Part-MED.'],['ICAO und Annexe','Chicago Convention, 19 Annexe, Freiheiten der Luft.']],
+  mod:[['Luftraumklassen A bis G','ICAO Klassen und deutsche Struktur in 3D, Vergleichstabelle mit Freigabe, Staffelung, Funk, Transponder und VMC.'],['VMC Minima Rechner','Luftraum, Höhe und Geschwindigkeit einstellen, Flugsicht und Wolkenabstand ablesen, mit Skizze.'],['Flugflächen und Halbkreisregel','Kurs drehen, erlaubte Flugflächen sehen, Transition Altitude und Level, RVSM.'],['Holding Explainer und Rechner','Einflug nach ICAO, Windkorrektur, Outbound Zeit, Schritt für Schritt mit deinen Werten erklärt, in 3D vorgeflogen, mit Video Modus zum Besprechen.'],['Ausweichregeln','Szenen von oben: wer weicht aus? Mit Positionslichtern bei Nacht.'],['Signale und Zeichen','Lichtsignale, Bodensignale, Abfangsignale, Marshalling.'],['Lizenzen, Medical, Fristen','Zeitleiste mit Gültigkeiten und Recency nach Part-FCL und Part-MED.'],['ICAO und Annexe','Chicago Convention, 19 Annexe, Freiheiten der Luft.']],
   germany:'Deutschland', icao:'ICAO A bis G', zones:'Zonen', data:'Daten', compare:'Vergleich', help:'Hilfe', close:'Panel schließen', fab:'Zonen und Daten',
   views:['Übersicht','Von vorn','Flughafen','TMZ + CTR','Alpen','Von oben'], viewsIcao:['Übersicht','Von vorn','Unten (E bis G)','Oben (A bis C)'],
   hintIcao:'Die sieben ICAO Klassen als Stapel, A oben, G unten (schematisch, nicht maßstäblich). Antippen zeigt die Regeln.', hintDe:'Antippen zeigt die Daten und fliegt die Kamera hin. Das Auge blendet die Zone aus.',
@@ -1226,11 +1241,11 @@ de: {
   k:{lower:'Untergrenze', upper:'Obergrenze', clr:'Freigabe', sep:'Staffelung', tx:'Transponder', vmc:'VMC', note:'Hinweis', radio:'Funk'},
 },
 en: {
-  lang:'English', title:'Air Law Explorer', start:'Home', mAir:'Airspace classes', mVmc:'VMC calculator', mFl:'Flight levels', mRow:'Right of way', mSig:'Signals', mLic:'Licences', mIcao:'ICAO',
+  lang:'English', title:'Air Law Explorer', start:'Home', mAir:'Airspace classes', mVmc:'VMC calculator', mFl:'Flight levels', mHold:'Holding', mRow:'Right of way', mSig:'Signals', mLic:'Licences', mIcao:'ICAO',
   soonT:'Coming next', soonP:'This module is planned. Order: right of way, signals, licences and validity, ICAO structure.',
   homeEyebrow:'ATPL 010 Air Law', homeT:'Look it up, see it, understand it', homeP:'The dry parts of Air Law as interactive tools. Every module is built for the iPad and works offline. To practise the matching questions, go to the ATPL Progress Trainer.',
   module:'Module', ready:'available', planned:'planned', toTrainer:'Open ATPL Progress Trainer',
-  mod:[['Airspace classes A to G','ICAO classes and the German structure in 3D, comparison table with clearance, separation, radio, transponder and VMC.'],['VMC minima calculator','Set airspace, altitude and speed, read flight visibility and cloud clearance, with a sketch.'],['Flight levels and semicircular rule','Turn the heading, see the allowed flight levels, transition altitude and level, RVSM.'],['Right of way','Scenes from above: who gives way? With navigation lights at night.'],['Signals','Light signals, ground signals, interception signals, marshalling.'],['Licences, medical, validity','Timeline with validity periods and recency under Part-FCL and Part-MED.'],['ICAO and annexes','Chicago Convention, 19 annexes, freedoms of the air.']],
+  mod:[['Airspace classes A to G','ICAO classes and the German structure in 3D, comparison table with clearance, separation, radio, transponder and VMC.'],['VMC minima calculator','Set airspace, altitude and speed, read flight visibility and cloud clearance, with a sketch.'],['Flight levels and semicircular rule','Turn the heading, see the allowed flight levels, transition altitude and level, RVSM.'],['Holding explainer and calculator','ICAO entry, wind correction, outbound time, explained step by step with your values, flown in 3D, with a video mode for voice-over.'],['Right of way','Scenes from above: who gives way? With navigation lights at night.'],['Signals','Light signals, ground signals, interception signals, marshalling.'],['Licences, medical, validity','Timeline with validity periods and recency under Part-FCL and Part-MED.'],['ICAO and annexes','Chicago Convention, 19 annexes, freedoms of the air.']],
   germany:'Germany', icao:'ICAO A to G', zones:'Zones', data:'Data', compare:'Compare', help:'Help', close:'Close panel', fab:'Zones and data',
   views:['Overview','From the front','Airport','TMZ + CTR','Alps','From above'], viewsIcao:['Overview','From the front','Lower (E to G)','Upper (A to C)'],
   hintIcao:'The seven ICAO classes as a stack, A on top, G at the bottom (schematic, not to scale). Tap to see the rules.', hintDe:'Tap to show the data and fly the camera there. The eye hides a zone.',
@@ -1252,11 +1267,11 @@ en: {
   k:{lower:'Lower limit', upper:'Upper limit', clr:'Clearance', sep:'Separation', tx:'Transponder', vmc:'VMC', note:'Note', radio:'Radio'},
 },
 fr: {
-  lang:'Français', title:'Air Law Explorer', start:'Accueil', mAir:'Classes d’espace', mVmc:'Calculateur VMC', mFl:'Niveaux de vol', mRow:'Priorités', mSig:'Signaux', mLic:'Licences', mIcao:'OACI',
+  lang:'Français', title:'Air Law Explorer', start:'Accueil', mAir:'Classes d’espace', mVmc:'Calculateur VMC', mFl:'Niveaux de vol', mHold:'Attente', mRow:'Priorités', mSig:'Signaux', mLic:'Licences', mIcao:'OACI',
   soonT:'À venir', soonP:'Ce module est prévu. Ordre : priorités, signaux, licences et validités, structure OACI.',
   homeEyebrow:'ATPL 010 Air Law', homeT:'Consulter, visualiser, comprendre', homeP:'Les parties arides du droit aérien sous forme d’outils interactifs. Chaque module est conçu pour l’iPad et fonctionne hors ligne. Pour s’entraîner sur les questions, direction l’ATPL Progress Trainer.',
   module:'Module', ready:'disponible', planned:'prévu', toTrainer:'Ouvrir l’ATPL Progress Trainer',
-  mod:[['Classes d’espace A à G','Classes OACI et structure allemande en 3D, tableau comparatif : clairance, séparation, radio, transpondeur et VMC.'],['Calculateur de minima VMC','Régler l’espace, l’altitude et la vitesse, lire la visibilité en vol et la distance aux nuages, avec schéma.'],['Niveaux de vol et règle semi-circulaire','Tourner le cap, voir les niveaux autorisés, altitude et niveau de transition, RVSM.'],['Règles de priorité','Scènes vues de dessus : qui s’écarte ? Avec feux de navigation la nuit.'],['Signaux','Signaux lumineux, signaux au sol, interception, signaux de guidage au sol.'],['Licences, médical, validités','Frise avec validités et expérience récente selon Part-FCL et Part-MED.'],['OACI et annexes','Convention de Chicago, 19 annexes, libertés de l’air.']],
+  mod:[['Classes d’espace A à G','Classes OACI et structure allemande en 3D, tableau comparatif : clairance, séparation, radio, transpondeur et VMC.'],['Calculateur de minima VMC','Régler l’espace, l’altitude et la vitesse, lire la visibilité en vol et la distance aux nuages, avec schéma.'],['Niveaux de vol et règle semi-circulaire','Tourner le cap, voir les niveaux autorisés, altitude et niveau de transition, RVSM.'],['Attente : explications et calculateur','Entrée OACI, correction de vent, temps d’éloignement, expliqués pas à pas avec vos valeurs, volés en 3D, avec un mode vidéo pour commenter.'],['Règles de priorité','Scènes vues de dessus : qui s’écarte ? Avec feux de navigation la nuit.'],['Signaux','Signaux lumineux, signaux au sol, interception, signaux de guidage au sol.'],['Licences, médical, validités','Frise avec validités et expérience récente selon Part-FCL et Part-MED.'],['OACI et annexes','Convention de Chicago, 19 annexes, libertés de l’air.']],
   germany:'Allemagne', icao:'OACI A à G', zones:'Zones', data:'Données', compare:'Comparer', help:'Aide', close:'Fermer le panneau', fab:'Zones et données',
   views:['Vue d’ensemble','De face','Aéroport','TMZ + CTR','Alpes','Vue de dessus'], viewsIcao:['Vue d’ensemble','De face','Bas (E à G)','Haut (A à C)'],
   hintIcao:'Les sept classes OACI empilées, A en haut, G en bas (schéma, pas à l’échelle). Toucher pour voir les règles.', hintDe:'Toucher affiche les données et déplace la caméra. L’œil masque la zone.',
@@ -1417,20 +1432,20 @@ const sel = $('#lang');
 for (const [k, v] of Object.entries(I18N)) { const o = el('option', '', v.lang); o.value = k; o.selected = k === LANG; sel.append(o); }
 sel.onchange = () => { LANG = sel.value; try { localStorage.setItem('airlaw-lang', LANG); } catch (e) {} document.documentElement.lang = LANG; renderAll(); };
 let view = 'home';
-const NAV = [['home','start'],['air','mAir'],['vmc','mVmc'],['fl','mFl'],['soon','mRow'],['soon','mSig'],['soon','mLic'],['soon','mIcao']];
+const NAV = [['home','start'],['air','mAir'],['vmc','mVmc'],['fl','mFl'],['hold','mHold'],['soon','mRow'],['soon','mSig'],['soon','mLic'],['soon','mIcao']];
 function renderNav() {
   const n = $('#nav'); n.innerHTML = '';
-  NAV.forEach(([v, k], i) => { const b = el('button', 'chip' + (v === 'soon' ? ' soon' : ''), T(k)); b.dataset.v = v; b.setAttribute('aria-pressed', v === view && (v !== 'soon' || i === 4)); b.onclick = () => go(v); n.append(b); });
+  NAV.forEach(([v, k], i) => { const b = el('button', 'chip' + (v === 'soon' ? ' soon' : ''), T(k)); b.dataset.v = v; b.setAttribute('aria-pressed', v === view && (v !== 'soon' || i === 5)); b.onclick = () => go(v); n.append(b); });
 }
-function go(v) { view = v; location.hash = v; for (const b of $('#nav').children) b.setAttribute('aria-pressed', b.dataset.v === v && v !== 'soon'); for (const s of document.querySelectorAll('.view')) s.hidden = s.id !== 'v-' + v; if (v === 'air') { initScene(); resize(); } }
-window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (['home','air','vmc','fl','soon'].includes(v) && v !== view) go(v); });
+function go(v) { view = v; location.hash = v; for (const b of $('#nav').children) b.setAttribute('aria-pressed', b.dataset.v === v && v !== 'soon'); for (const s of document.querySelectorAll('.view')) s.hidden = s.id !== 'v-' + v; if (v === 'air') { initScene(); resize(); } if (v === 'hold') h3dMount(); }
+window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (['home','air','vmc','fl','hold','soon'].includes(v) && v !== view) go(v); });
 
 function renderHome() {
   const h = $('#home'); h.innerHTML = '';
   h.append(el('div', 'eyebrow', T('homeEyebrow')), el('h2', '', T('homeT')), el('p', 'muted', T('homeP')));
   const g = el('div', 'grid');
   T('mod').forEach(([title, desc], i) => {
-    const v = NAV[i+1][0], ready = i < 3;
+    const v = NAV[i+1][0], ready = i < 4;
     const c = el('button', 'card link'); c.append(el('span', 'num', T('module') + ' ' + (i+1)), el('h3', '', title), el('span', 'muted', desc), el('span', 'tag', ready ? T('ready') : T('planned')));
     c.onclick = () => go(v); if (!ready) c.style.opacity = .6; g.append(c);
   });
@@ -1439,7 +1454,7 @@ function renderHome() {
   const so = $('#soon'); so.innerHTML = ''; so.append(el('h2', '', T('soonT')), el('p', 'muted', T('soonP')));
 }
 function renderAll() {
-  renderNav(); renderHome(); renderVmc(); renderFl();
+  renderNav(); renderHome(); renderVmc(); renderFl(); renderHold();
   const m = $('#mode'); m.children[0].textContent = T('germany'); m.children[1].textContent = T('icao');
   $('#tab-list').textContent = T('zones'); $('#tab-info').textContent = T('data'); $('#tab-cmp').textContent = T('compare'); $('#tab-help').textContent = T('help'); $('#fab').textContent = T('fab'); $('#btn-close').setAttribute('aria-label', T('close'));
   renderViews(); if (sceneReady) renderBody();
@@ -1942,11 +1957,408 @@ function vmcSvg(r) {
   return s;
 }
 
+/* ---------- Modul 3: Holding ---------- */
+const HOLD_T = {
+de: {
+  title:'Holding Explainer und Rechner', intro:'Stell dein Holding ein. Die App bestimmt den Einflug nach ICAO Doc 8168, rechnet Windkorrektur und Outbound Zeit, erklärt jeden Schritt mit deinen Werten und fliegt das Ganze in 3D vor.',
+  inbound:'Inbound Kurs zum Fix', turns:'Drehrichtung', right:'Rechts (Standard)', left:'Links', heading:'Dein Steuerkurs beim Überflug des Fix', wind:'Wind aus', windSpd:'Windstärke', tas:'TAS', alt:'Höhe',
+  entry:'Einflug', direct:'Direct Entry', parallel:'Parallel Entry', teardrop:'Teardrop (Offset) Entry', sector:'Sektor', outboundHdg:'Outbound Steuerkurs', inboundHdg:'Inbound Steuerkurs', outboundT:'Outbound Zeit', wca:'Windkorrektur (WCA)',
+  steps:'So kommst du drauf', s1:'Outbound Kurs = Inbound Kurs + 180°: {ib}° + 180° = {ob}°.',
+  s2r:'Rechtskurven: Vom Outbound Kurs {ob}° aus liegt der Parallel Sektor 110° links (von {p1}° bis {ob}°), der Teardrop Sektor 70° rechts (von {ob}° bis {t2}°). Der Rest ist Direct.',
+  s2l:'Linkskurven: Vom Outbound Kurs {ob}° aus liegt der Parallel Sektor 110° rechts (von {ob}° bis {p2}°), der Teardrop Sektor 70° links (von {t1}° bis {ob}°). Der Rest ist Direct.',
+  s3:'Dein Steuerkurs {hd}° liegt {rel}° {side} vom Outbound Kurs. Das ist der {sec}.', sideL:'links', sideR:'rechts',
+  s4d:'Direct: Über dem Fix sofort in die Holding Kurve ({dir}) drehen und auf Outbound Steuerkurs gehen.',
+  s4p:'Parallel: Über dem Fix auf den Outbound Kurs {ob}° drehen (parallel zum Inbound, auf der Nicht-Holding Seite), {t} fliegen, dann in Richtung Holding Seite ({dirOpp}) eindrehen und zurück zum Inbound Kurs oder Fix.',
+  s4t:'Teardrop: Über dem Fix auf Steuerkurs {td}° drehen (Outbound 30° zur Holding Seite), {t} fliegen, dann {dir} auf den Inbound Kurs {ib}° eindrehen.',
+  s5:'Wind: Aus {wd}° mit {ws} kt. Auf dem Inbound Kurs {ib}° ergibt das {xw} kt Seitenwind von {xside} und {hw} kt {hwt}.',
+  s6:'WCA = arcsin(Seitenwind / TAS) = arcsin({xw} / {tas}) = {wca}°. Inbound steuerst du {ibh}° (Vorhaltewinkel {wcaS} in den Wind).',
+  s7:'Outbound dreifache Korrektur (die Kurven driften mit): {ob}° {op} 3 × {wca}° = {obh}°.',
+  s8:'Zeit: Basis {base} s (bis 14 000 ft 1 min, darüber 1,5 min). Inbound Groundspeed {gsi} kt, Outbound {gso} kt. Outbound Zeit = {base} × {gsi} / {gso} = {tout} s, damit der Inbound wieder etwa {base} s dauert. Faustregel: pro Knoten Gegenwind auf dem Inbound 1 s länger outbound.',
+  s9:'Maximale Holding Geschwindigkeit in {alt} ft: {vmax}. Deine TAS {tas} kt ist {ok}.', okY:'in Ordnung', okN:'zu hoch',
+  headwind:'Gegenwind', tailwind:'Rückenwind',
+  tol:'ICAO gewährt ±5° Toleranz an den Sektorgrenzen.', legend:'Skizze: Holding von oben, Norden oben. Blau = Holding, orange = dein Anflug, grün = Einflugverfahren, grau = Sektorgrenzen, Pfeil = Wind.',
+  speeds:'Maximale Holding Geschwindigkeiten (ICAO)', spdRows:[['bis 14 000 ft','230 kt (Kat. A/B: 170 kt, Turbulenz 280 kt)'],['14 000 bis 20 000 ft','240 kt (Turbulenz 280 kt oder 0,8 M)'],['20 000 bis 34 000 ft','265 kt (Turbulenz 280 kt oder 0,8 M)'],['über 34 000 ft','0,83 M']],
+  memo:'Merkhilfen', memoList:['Standard Holding: Rechtskurven, 1 min Inbound bis 14 000 ft, 1,5 min darüber.','Einflugsektoren: 70° Linie durch den Fix auf der Holding Seite teilt Teardrop (70°) und Parallel (110°), der Rest (180°) ist Direct.','Windkorrektur: Inbound einfach, Outbound dreifach, Zeit nach Groundspeed.','Zeitnahme outbound: abeam Fix oder nach Erreichen der Outbound Kurve, je nachdem was später ist.','Kurven mit 25° Querlage oder 3°/s, was weniger ist.'],
+  random:'Zufallsaufgabe', quiz:'Selbsttest', quizQ:'Welcher Einflug?', correct:'Richtig', wrongA:'Nicht ganz. Richtig ist: ',
+  threeD:'3D Flug', video:'Video Modus', videoHint:'Video Modus: Vollbild, große Untertitel, Flugzeug fliegt Anflug, Einflug und Holding. Bildschirmaufnahme mit Mikrofon starten und draufsprechen.',
+  play:'Play', pause:'Pause', restart:'Neustart', follow:'Kamera folgt', top:'Draufsicht', speed:'Tempo', plane:'Flugzeug', jet:'Jet', sep:'SEP', exit:'Beenden', auto:'Untertitel automatisch', step:'Schritt',
+  phApproach:'Anflug zum Fix', phEntry:'Einflug', phHold:'Holding', tapHint:'Tippen zeigt die Steuerung, Leertaste pausiert, Pfeiltasten wechseln den Schritt, Esc beendet.',
+  noGl:'3D nicht verfügbar (WebGL fehlt). Die Skizze oben zeigt alles.'
+},
+en: {
+  title:'Holding explainer and calculator', intro:'Set up your hold. The app determines the entry per ICAO Doc 8168, calculates wind correction and outbound time, explains every step with your values and flies the whole thing in 3D.',
+  inbound:'Inbound track to the fix', turns:'Turn direction', right:'Right (standard)', left:'Left', heading:'Your heading when crossing the fix', wind:'Wind from', windSpd:'Wind speed', tas:'TAS', alt:'Altitude',
+  entry:'Entry', direct:'Direct entry', parallel:'Parallel entry', teardrop:'Teardrop (offset) entry', sector:'Sector', outboundHdg:'Outbound heading', inboundHdg:'Inbound heading', outboundT:'Outbound time', wca:'Wind correction angle',
+  steps:'How to work it out', s1:'Outbound track = inbound track + 180°: {ib}° + 180° = {ob}°.',
+  s2r:'Right turns: from the outbound track {ob}° the parallel sector spans 110° to the left ({p1}° to {ob}°), the teardrop sector 70° to the right ({ob}° to {t2}°). Everything else is direct.',
+  s2l:'Left turns: from the outbound track {ob}° the parallel sector spans 110° to the right ({ob}° to {p2}°), the teardrop sector 70° to the left ({t1}° to {ob}°). Everything else is direct.',
+  s3:'Your heading {hd}° is {rel}° {side} of the outbound track. That is the {sec}.', sideL:'left', sideR:'right',
+  s4d:'Direct: over the fix turn straight into the holding pattern ({dir}) onto the outbound heading.',
+  s4p:'Parallel: over the fix turn onto the outbound track {ob}° (parallel to the inbound, on the non-holding side), fly {t}, then turn towards the holding side ({dirOpp}) back to the inbound track or the fix.',
+  s4t:'Teardrop: over the fix turn to heading {td}° (outbound 30° towards the holding side), fly {t}, then turn {dir} onto the inbound track {ib}°.',
+  s5:'Wind: from {wd}° at {ws} kt. On the inbound track {ib}° that gives {xw} kt crosswind from the {xside} and {hw} kt {hwt}.',
+  s6:'WCA = arcsin(crosswind / TAS) = arcsin({xw} / {tas}) = {wca}°. Inbound heading {ibh}° (correct {wcaS} into the wind).',
+  s7:'Outbound triple correction (the turns drift too): {ob}° {op} 3 × {wca}° = {obh}°.',
+  s8:'Timing: base {base} s (1 min up to 14 000 ft, 1.5 min above). Inbound groundspeed {gsi} kt, outbound {gso} kt. Outbound time = {base} × {gsi} / {gso} = {tout} s so the inbound takes about {base} s again. Rule of thumb: 1 s longer outbound per knot of headwind on the inbound.',
+  s9:'Maximum holding speed at {alt} ft: {vmax}. Your TAS {tas} kt is {ok}.', okY:'fine', okN:'too high',
+  headwind:'headwind', tailwind:'tailwind',
+  tol:'ICAO allows ±5° tolerance at the sector boundaries.', legend:'Sketch: hold from above, north up. Blue = hold, orange = your arrival, green = entry procedure, grey = sector boundaries, arrow = wind.',
+  speeds:'Maximum holding speeds (ICAO)', spdRows:[['up to 14 000 ft','230 kt (Cat A/B: 170 kt, turbulence 280 kt)'],['14 000 to 20 000 ft','240 kt (turbulence 280 kt or 0.8 M)'],['20 000 to 34 000 ft','265 kt (turbulence 280 kt or 0.8 M)'],['above 34 000 ft','0.83 M']],
+  memo:'Memory hooks', memoList:['Standard hold: right turns, 1 min inbound up to 14 000 ft, 1.5 min above.','Entry sectors: the 70° line through the fix on the holding side splits teardrop (70°) and parallel (110°), the remaining 180° is direct.','Wind correction: single on the inbound, triple on the outbound, timing by groundspeed.','Start outbound timing abeam the fix or wings level, whichever is later.','Turns at 25° bank or 3°/s, whichever is less.'],
+  random:'Random exercise', quiz:'Self test', quizQ:'Which entry?', correct:'Correct', wrongA:'Not quite. Correct is: ',
+  threeD:'3D flight', video:'Video mode', videoHint:'Video mode: full screen, large captions, the aircraft flies arrival, entry and hold. Start a screen recording with microphone and talk over it.',
+  play:'Play', pause:'Pause', restart:'Restart', follow:'Chase camera', top:'Top view', speed:'Speed', plane:'Aircraft', jet:'Jet', sep:'SEP', exit:'Exit', auto:'Auto captions', step:'Step',
+  phApproach:'Arrival to the fix', phEntry:'Entry', phHold:'Holding', tapHint:'Tap to show controls, space pauses, arrow keys change the step, Esc exits.',
+  noGl:'3D not available (no WebGL). The sketch above shows everything.'
+},
+fr: {
+  title:'Attente : explications et calculateur', intro:'Réglez votre attente. L’application détermine l’entrée selon l’OACI Doc 8168, calcule la correction de vent et le temps d’éloignement, explique chaque étape avec vos valeurs et fait voler le tout en 3D.',
+  inbound:'Route de rapprochement vers le repère', turns:'Sens des virages', right:'Droite (standard)', left:'Gauche', heading:'Votre cap au passage du repère', wind:'Vent du', windSpd:'Force du vent', tas:'TAS', alt:'Altitude',
+  entry:'Entrée', direct:'Entrée directe', parallel:'Entrée parallèle', teardrop:'Entrée en goutte d’eau (décalée)', sector:'Secteur', outboundHdg:'Cap d’éloignement', inboundHdg:'Cap de rapprochement', outboundT:'Temps d’éloignement', wca:'Correction de dérive',
+  steps:'Comment on y arrive', s1:'Route d’éloignement = route de rapprochement + 180° : {ib}° + 180° = {ob}°.',
+  s2r:'Virages à droite : depuis la route d’éloignement {ob}°, le secteur parallèle couvre 110° à gauche ({p1}° à {ob}°), le secteur goutte d’eau 70° à droite ({ob}° à {t2}°). Le reste est direct.',
+  s2l:'Virages à gauche : depuis la route d’éloignement {ob}°, le secteur parallèle couvre 110° à droite ({ob}° à {p2}°), le secteur goutte d’eau 70° à gauche ({t1}° à {ob}°). Le reste est direct.',
+  s3:'Votre cap {hd}° est à {rel}° à {side} de la route d’éloignement. C’est l’{sec}.', sideL:'gauche', sideR:'droite',
+  s4d:'Directe : au repère, virer directement dans le circuit ({dir}) vers le cap d’éloignement.',
+  s4p:'Parallèle : au repère, prendre la route d’éloignement {ob}° (parallèle au rapprochement, côté non protégé), voler {t}, puis virer vers le côté de l’attente ({dirOpp}) pour rejoindre la route de rapprochement ou le repère.',
+  s4t:'Goutte d’eau : au repère, prendre le cap {td}° (éloignement 30° vers le côté attente), voler {t}, puis virer à {dir} vers la route de rapprochement {ib}°.',
+  s5:'Vent : du {wd}° pour {ws} kt. Sur la route de rapprochement {ib}°, cela donne {xw} kt de vent de travers de {xside} et {hw} kt de vent {hwt}.',
+  s6:'Dérive = arcsin(vent de travers / TAS) = arcsin({xw} / {tas}) = {wca}°. Cap de rapprochement {ibh}° (corriger {wcaS} dans le vent).',
+  s7:'Éloignement, correction triple (les virages dérivent aussi) : {ob}° {op} 3 × {wca}° = {obh}°.',
+  s8:'Temps : base {base} s (1 min jusqu’à 14 000 ft, 1,5 min au-dessus). Vitesse sol rapprochement {gsi} kt, éloignement {gso} kt. Temps d’éloignement = {base} × {gsi} / {gso} = {tout} s pour que le rapprochement dure à nouveau environ {base} s. Règle : 1 s de plus par nœud de vent de face au rapprochement.',
+  s9:'Vitesse maximale d’attente à {alt} ft : {vmax}. Votre TAS de {tas} kt est {ok}.', okY:'correcte', okN:'trop élevée',
+  headwind:'de face', tailwind:'arrière',
+  tol:'L’OACI accorde ±5° de tolérance aux limites de secteur.', legend:'Schéma : attente vue de dessus, nord en haut. Bleu = attente, orange = votre arrivée, vert = procédure d’entrée, gris = limites de secteur, flèche = vent.',
+  speeds:'Vitesses maximales d’attente (OACI)', spdRows:[['jusqu’à 14 000 ft','230 kt (cat. A/B : 170 kt, turbulence 280 kt)'],['14 000 à 20 000 ft','240 kt (turbulence 280 kt ou 0,8 M)'],['20 000 à 34 000 ft','265 kt (turbulence 280 kt ou 0,8 M)'],['au-dessus de 34 000 ft','0,83 M']],
+  memo:'Repères', memoList:['Attente standard : virages à droite, 1 min de rapprochement jusqu’à 14 000 ft, 1,5 min au-dessus.','Secteurs d’entrée : la ligne à 70° par le repère côté attente sépare goutte d’eau (70°) et parallèle (110°), le reste (180°) est direct.','Correction de vent : simple au rapprochement, triple à l’éloignement, temps selon la vitesse sol.','Chronométrage éloignement : par le travers du repère ou ailes à plat, le plus tardif.','Virages à 25° d’inclinaison ou 3°/s, la plus faible des deux.'],
+  random:'Exercice aléatoire', quiz:'Auto-test', quizQ:'Quelle entrée ?', correct:'Correct', wrongA:'Pas tout à fait. La bonne réponse : ',
+  threeD:'Vol 3D', video:'Mode vidéo', videoHint:'Mode vidéo : plein écran, grands sous-titres, l’avion vole l’arrivée, l’entrée et l’attente. Lancez un enregistrement d’écran avec micro et commentez.',
+  play:'Lecture', pause:'Pause', restart:'Recommencer', follow:'Caméra de poursuite', top:'Vue de dessus', speed:'Vitesse', plane:'Avion', jet:'Jet', sep:'SEP', exit:'Quitter', auto:'Sous-titres automatiques', step:'Étape',
+  phApproach:'Arrivée vers le repère', phEntry:'Entrée', phHold:'Attente', tapHint:'Toucher affiche les commandes, espace met en pause, flèches changent l’étape, Échap quitte.',
+  noGl:'3D indisponible (pas de WebGL). Le schéma ci-dessus montre tout.'
+}
+};
+const HT = k => HOLD_T[LANG][k] ?? HOLD_T.de[k];
+const fmt = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
+const norm = a => ((a % 360) + 360) % 360;
+const rel180 = a => { a = norm(a); return a > 180 ? a - 360 : a; };
+const pad3 = n => String(Math.round(norm(n))).padStart(3, '0');
+const hs = {ib: 270, dir: 'R', hd: 120, wd: 320, ws: 25, tas: 180, alt: 5000, quiz: false, pick: null};
+const holdEl = $('#hold');
+function holdCalc() {
+  const ob = norm(hs.ib + 180);
+  const a = rel180(hs.hd - ob); // + = rechts vom Outbound
+  let entry;
+  if (hs.dir === 'R') entry = (a >= -110 && a < 0) ? 'parallel' : (a >= 0 && a < 70) ? 'teardrop' : 'direct';
+  else entry = (a > 0 && a <= 110) ? 'parallel' : (a <= 0 && a > -70) ? 'teardrop' : 'direct';
+  const rad = d => d * Math.PI / 180;
+  const wa = rel180(hs.wd - hs.ib);
+  const xw = hs.ws * Math.sin(rad(wa));        // + = Wind von rechts (inbound)
+  const hw = hs.ws * Math.cos(rad(wa));        // + = Gegenwind inbound
+  const wca = Math.asin(Math.min(1, Math.abs(xw) / hs.tas)) * 180 / Math.PI;
+  const ibh = norm(hs.ib + Math.sign(xw) * wca);
+  const obh = norm(ob - Math.sign(xw) * 3 * wca);
+  const gsi = Math.max(1, Math.round(hs.tas * Math.cos(rad(wca)) - hw));
+  const gso = Math.max(1, Math.round(hs.tas * Math.cos(rad(3 * wca)) + hw));
+  const base = hs.alt > 14000 ? 90 : 60;
+  const tout = Math.round(base * gsi / gso);
+  const vmax = hs.alt <= 14000 ? '230 kt' : hs.alt <= 20000 ? '240 kt' : hs.alt <= 34000 ? '265 kt' : '0.83 M';
+  const vnum = hs.alt <= 14000 ? 230 : hs.alt <= 20000 ? 240 : hs.alt <= 34000 ? 265 : 480;
+  const td = norm(hs.dir === 'R' ? ob - 30 : ob + 30); // Teardrop 30° zur Holding Seite
+  return {ob, a, entry, xw, hw, wca, ibh, obh, gsi, gso, base, tout, vmax, vnum, td};
+}
+function holdSteps(r) {
+  const p1 = norm(r.ob - 110), t2 = norm(r.ob + 70), p2 = norm(r.ob + 110), t1 = norm(r.ob - 70);
+  const side = r.a >= 0 ? HT('sideR') : HT('sideL');
+  const dirTxt = hs.dir === 'R' ? HT('right').split(' ')[0] : HT('left'); const dirOpp = hs.dir === 'R' ? HT('left') : HT('right').split(' ')[0];
+  const tTxt = r.base === 60 ? '1 min' : '1,5 min';
+  return [
+    fmt(HT('s1'), {ib: hs.ib, ob: r.ob}),
+    fmt(HT(hs.dir === 'R' ? 's2r' : 's2l'), {ob: r.ob, p1, t2, p2, t1}),
+    fmt(HT('s3'), {hd: hs.hd, rel: Math.abs(Math.round(r.a)), side, sec: HT(r.entry)}),
+    r.entry === 'direct' ? fmt(HT('s4d'), {dir: dirTxt}) : r.entry === 'parallel' ? fmt(HT('s4p'), {ob: r.ob, t: tTxt, dirOpp}) : fmt(HT('s4t'), {td: r.td, t: tTxt, dir: dirTxt, ib: hs.ib}),
+    fmt(HT('s5'), {wd: hs.wd, ws: hs.ws, ib: hs.ib, xw: Math.abs(r.xw).toFixed(0), xside: r.xw >= 0 ? HT('sideR') : HT('sideL'), hw: Math.abs(r.hw).toFixed(0), hwt: r.hw >= 0 ? HT('headwind') : HT('tailwind')}),
+    fmt(HT('s6'), {xw: Math.abs(r.xw).toFixed(0), tas: hs.tas, wca: r.wca.toFixed(0), ibh: pad3(r.ibh), wcaS: (r.xw >= 0 ? '+' : '−') + r.wca.toFixed(0) + '°'}),
+    fmt(HT('s7'), {ob: r.ob, op: r.xw >= 0 ? '−' : '+', wca: r.wca.toFixed(0), obh: pad3(r.obh)}),
+    fmt(HT('s8'), {base: r.base, gsi: r.gsi, gso: r.gso, tout: r.tout}),
+    fmt(HT('s9'), {alt: hs.alt.toLocaleString('de-DE'), vmax: r.vmax, tas: hs.tas, ok: hs.tas <= r.vnum ? HT('okY') : HT('okN')}),
+  ];
+}
+function renderHold() {
+  if (!holdEl) return;
+  holdEl.innerHTML = '';
+  const r = holdCalc();
+  holdEl.append(el('div', 'eyebrow', T('module') + ' 4'), el('h2', '', HT('title')), el('p', 'muted', HT('intro')));
+  const g = el('div', 'vmc');
+  const form = el('div', 'card'); form.style.gap = '12px';
+  const num = (label, key, min, max, step, unit) => { const l = el('label', 'f', `${label}: ${hs[key]}${unit}`); const i = document.createElement('input'); i.type = 'range'; i.min = min; i.max = max; i.step = step; i.value = hs[key]; i.oninput = () => { hs[key] = +i.value; hs.pick = null; renderHold(); }; l.append(i); return l; };
+  form.append(num(HT('inbound'), 'ib', 0, 359, 1, '°'));
+  const seg = el('div', 'seg'); for (const [v, l] of [['R', HT('right')], ['L', HT('left')]]) { const b = el('button', '', l); b.setAttribute('aria-pressed', String(hs.dir === v)); b.onclick = () => { hs.dir = v; hs.pick = null; renderHold(); }; seg.append(b); } form.append(el('div', 'eyebrow', HT('turns')), seg);
+  form.append(num(HT('heading'), 'hd', 0, 359, 1, '°'), num(HT('wind'), 'wd', 0, 359, 5, '°'), num(HT('windSpd'), 'ws', 0, 60, 1, ' kt'), num(HT('tas'), 'tas', 90, 300, 5, ' kt'), num(HT('alt'), 'alt', 1000, 40000, 500, ' ft'));
+  const rrow = el('div', 'row'); rrow.append(btn(HT('random'), () => { hs.ib = Math.floor(Math.random() * 36) * 10; hs.dir = Math.random() < .7 ? 'R' : 'L'; hs.hd = Math.floor(Math.random() * 36) * 10; hs.wd = Math.floor(Math.random() * 36) * 10; hs.ws = 5 + Math.floor(Math.random() * 8) * 5; hs.pick = null; renderHold(); }), btn(HT('quiz'), () => { hs.quiz = !hs.quiz; hs.pick = null; renderHold(); })); form.append(rrow);
+  g.append(form);
+  const out = el('div', 'card');
+  out.append(holdSvg(r));
+  if (hs.quiz) {
+    out.append(el('h3', '', HT('quizQ')));
+    const row = el('div', 'row');
+    for (const e of ['direct', 'parallel', 'teardrop']) { const b = el('button', 'btn-s', HT(e)); b.onclick = () => { hs.pick = e; renderHold(); }; if (hs.pick === e) b.style.borderColor = 'var(--accent)'; row.append(b); }
+    out.append(row);
+    if (hs.pick) out.append(el('div', hs.pick === r.entry ? 'ok' : 'no', (hs.pick === r.entry ? HT('correct') : HT('wrongA') + HT(r.entry)) + '.'));
+  }
+  if (!hs.quiz || hs.pick) {
+    const res = el('div', 'res');
+    const c = (lbl, val, sub) => { const cd = el('div', 'card'); cd.append(el('span', 'eyebrow', lbl), el('div', 'big', val)); if (sub) cd.append(el('span', 'muted', sub)); return cd; };
+    const ec = c(HT('entry'), HT(r.entry).split(' ')[0], HT('sector') + ' ' + (r.entry === 'parallel' ? 1 : r.entry === 'teardrop' ? 2 : 3)); ec.querySelector('.big').style.fontSize = '1.7rem';
+    res.append(ec, c(HT('outboundHdg'), pad3(r.obh) + '°', String(r.tout) + ' s'), c(HT('inboundHdg'), pad3(r.ibh) + '°', HT('wca') + ' ' + r.wca.toFixed(0) + '°'));
+    out.append(res);
+    // 3D
+    out.append(el('h3', '', HT('threeD')));
+    const st = el('div', 'hstage'); st.id = 'hstage-page'; out.append(st);
+    const vrow = el('div', 'row'); vrow.append(btn(HT('video'), () => openVideo(), 'btn'), btn(HT('restart'), () => h3dReset())); out.append(vrow, el('div', 'hint', HT('videoHint')));
+    out.append(el('h3', '', HT('steps')));
+    const ol = document.createElement('ol'); ol.style.paddingLeft = '20px'; ol.style.display = 'flex'; ol.style.flexDirection = 'column'; ol.style.gap = '8px';
+    for (const s of holdSteps(r)) ol.append(el('li', '', s));
+    out.append(ol, el('div', 'hint', HT('tol') + ' ' + HT('legend')));
+  }
+  g.append(out); holdEl.append(g);
+  const sp = el('div', 'card'); sp.append(el('h3', '', HT('speeds')));
+  const tw = el('div', 'tablewrap'); const tb = document.createElement('table'); const body = document.createElement('tbody'); for (const [a, b] of HT('spdRows')) { const tr = document.createElement('tr'); tr.append(el('td', '', a), el('td', '', b)); body.append(tr); } tb.append(body); tw.append(tb); sp.append(tw);
+  const mm = el('div', 'card'); mm.append(el('h3', '', HT('memo'))); const ul = document.createElement('ul'); ul.style.paddingLeft = '20px'; for (const m of HT('memoList')) ul.append(el('li', '', m)); mm.append(ul);
+  holdEl.append(sp, mm);
+  if (view === 'hold' && !H3.video) h3dMount();
+}
+function holdSvg(r) {
+  const W = 520, H = 420, ns = 'http://www.w3.org/2000/svg';
+  const s = document.createElementNS(ns, 'svg'); s.setAttribute('viewBox', `0 0 ${W} ${H}`); s.style.width = '100%'; s.style.maxWidth = '560px';
+  const add = (t, a, txt) => { const e = document.createElementNS(ns, t); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); if (txt != null) e.textContent = txt; s.append(e); return e; };
+  add('rect', {x: 0, y: 0, width: W, height: H, rx: 10, fill: 'var(--sky)'});
+  const fx = 260, fy = 250;
+  const rad = d => (d - 90) * Math.PI / 180;
+  const pt = (ang, dist, ox = fx, oy = fy) => [ox + Math.cos(rad(ang)) * dist, oy + Math.sin(rad(ang)) * dist];
+  const L = 120, R = 40;
+  const sgn = hs.dir === 'R' ? 1 : -1;
+  const sector = (from, to, color) => { const sweep = norm(to - from); const rr = 150; const p0 = pt(from + 180, rr), p1 = pt(to + 180, rr); add('path', {d: `M${fx} ${fy} L${p0[0]} ${p0[1]} A${rr} ${rr} 0 ${sweep > 180 ? 1 : 0} 1 ${p1[0]} ${p1[1]} Z`, fill: color, opacity: .13}); };
+  const ob = r.ob;
+  if (hs.dir === 'R') { sector(ob - 110, ob, '#2a8a52'); sector(ob, ob + 70, '#b7791f'); sector(ob + 70, ob + 250, '#0b6e8f'); }
+  else { sector(ob, ob + 110, '#2a8a52'); sector(ob - 70, ob, '#b7791f'); sector(ob + 110, ob + 290, '#0b6e8f'); }
+  for (const ang of (hs.dir === 'R' ? [ob - 110, ob, ob + 70] : [ob + 110, ob, ob - 70])) { const p = pt(ang + 180, 150); add('line', {x1: fx, y1: fy, x2: p[0], y2: p[1], stroke: '#6b7784', 'stroke-width': 1.5, 'stroke-dasharray': '5 4'}); }
+  const lab = (ang, txt, col) => { const p = pt(ang + 180, 120); add('text', {x: p[0], y: p[1], 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: col}, txt); };
+  if (hs.dir === 'R') { lab(ob - 55, HT('parallel').split(' ')[0], '#2a8a52'); lab(ob + 35, HT('teardrop').split(' ')[0], '#b7791f'); lab(ob + 160, HT('direct').split(' ')[0], '#0b6e8f'); }
+  else { lab(ob + 55, HT('parallel').split(' ')[0], '#2a8a52'); lab(ob - 35, HT('teardrop').split(' ')[0], '#b7791f'); lab(ob - 160, HT('direct').split(' ')[0], '#0b6e8f'); }
+  const ibDir = hs.ib;
+  const start = pt(ibDir + 180, L);
+  const side = ibDir + sgn * 90;
+  const obStart = pt(side, 2 * R);
+  const obEnd = pt(side, 2 * R, start[0], start[1]);
+  const sw = hs.dir === 'R' ? 1 : 0;
+  add('path', {d: `M${start[0]} ${start[1]} L${fx} ${fy} A${R} ${R} 0 0 ${sw} ${obStart[0]} ${obStart[1]} L${obEnd[0]} ${obEnd[1]} A${R} ${R} 0 0 ${sw} ${start[0]} ${start[1]}`, fill: 'none', stroke: '#0b6e8f', 'stroke-width': 4});
+  const arrow = (ang, x, y, col) => { const a1 = pt(ang + 150, 10, x, y), a2 = pt(ang - 150, 10, x, y); add('path', {d: `M${a1[0]} ${a1[1]} L${x} ${y} L${a2[0]} ${a2[1]}`, fill: 'none', stroke: col, 'stroke-width': 3}); };
+  const mi = pt(ibDir + 180, L / 2); arrow(ibDir, mi[0], mi[1], '#0b6e8f');
+  const mo = pt(side, 2 * R, ...pt(ibDir + 180, L / 2)); arrow(ibDir + 180, mo[0], mo[1], '#0b6e8f');
+  add('polygon', {points: [pt(0, 9), pt(120, 9), pt(240, 9)].map(p => p.join(',')).join(' '), fill: '#17202b'});
+  add('text', {x: fx + 12, y: fy - 8, 'font-size': 12, fill: 'var(--fg)', 'font-weight': 700}, 'FIX ' + pad3(hs.ib) + '° inbound');
+  const from = pt(hs.hd + 180, 170); add('line', {x1: from[0], y1: from[1], x2: fx, y2: fy, stroke: '#d9742b', 'stroke-width': 3}); arrow(hs.hd, ...pt(hs.hd + 180, 40), '#d9742b');
+  add('text', {x: from[0], y: from[1] - 8, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: '#d9742b'}, 'HDG ' + pad3(hs.hd) + '°');
+  // Einflugverfahren aus der Simulation (gruen), Masstab wie Racetrack (L 120, R 40)
+  const sim = holdPath(r, {L, R});
+  const ent = sim.pts.slice(sim.iApproach, sim.iEntry + 1);
+  if (ent.length > 1) add('path', {d: 'M' + ent.map(p => (fx + p[0]).toFixed(1) + ' ' + (fy - p[1]).toFixed(1)).join(' L'), fill: 'none', stroke: '#2a8a52', 'stroke-width': 3, 'stroke-dasharray': '7 5'});
+  const wx = 60, wy = 60; const wt = pt(hs.wd + 180, 28, wx, wy), wf = pt(hs.wd, 28, wx, wy);
+  add('circle', {cx: wx, cy: wy, r: 34, fill: 'var(--surface)', stroke: 'var(--line)'});
+  add('line', {x1: wf[0], y1: wf[1], x2: wt[0], y2: wt[1], stroke: '#6b7784', 'stroke-width': 3}); arrow(hs.wd + 180, wt[0], wt[1], '#6b7784');
+  add('text', {x: wx, y: wy + 50, 'text-anchor': 'middle', 'font-size': 11, fill: 'var(--muted)', 'font-weight': 600}, `${pad3(hs.wd)}°/${hs.ws} kt`);
+  add('text', {x: W - 14, y: 20, 'text-anchor': 'end', 'font-size': 11, fill: 'var(--muted)'}, 'N ↑');
+  return s;
+}
+/* ---------- Flugweg Simulation: Punkte [ost, nord], Fix im Ursprung ---------- */
+function holdPath(r, {L, R}) {
+  const pts = [], hdgs = [];
+  let x = 0, y = 0, hdg = hs.hd;
+  const step = R / 14;
+  const sgn = hs.dir === 'R' ? 1 : -1;
+  const push = () => { pts.push([x, y]); hdgs.push(hdg); };
+  const fwd = d => { const a = hdg * Math.PI / 180; x += Math.sin(a) * d; y += Math.cos(a) * d; };
+  const fly = dist => { for (let d = 0; d < dist; d += step) { fwd(step); push(); } };
+  const dps = step / R * 180 / Math.PI; // Grad pro Schritt
+  const turn = (to, dir) => { let rem = norm(dir > 0 ? to - hdg : hdg - to); if (rem < 0.01) return; let n = 0; while (rem > 0 && n < 400) { const d = Math.min(dps, rem); hdg = norm(hdg + dir * d); rem -= d; fwd(step); push(); n++; } };
+  const trackTo = (tx, ty) => { let n = 0; while (n < 900) { const dx = tx - x, dy = ty - y, dist = Math.hypot(dx, dy); if (dist < step * 1.2) break; const br = norm(Math.atan2(dx, dy) * 180 / Math.PI); const diff = rel180(br - hdg); if (Math.abs(diff) > dps) hdg = norm(hdg + Math.sign(diff) * dps); else hdg = br; fwd(step); push(); n++; } };
+  // Anflug
+  const a0 = hs.hd * Math.PI / 180; x = -Math.sin(a0) * L * 1.8; y = -Math.cos(a0) * L * 1.8; push(); fly(L * 1.8); x = 0; y = 0; hdg = hs.hd; push();
+  const iApproach = pts.length - 1;
+  const ob = r.ob;
+  if (r.entry === 'direct') { turn(ob, sgn); fly(L * 0.8); turn(hs.ib, sgn); trackTo(0, 0); }
+  else if (r.entry === 'parallel') { const dOut = rel180(ob - hdg) >= 0 ? 1 : -1; turn(ob, dOut); fly(L); turn(hs.ib, -sgn); trackTo(0, 0); }
+  else { turn(r.td, rel180(r.td - hdg) >= 0 ? 1 : -1); fly(L); turn(hs.ib, sgn); trackTo(0, 0); }
+  x = 0; y = 0; hdg = hs.ib; push();
+  const iEntry = pts.length - 1;
+  // Racetrack
+  turn(ob, sgn); fly(L); turn(hs.ib, sgn); trackTo(0, 0); x = 0; y = 0; hdg = hs.ib; push();
+  const iLoop = pts.length - 1;
+  const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  return {pts, hdgs, cum, iApproach, iEntry, iLoop, dApproach: cum[iApproach], dEntry: cum[iEntry], dLoop: cum[iLoop]};
+}
+/* ---------- 3D Szene ---------- */
+const H3 = {ready: false, scene: null, cam: null, ren: null, ctl: null, world: null, plane: null, planeType: 'jet', path: null, dist: 0, playing: true, speed: 1, follow: false, topView: false, last: 0, auto: true, step: 0, video: false, ro: null, key: '', center: null};
+const ALT3 = 14;
+function h3dInit() {
+  if (H3.ready) return true;
+  if (!window.THREE) return false;
+  let ren; try { ren = new THREE.WebGLRenderer({antialias: true}); } catch (e) { return false; }
+  H3.ready = true; H3.ren = ren; ren.setPixelRatio(Math.min(2, window.devicePixelRatio));
+  const sc = new THREE.Scene(); H3.scene = sc;
+  const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  sc.background = new THREE.Color(cssVar('--sky') || '#dfe9f3'); sc.fog = new THREE.Fog(sc.background, 500, 1100);
+  H3.cam = new THREE.PerspectiveCamera(42, 1, 0.5, 2000); H3.cam.position.set(-120, 110, 160);
+  H3.ctl = new THREE.OrbitControls(H3.cam, ren.domElement); H3.ctl.enableDamping = true; H3.ctl.dampingFactor = .08; H3.ctl.maxPolarAngle = Math.PI / 2.05; H3.ctl.minDistance = 20; H3.ctl.maxDistance = 600; H3.ctl.target.set(0, ALT3, -20); H3.ctl.update();
+  sc.add(new THREE.HemisphereLight(0xffffff, 0x667788, 0.95)); const sun = new THREE.DirectionalLight(0xffffff, 0.7); sun.position.set(-80, 150, 80); sc.add(sun);
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(800, 64), new THREE.MeshLambertMaterial({color: 0x9aa86a})); ground.rotateX(-Math.PI / 2); ground.position.y = -0.2; sc.add(ground);
+  const grid = new THREE.GridHelper(900, 36, 0x8a9663, 0x8a9663); grid.position.y = -0.1; grid.material.transparent = true; grid.material.opacity = .35; sc.add(grid);
+  H3.world = new THREE.Group(); sc.add(H3.world);
+  H3.ro = new ResizeObserver(() => h3dResize());
+  (function loop() { requestAnimationFrame(loop); if (view !== 'hold' && !H3.video) return; h3dTick(); })();
+  return true;
+}
+function h3dResize() { const c = H3.ren && H3.ren.domElement.parentElement; if (!c) return; const w = c.clientWidth, h = c.clientHeight; if (!w || !h) return; H3.cam.aspect = w / h; H3.cam.updateProjectionMatrix(); H3.ren.setSize(w, h, false); H3.ren.domElement.style.width = '100%'; H3.ren.domElement.style.height = '100%'; }
+function h3dMount(container) {
+  const c = container || $('#hstage-page'); if (!c) return;
+  if (!h3dInit()) { c.textContent = HT('noGl'); return; }
+  if (H3.ren.domElement.parentElement !== c) { if (H3.ren.domElement.parentElement) H3.ro.unobserve(H3.ren.domElement.parentElement); c.innerHTML = ''; c.appendChild(H3.ren.domElement); H3.ro.observe(c); }
+  h3dBuild(); h3dResize();
+}
+function h3dHome() { const c = H3.center || new THREE.Vector3(); H3.cam.position.set(c.x - 130, 165, c.z + 215); H3.ctl.target.set(c.x, 0, c.z - 15); }
+function h3dReset() { H3.dist = 0; H3.playing = true; H3.step = 0; if (H3.video) videoCaption(); }
+function tube(points, color, radius = .45, dashed = false) {
+  const g = new THREE.Group();
+  if (dashed) { for (let i = 0; i + 1 < points.length; i += 2) { const a = points[i], b = points[i + 1]; const len = a.distanceTo(b); const m = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, len, 6), new THREE.MeshLambertMaterial({color})); m.position.copy(a).add(b).multiplyScalar(.5); m.lookAt(b); m.rotateX(Math.PI / 2); g.add(m); } return g; }
+  const curve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.2);
+  g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, Math.max(8, points.length * 2), radius, 6, false), new THREE.MeshLambertMaterial({color})));
+  return g;
+}
+function wedge(from, to, color, rr = 135) { // Kompasswinkel (Steuerkurse) von..bis im Uhrzeigersinn, Sektor der Anflugrichtungen = Kurs + 180
+  const sh = new THREE.Shape(); sh.moveTo(0, 0);
+  const a1 = (90 - (from + 180)) * Math.PI / 180, a2 = (90 - (to + 180)) * Math.PI / 180;
+  sh.absarc(0, 0, rr, a1, a2, true); sh.lineTo(0, 0);
+  const geo = new THREE.ShapeGeometry(sh, 32); geo.rotateX(-Math.PI / 2);
+  const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({color, transparent: true, opacity: .28, depthWrite: false})); m.position.y = 0.05; return m;
+}
+function h3dBuild() {
+  const r = holdCalc(); const key = JSON.stringify([hs.ib, hs.dir, hs.hd, hs.wd, hs.ws, hs.alt, H3.planeType, LANG]);
+  if (key === H3.key && H3.world.children.length) return; H3.key = key;
+  const w = H3.world; while (w.children.length) w.remove(w.children[0]);
+  H3.path = holdPath(r, {L: 100, R: 33}); H3.dist = Math.min(H3.dist, H3.path.dLoop);
+  const P = H3.path; const v3 = (p, y = ALT3) => new THREE.Vector3(p[0], y, -p[1]);
+  const ob = r.ob;
+  if (hs.dir === 'R') { w.add(wedge(ob - 110, ob, 0x2a8a52), wedge(ob, ob + 70, 0xb7791f), wedge(ob + 70, ob + 250, 0x0b6e8f)); }
+  else { w.add(wedge(ob, ob + 110, 0x2a8a52), wedge(ob - 70, ob, 0xb7791f), wedge(ob + 110, ob + 290, 0x0b6e8f)); }
+  const lab = (ang, txt, col) => { const a = (ang + 180) * Math.PI / 180; const s = textSprite(txt, col, .036); s.position.set(Math.sin(a) * 108, 1.5, -Math.cos(a) * 108); w.add(s); };
+  const sh = hs.dir === 'R' ? 1 : -1;
+  lab(ob - sh * 55, HT('parallel').split(' ')[0], 0x2a8a52); lab(ob + sh * 35, HT('teardrop').split(' ')[0], 0xb7791f); lab(ob + sh * 160, HT('direct').split(' ')[0], 0x0b6e8f);
+  w.add(tube(P.pts.slice(P.iEntry, P.iLoop + 1).map(p => v3(p)), 0x0b6e8f, .5));
+  w.add(tube(P.pts.slice(P.iApproach, P.iEntry + 1).map(p => v3(p, ALT3 - .3)), 0x2a8a52, .35, true));
+  w.add(tube(P.pts.slice(0, P.iApproach + 1).map(p => v3(p, ALT3 - .6)), 0xd9742b, .3));
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(.25, .25, ALT3 + 3, 8), new THREE.MeshLambertMaterial({color: 0x17202b})); mast.position.y = (ALT3 + 3) / 2; w.add(mast);
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(2.2, 4, 3), new THREE.MeshLambertMaterial({color: 0x17202b})); cone.position.y = 2; cone.rotation.x = Math.PI; w.add(cone);
+  const fl = textSprite('FIX  ' + pad3(hs.ib) + '° inbound', 0x17202b, .045); fl.position.set(0, ALT3 + 9, 0); w.add(fl);
+  const mid = P.pts[Math.floor((P.iEntry + P.iLoop) / 2)]; const ol = textSprite(pad3(ob) + '° outbound  ' + r.tout + ' s', 0x0b6e8f, .04); ol.position.copy(v3(mid, ALT3 + 4)); w.add(ol);
+  const ap = P.pts[Math.floor(P.iApproach * 0.3)]; const al = textSprite('HDG ' + pad3(hs.hd) + '°', 0xd9742b, .04); al.position.copy(v3(ap, ALT3 + 4)); w.add(al);
+  if (hs.ws > 0) { const wa = hs.wd * Math.PI / 180; const dir = new THREE.Vector3(-Math.sin(wa), 0, Math.cos(wa)); const org = new THREE.Vector3(Math.sin(wa) * 150, ALT3 + 30, -Math.cos(wa) * 150); w.add(new THREE.ArrowHelper(dir, org, 60, 0x5b6876, 14, 7)); const wl = textSprite(`${pad3(hs.wd)}° / ${hs.ws} kt`, 0x5b6876, .04); wl.position.copy(org).add(new THREE.Vector3(0, 6, 0)); w.add(wl); }
+  w.add(new THREE.ArrowHelper(new THREE.Vector3(0, 0, -1), new THREE.Vector3(-170, 1, 160), 35, 0x17202b, 9, 5)); const nl = textSprite('N', 0x17202b, .04); nl.position.set(-170, 4, 118); w.add(nl);
+  H3.plane = H3.planeType === 'jet' ? makeAirliner(2.1) : makeSEP(3.6); w.add(H3.plane);
+  // Kamera auf den Schwerpunkt des Racetracks
+  const loop = P.pts.slice(P.iEntry, P.iLoop + 1); const cx = loop.reduce((a, p) => a + p[0], 0) / loop.length, cz = -loop.reduce((a, p) => a + p[1], 0) / loop.length; H3.center = new THREE.Vector3(cx, 0, cz);
+  if (!H3.follow && !H3.topView) h3dHome();
+}
+function h3dPose(d) {
+  const P = H3.path; if (!P) return;
+  let s = d; if (s > P.dLoop) s = P.dEntry + ((s - P.dEntry) % (P.dLoop - P.dEntry));
+  let lo = 0, hi = P.cum.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (P.cum[m] < s) lo = m + 1; else hi = m; } const i = Math.max(1, lo);
+  const t = (s - P.cum[i - 1]) / Math.max(1e-6, P.cum[i] - P.cum[i - 1]);
+  const a = P.pts[i - 1], b = P.pts[i]; const x = a[0] + (b[0] - a[0]) * t, y = a[1] + (b[1] - a[1]) * t;
+  const pos = new THREE.Vector3(x, ALT3, -y);
+  const hdg = P.hdgs[i] * Math.PI / 180; const dir = new THREE.Vector3(Math.sin(hdg), 0, -Math.cos(hdg));
+  const turn = rel180(P.hdgs[Math.min(P.hdgs.length - 1, i + 2)] - P.hdgs[Math.max(0, i - 2)]);
+  const pl = H3.plane; pl.position.copy(pos); pl.lookAt(pos.clone().add(dir)); pl.rotateY(-Math.PI / 2); pl.rotateX(Math.max(-.45, Math.min(.45, turn * .035)));
+  if (pl.userData.prop) pl.userData.prop.rotation.x += 0.7;
+  return {pos, dir, s};
+}
+function h3dPhase() { const P = H3.path, d = H3.dist; if (!P) return 'approach'; return d < P.dApproach ? 'approach' : d < P.dEntry ? 'entry' : 'hold'; }
+function h3dTick() {
+  const now = performance.now(); const dt = Math.min(.1, (now - (H3.last || now)) / 1000); H3.last = now;
+  if (!H3.path || !H3.plane) return;
+  if (H3.playing) H3.dist += dt * 30 * H3.speed;
+  const p = h3dPose(H3.dist);
+  if (H3.follow && p) { const back = p.dir.clone().multiplyScalar(-60); const want = p.pos.clone().add(back).add(new THREE.Vector3(0, 24, 0)); H3.cam.position.lerp(want, .06); H3.ctl.target.lerp(p.pos, .1); }
+  H3.ctl.update(); H3.ren.render(H3.scene, H3.cam);
+  if (H3.video) videoSync();
+}
+/* ---------- Video Modus ---------- */
+const VM = {el: null, cap: null, bar: null, hud: null, timer: 0};
+function openVideo() {
+  if (!h3dInit()) return;
+  if (!VM.el) {
+    const v = el('div', 'vmode'); v.id = 'vmode';
+    const st = el('div', 'hstage vst'); st.id = 'hstage-video';
+    const hud = el('div', 'vhud'); const cap = el('div', 'vcap'); const bar = el('div', 'vbar');
+    v.append(st, hud, cap, bar); document.body.append(v); VM.el = v; VM.cap = cap; VM.bar = bar; VM.hud = hud;
+    let down = null;
+    st.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
+    st.addEventListener('pointerup', e => { if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 8) showBar(); down = null; });
+    v.addEventListener('pointermove', () => { if (matchMedia('(pointer:fine)').matches) showBar(); });
+  }
+  H3.video = true; document.body.classList.add('video-on'); VM.el.hidden = false;
+  h3dMount($('#hstage-video')); h3dReset(); H3.playing = true; renderBar(); videoCaption(); showBar();
+  window.addEventListener('keydown', videoKeys);
+  if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+}
+function closeVideo() {
+  H3.video = false; document.body.classList.remove('video-on'); VM.el.hidden = true; window.removeEventListener('keydown', videoKeys);
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+  h3dMount();
+}
+function videoKeys(e) {
+  if (e.key === 'Escape') closeVideo(); else if (e.key === ' ') { e.preventDefault(); H3.playing = !H3.playing; renderBar(); }
+  else if (e.key === 'ArrowRight') { H3.auto = false; H3.step = Math.min(8, H3.step + 1); videoCaption(); renderBar(); }
+  else if (e.key === 'ArrowLeft') { H3.auto = false; H3.step = Math.max(0, H3.step - 1); videoCaption(); renderBar(); }
+}
+function showBar() { VM.bar.classList.add('show'); clearTimeout(VM.timer); VM.timer = setTimeout(() => VM.bar.classList.remove('show'), 4000); }
+function renderBar() {
+  const b = VM.bar; b.innerHTML = '';
+  const tb = (txt, fn, on) => { const x = btn(txt, () => { fn(); renderBar(); showBar(); }, 'chip'); if (on != null) x.setAttribute('aria-pressed', String(on)); return x; };
+  b.append(tb(H3.playing ? '❚❚ ' + HT('pause') : '▶ ' + HT('play'), () => { H3.playing = !H3.playing; }),
+    tb('↺ ' + HT('restart'), () => h3dReset()),
+    tb('◀ ' + HT('step'), () => { H3.auto = false; H3.step = Math.max(0, H3.step - 1); videoCaption(); }),
+    tb(HT('step') + ' ▶', () => { H3.auto = false; H3.step = Math.min(8, H3.step + 1); videoCaption(); }),
+    tb(HT('auto'), () => { H3.auto = !H3.auto; }, H3.auto),
+    tb(HT('speed') + ' ' + H3.speed + '×', () => { H3.speed = H3.speed >= 2 ? .5 : H3.speed + .5; }),
+    tb(HT('follow'), () => { H3.follow = !H3.follow; if (H3.follow) H3.topView = false; else h3dHome(); }, H3.follow),
+    tb(HT('top'), () => { H3.topView = !H3.topView; H3.follow = false; if (H3.topView) { const c = H3.center || new THREE.Vector3(); H3.cam.position.set(c.x, 420, c.z + 0.1); H3.ctl.target.set(c.x, 0, c.z); } else h3dHome(); }, H3.topView),
+    tb(HT('plane') + ': ' + (H3.planeType === 'jet' ? HT('jet') : HT('sep')), () => { H3.planeType = H3.planeType === 'jet' ? 'sep' : 'jet'; h3dBuild(); }),
+    tb('✕ ' + HT('exit'), () => closeVideo()));
+}
+function videoSync() {
+  const P = H3.path; if (!P) return;
+  const ph = h3dPhase(); const d = H3.dist;
+  if (H3.auto) {
+    let st;
+    if (ph === 'approach') st = Math.min(2, Math.floor(d / P.dApproach * 3));
+    else if (ph === 'entry') st = 3;
+    else { const loopLen = P.dLoop - P.dEntry; const k = (d - P.dEntry) / loopLen; st = k < 1 ? 4 + Math.min(2, Math.floor(k * 3)) : k < 2 ? 7 : 8; }
+    if (st !== H3.step) { H3.step = st; videoCaption(); }
+  }
+  const r = holdCalc();
+  VM.hud.textContent = `${HT(ph === 'approach' ? 'phApproach' : ph === 'entry' ? 'phEntry' : 'phHold')}  ·  ${HT(r.entry)}  ·  IB ${pad3(r.ibh)}°  OB ${pad3(r.obh)}°  ${r.tout} s  ·  ${hs.dir === 'R' ? HT('right').split(' ')[0] : HT('left')}`;
+}
+function videoCaption() {
+  const steps = holdSteps(holdCalc()); VM.cap.innerHTML = '';
+  VM.cap.append(el('span', 'vnum', `${HT('step')} ${H3.step + 1} / 9`), el('div', '', steps[H3.step]));
+}
+
 /* ---------- Start ---------- */
 document.documentElement.lang = LANG;
 renderAll();
 const v0 = location.hash.slice(1);
-go(['home','air','vmc','fl','soon'].includes(v0) ? v0 : 'home');
+go(['home','air','vmc','fl','hold','soon'].includes(v0) ? v0 : 'home');
 })();
 </script>
 <script>if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)location.reload();});navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update().catch(()=>{});}).catch(()=>{});}</script></body></html>
