@@ -122,6 +122,8 @@ input[type=range]{width:100%}
 .res .card{gap:4px}
 .ok{color:var(--good)}.no{color:var(--bad)}
 svg text{font-family:var(--body)}
+.numrow{display:flex;align-items:center;gap:8px}.numrow>span:first-child{flex:1}
+.numin{width:84px;font:inherit;font-variant-numeric:tabular-nums;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);text-align:right}
 .hstage{position:relative;width:100%;height:min(420px,55vh);border-radius:12px;overflow:hidden;background:var(--sky);border:1px solid var(--line);touch-action:none}
 .hstage canvas{display:block}
 .vmode{position:fixed;inset:0;z-index:40;background:var(--sky)}
@@ -1979,7 +1981,7 @@ de: {
   tol:'ICAO gewährt ±5° Toleranz an den Sektorgrenzen.', legend:'Skizze: Holding von oben, Norden oben. Blau = Holding, orange = dein Anflug, grün = Einflugverfahren, grau = Sektorgrenzen, Pfeil = Wind.',
   speeds:'Maximale Holding Geschwindigkeiten (ICAO)', spdRows:[['bis 14 000 ft','230 kt (Kat. A/B: 170 kt, Turbulenz 280 kt)'],['14 000 bis 20 000 ft','240 kt (Turbulenz 280 kt oder 0,8 M)'],['20 000 bis 34 000 ft','265 kt (Turbulenz 280 kt oder 0,8 M)'],['über 34 000 ft','0,83 M']],
   memo:'Merkhilfen', memoList:['Standard Holding: Rechtskurven, 1 min Inbound bis 14 000 ft, 1,5 min darüber.','Einflugsektoren: 70° Linie durch den Fix auf der Holding Seite teilt Teardrop (70°) und Parallel (110°), der Rest (180°) ist Direct.','Windkorrektur: Inbound einfach, Outbound dreifach, Zeit nach Groundspeed.','Zeitnahme outbound: abeam Fix oder nach Erreichen der Outbound Kurve, je nachdem was später ist.','Kurven mit 25° Querlage oder 3°/s, was weniger ist.'],
-  random:'Zufallsaufgabe', quiz:'Selbsttest', quizQ:'Welcher Einflug?', correct:'Richtig', wrongA:'Nicht ganz. Richtig ist: ',
+  random:'Zufallsaufgabe', quizHint:'Erst im Kopf entscheiden, dann tippen. Sektoren und Einflugweg erscheinen nach deiner Antwort.', next:'Nächste Aufgabe', score:'Treffer', quiz:'Selbsttest', quizQ:'Welcher Einflug?', correct:'Richtig', wrongA:'Nicht ganz. Richtig ist: ',
   threeD:'3D Flug', video:'Video Modus', videoHint:'Video Modus: Vollbild, große Untertitel, Flugzeug fliegt Anflug, Einflug und Holding. Bildschirmaufnahme mit Mikrofon starten und draufsprechen.',
   play:'Play', pause:'Pause', restart:'Neustart', follow:'Kamera folgt', top:'Draufsicht', speed:'Tempo', plane:'Flugzeug', jet:'Jet', sep:'SEP', exit:'Beenden', auto:'Untertitel automatisch', step:'Schritt',
   phApproach:'Anflug zum Fix', phEntry:'Einflug', phHold:'Holding', tapHint:'Tippen zeigt die Steuerung, Leertaste pausiert, Pfeiltasten wechseln den Schritt, Esc beendet.',
@@ -2005,7 +2007,7 @@ en: {
   tol:'ICAO allows ±5° tolerance at the sector boundaries.', legend:'Sketch: hold from above, north up. Blue = hold, orange = your arrival, green = entry procedure, grey = sector boundaries, arrow = wind.',
   speeds:'Maximum holding speeds (ICAO)', spdRows:[['up to 14 000 ft','230 kt (Cat A/B: 170 kt, turbulence 280 kt)'],['14 000 to 20 000 ft','240 kt (turbulence 280 kt or 0.8 M)'],['20 000 to 34 000 ft','265 kt (turbulence 280 kt or 0.8 M)'],['above 34 000 ft','0.83 M']],
   memo:'Memory hooks', memoList:['Standard hold: right turns, 1 min inbound up to 14 000 ft, 1.5 min above.','Entry sectors: the 70° line through the fix on the holding side splits teardrop (70°) and parallel (110°), the remaining 180° is direct.','Wind correction: single on the inbound, triple on the outbound, timing by groundspeed.','Start outbound timing abeam the fix or wings level, whichever is later.','Turns at 25° bank or 3°/s, whichever is less.'],
-  random:'Random exercise', quiz:'Self test', quizQ:'Which entry?', correct:'Correct', wrongA:'Not quite. Correct is: ',
+  random:'Random exercise', quizHint:'Decide in your head first, then tap. Sectors and entry path appear after your answer.', next:'Next task', score:'Score', quiz:'Self test', quizQ:'Which entry?', correct:'Correct', wrongA:'Not quite. Correct is: ',
   threeD:'3D flight', video:'Video mode', videoHint:'Video mode: full screen, large captions, the aircraft flies arrival, entry and hold. Start a screen recording with microphone and talk over it.',
   play:'Play', pause:'Pause', restart:'Restart', follow:'Chase camera', top:'Top view', speed:'Speed', plane:'Aircraft', jet:'Jet', sep:'SEP', exit:'Exit', auto:'Auto captions', step:'Step',
   phApproach:'Arrival to the fix', phEntry:'Entry', phHold:'Holding', tapHint:'Tap to show controls, space pauses, arrow keys change the step, Esc exits.',
@@ -2031,7 +2033,7 @@ fr: {
   tol:'L’OACI accorde ±5° de tolérance aux limites de secteur.', legend:'Schéma : attente vue de dessus, nord en haut. Bleu = attente, orange = votre arrivée, vert = procédure d’entrée, gris = limites de secteur, flèche = vent.',
   speeds:'Vitesses maximales d’attente (OACI)', spdRows:[['jusqu’à 14 000 ft','230 kt (cat. A/B : 170 kt, turbulence 280 kt)'],['14 000 à 20 000 ft','240 kt (turbulence 280 kt ou 0,8 M)'],['20 000 à 34 000 ft','265 kt (turbulence 280 kt ou 0,8 M)'],['au-dessus de 34 000 ft','0,83 M']],
   memo:'Repères', memoList:['Attente standard : virages à droite, 1 min de rapprochement jusqu’à 14 000 ft, 1,5 min au-dessus.','Secteurs d’entrée : la ligne à 70° par le repère côté attente sépare goutte d’eau (70°) et parallèle (110°), le reste (180°) est direct.','Correction de vent : simple au rapprochement, triple à l’éloignement, temps selon la vitesse sol.','Chronométrage éloignement : par le travers du repère ou ailes à plat, le plus tardif.','Virages à 25° d’inclinaison ou 3°/s, la plus faible des deux.'],
-  random:'Exercice aléatoire', quiz:'Auto-test', quizQ:'Quelle entrée ?', correct:'Correct', wrongA:'Pas tout à fait. La bonne réponse : ',
+  random:'Exercice aléatoire', quizHint:'Décidez d’abord de tête, puis touchez. Les secteurs et la trajectoire apparaissent après votre réponse.', next:'Exercice suivant', score:'Score', quiz:'Auto-test', quizQ:'Quelle entrée ?', correct:'Correct', wrongA:'Pas tout à fait. La bonne réponse : ',
   threeD:'Vol 3D', video:'Mode vidéo', videoHint:'Mode vidéo : plein écran, grands sous-titres, l’avion vole l’arrivée, l’entrée et l’attente. Lancez un enregistrement d’écran avec micro et commentez.',
   play:'Lecture', pause:'Pause', restart:'Recommencer', follow:'Caméra de poursuite', top:'Vue de dessus', speed:'Vitesse', plane:'Avion', jet:'Jet', sep:'SEP', exit:'Quitter', auto:'Sous-titres automatiques', step:'Étape',
   phApproach:'Arrivée vers le repère', phEntry:'Entrée', phHold:'Attente', tapHint:'Toucher affiche les commandes, espace met en pause, flèches changent l’étape, Échap quitte.',
@@ -2043,7 +2045,8 @@ const fmt = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
 const norm = a => ((a % 360) + 360) % 360;
 const rel180 = a => { a = norm(a); return a > 180 ? a - 360 : a; };
 const pad3 = n => String(Math.round(norm(n))).padStart(3, '0');
-const hs = {ib: 270, dir: 'R', hd: 120, wd: 320, ws: 25, tas: 180, alt: 5000, quiz: false, pick: null};
+const hs = {ib: 270, dir: 'R', hd: 120, wd: 320, ws: 25, tas: 180, alt: 5000, quiz: false, pick: null, score: [0, 0]};
+window.__hold = {hs, render: () => renderHold()};
 const holdEl = $('#hold');
 function holdCalc() {
   const ob = norm(hs.ib + 180);
@@ -2084,6 +2087,7 @@ function holdSteps(r) {
     fmt(HT('s9'), {alt: hs.alt.toLocaleString('de-DE'), vmax: r.vmax, tas: hs.tas, ok: hs.tas <= r.vnum ? HT('okY') : HT('okN')}),
   ];
 }
+function randomTask() { hs.ib = Math.floor(Math.random() * 36) * 10; hs.dir = Math.random() < .7 ? 'R' : 'L'; hs.hd = Math.floor(Math.random() * 36) * 10; hs.wd = Math.floor(Math.random() * 36) * 10; hs.ws = 5 + Math.floor(Math.random() * 8) * 5; hs.pick = null; renderHold(); }
 function renderHold() {
   if (!holdEl) return;
   holdEl.innerHTML = '';
@@ -2091,20 +2095,28 @@ function renderHold() {
   holdEl.append(el('div', 'eyebrow', T('module') + ' 4'), el('h2', '', HT('title')), el('p', 'muted', HT('intro')));
   const g = el('div', 'vmc');
   const form = el('div', 'card'); form.style.gap = '12px';
-  const num = (label, key, min, max, step, unit) => { const l = el('label', 'f', `${label}: ${hs[key]}${unit}`); const i = document.createElement('input'); i.type = 'range'; i.min = min; i.max = max; i.step = step; i.value = hs[key]; i.oninput = () => { hs[key] = +i.value; hs.pick = null; renderHold(); }; l.append(i); return l; };
+  const num = (label, key, min, max, step, unit) => {
+    const l = el('label', 'f'); const head = el('span', 'numrow'); head.append(el('span', '', label));
+    const n = document.createElement('input'); n.type = 'number'; n.inputMode = 'decimal'; n.min = min; n.max = max; n.step = 'any'; n.value = hs[key]; n.className = 'numin'; n.setAttribute('aria-label', label);
+    const commit = v => { v = parseFloat(String(v).replace(',', '.')); if (!isFinite(v)) return; v = Math.min(max, Math.max(min, v)); hs[key] = key === 'ib' || key === 'hd' || key === 'wd' ? norm(v) : v; hs.pick = null; renderHold(); };
+    n.onchange = () => commit(n.value); n.onkeydown = e => { if (e.key === 'Enter') { n.blur(); } };
+    head.append(n, el('span', 'muted', unit.trim()));
+    const i = document.createElement('input'); i.type = 'range'; i.min = min; i.max = max; i.step = step; i.value = hs[key]; i.oninput = () => commit(i.value);
+    l.append(head, i); return l; };
   form.append(num(HT('inbound'), 'ib', 0, 359, 1, '°'));
   const seg = el('div', 'seg'); for (const [v, l] of [['R', HT('right')], ['L', HT('left')]]) { const b = el('button', '', l); b.setAttribute('aria-pressed', String(hs.dir === v)); b.onclick = () => { hs.dir = v; hs.pick = null; renderHold(); }; seg.append(b); } form.append(el('div', 'eyebrow', HT('turns')), seg);
   form.append(num(HT('heading'), 'hd', 0, 359, 1, '°'), num(HT('wind'), 'wd', 0, 359, 5, '°'), num(HT('windSpd'), 'ws', 0, 60, 1, ' kt'), num(HT('tas'), 'tas', 90, 300, 5, ' kt'), num(HT('alt'), 'alt', 1000, 40000, 500, ' ft'));
-  const rrow = el('div', 'row'); rrow.append(btn(HT('random'), () => { hs.ib = Math.floor(Math.random() * 36) * 10; hs.dir = Math.random() < .7 ? 'R' : 'L'; hs.hd = Math.floor(Math.random() * 36) * 10; hs.wd = Math.floor(Math.random() * 36) * 10; hs.ws = 5 + Math.floor(Math.random() * 8) * 5; hs.pick = null; renderHold(); }), btn(HT('quiz'), () => { hs.quiz = !hs.quiz; hs.pick = null; renderHold(); })); form.append(rrow);
+  const rrow = el('div', 'row'); rrow.append(btn(HT('random'), randomTask), btn(HT('quiz'), () => { hs.quiz = !hs.quiz; hs.pick = null; if (hs.quiz) randomTask(); else renderHold(); })); form.append(rrow);
   g.append(form);
   const out = el('div', 'card');
-  out.append(holdSvg(r));
+  const reveal = !hs.quiz || !!hs.pick; out.append(holdSvg(r, reveal));
   if (hs.quiz) {
     out.append(el('h3', '', HT('quizQ')));
     const row = el('div', 'row');
-    for (const e of ['direct', 'parallel', 'teardrop']) { const b = el('button', 'btn-s', HT(e)); b.onclick = () => { hs.pick = e; renderHold(); }; if (hs.pick === e) b.style.borderColor = 'var(--accent)'; row.append(b); }
-    out.append(row);
-    if (hs.pick) out.append(el('div', hs.pick === r.entry ? 'ok' : 'no', (hs.pick === r.entry ? HT('correct') : HT('wrongA') + HT(r.entry)) + '.'));
+    for (const e of ['direct', 'parallel', 'teardrop']) { const b = el('button', 'btn-s', HT(e)); b.disabled = !!hs.pick; b.onclick = () => { hs.pick = e; hs.score[1]++; if (e === r.entry) hs.score[0]++; renderHold(); }; if (hs.pick === e) b.style.borderColor = hs.pick === r.entry ? 'var(--good)' : 'var(--bad)'; row.append(b); }
+    out.append(row, el('div', 'hint', hs.pick ? '' : HT('quizHint')));
+    if (hs.pick) { const fb = el('div', 'row'); fb.append(el('div', hs.pick === r.entry ? 'ok' : 'no', (hs.pick === r.entry ? HT('correct') : HT('wrongA') + HT(r.entry)) + '.'), btn(HT('next') + ' ▶', randomTask, 'btn')); out.append(fb); }
+    out.append(el('div', 'hint', `${HT('score')}: ${hs.score[0]} / ${hs.score[1]}`));
   }
   if (!hs.quiz || hs.pick) {
     const res = el('div', 'res');
@@ -2128,7 +2140,7 @@ function renderHold() {
   holdEl.append(sp, mm);
   if (view === 'hold' && !H3.video) h3dMount();
 }
-function holdSvg(r) {
+function holdSvg(r, reveal = true) {
   const W = 520, H = 420, ns = 'http://www.w3.org/2000/svg';
   const s = document.createElementNS(ns, 'svg'); s.setAttribute('viewBox', `0 0 ${W} ${H}`); s.style.width = '100%'; s.style.maxWidth = '560px';
   const add = (t, a, txt) => { const e = document.createElementNS(ns, t); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); if (txt != null) e.textContent = txt; s.append(e); return e; };
@@ -2140,12 +2152,14 @@ function holdSvg(r) {
   const sgn = hs.dir === 'R' ? 1 : -1;
   const sector = (from, to, color) => { const sweep = norm(to - from); const rr = 150; const p0 = pt(from + 180, rr), p1 = pt(to + 180, rr); add('path', {d: `M${fx} ${fy} L${p0[0]} ${p0[1]} A${rr} ${rr} 0 ${sweep > 180 ? 1 : 0} 1 ${p1[0]} ${p1[1]} Z`, fill: color, opacity: .13}); };
   const ob = r.ob;
+  if (reveal) {
   if (hs.dir === 'R') { sector(ob - 110, ob, '#2a8a52'); sector(ob, ob + 70, '#b7791f'); sector(ob + 70, ob + 250, '#0b6e8f'); }
   else { sector(ob, ob + 110, '#2a8a52'); sector(ob - 70, ob, '#b7791f'); sector(ob + 110, ob + 290, '#0b6e8f'); }
   for (const ang of (hs.dir === 'R' ? [ob - 110, ob, ob + 70] : [ob + 110, ob, ob - 70])) { const p = pt(ang + 180, 150); add('line', {x1: fx, y1: fy, x2: p[0], y2: p[1], stroke: '#6b7784', 'stroke-width': 1.5, 'stroke-dasharray': '5 4'}); }
   const lab = (ang, txt, col) => { const p = pt(ang + 180, 120); add('text', {x: p[0], y: p[1], 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: col}, txt); };
   if (hs.dir === 'R') { lab(ob - 55, HT('parallel').split(' ')[0], '#2a8a52'); lab(ob + 35, HT('teardrop').split(' ')[0], '#b7791f'); lab(ob + 160, HT('direct').split(' ')[0], '#0b6e8f'); }
   else { lab(ob + 55, HT('parallel').split(' ')[0], '#2a8a52'); lab(ob - 35, HT('teardrop').split(' ')[0], '#b7791f'); lab(ob - 160, HT('direct').split(' ')[0], '#0b6e8f'); }
+  }
   const ibDir = hs.ib;
   const start = pt(ibDir + 180, L);
   const side = ibDir + sgn * 90;
@@ -2163,7 +2177,7 @@ function holdSvg(r) {
   // Einflugverfahren aus der Simulation (gruen), Masstab wie Racetrack (L 120, R 40)
   const sim = holdPath(r, {L, R});
   const ent = sim.pts.slice(sim.iApproach, sim.iEntry + 1);
-  if (ent.length > 1) add('path', {d: 'M' + ent.map(p => (fx + p[0]).toFixed(1) + ' ' + (fy - p[1]).toFixed(1)).join(' L'), fill: 'none', stroke: '#2a8a52', 'stroke-width': 3, 'stroke-dasharray': '7 5'});
+  if (reveal && ent.length > 1) add('path', {d: 'M' + ent.map(p => (fx + p[0]).toFixed(1) + ' ' + (fy - p[1]).toFixed(1)).join(' L'), fill: 'none', stroke: '#2a8a52', 'stroke-width': 3, 'stroke-dasharray': '7 5'});
   const wx = 60, wy = 60; const wt = pt(hs.wd + 180, 28, wx, wy), wf = pt(hs.wd, 28, wx, wy);
   add('circle', {cx: wx, cy: wy, r: 34, fill: 'var(--surface)', stroke: 'var(--line)'});
   add('line', {x1: wf[0], y1: wf[1], x2: wt[0], y2: wt[1], stroke: '#6b7784', 'stroke-width': 3}); arrow(hs.wd + 180, wt[0], wt[1], '#6b7784');
@@ -2182,14 +2196,16 @@ function holdPath(r, {L, R}) {
   const fly = dist => { for (let d = 0; d < dist; d += step) { fwd(step); push(); } };
   const dps = step / R * 180 / Math.PI; // Grad pro Schritt
   const turn = (to, dir) => { let rem = norm(dir > 0 ? to - hdg : hdg - to); if (rem < 0.01) return; let n = 0; while (rem > 0 && n < 400) { const d = Math.min(dps, rem); hdg = norm(hdg + dir * d); rem -= d; fwd(step); push(); n++; } };
-  const trackTo = (tx, ty) => { let n = 0; while (n < 900) { const dx = tx - x, dy = ty - y, dist = Math.hypot(dx, dy); if (dist < step * 1.2) break; const br = norm(Math.atan2(dx, dy) * 180 / Math.PI); const diff = rel180(br - hdg); if (Math.abs(diff) > dps) hdg = norm(hdg + Math.sign(diff) * dps); else hdg = br; fwd(step); push(); n++; } };
+  const trackTo = (tx, ty) => { { const dx0 = tx - x, dy0 = ty - y, d0 = Math.hypot(dx0, dy0); const br0 = norm(Math.atan2(dx0, dy0) * 180 / Math.PI); if (d0 < 2.2 * R && Math.abs(rel180(br0 - hdg)) > 50) return; } let n = 0, best = 1e9; while (n < 900) { const dx = tx - x, dy = ty - y, dist = Math.hypot(dx, dy); if (dist < step * 1.2) break; if (dist > best + step * 2) break; best = Math.min(best, dist); const br = norm(Math.atan2(dx, dy) * 180 / Math.PI); const diff = rel180(br - hdg); if (Math.abs(diff) > dps) hdg = norm(hdg + Math.sign(diff) * dps); else hdg = br; fwd(step); push(); n++; } };
   // Anflug
   const a0 = hs.hd * Math.PI / 180; x = -Math.sin(a0) * L * 1.8; y = -Math.cos(a0) * L * 1.8; push(); fly(L * 1.8); x = 0; y = 0; hdg = hs.hd; push();
   const iApproach = pts.length - 1;
   const ob = r.ob;
-  if (r.entry === 'direct') { turn(ob, sgn); fly(L * 0.8); turn(hs.ib, sgn); trackTo(0, 0); }
-  else if (r.entry === 'parallel') { const dOut = rel180(ob - hdg) >= 0 ? 1 : -1; turn(ob, dOut); fly(L); turn(hs.ib, -sgn); trackTo(0, 0); }
-  else { turn(r.td, rel180(r.td - hdg) >= 0 ? 1 : -1); fly(L); turn(hs.ib, sgn); trackTo(0, 0); }
+  const ibp = d => { const a = (hs.ib + 180) * Math.PI / 180; return [Math.sin(a) * d, Math.cos(a) * d]; }; // Punkt auf dem Inbound Leg
+  const intercept = () => { trackTo(...ibp(L * 0.5)); trackTo(0, 0); x = 0; y = 0; hdg = hs.ib; push(); }; // Inbound Kurs anschneiden, dann zum Fix
+  if (r.entry === 'direct') { turn(ob, sgn); fly(L * 0.8); turn(hs.ib, sgn); intercept(); }
+  else if (r.entry === 'parallel') { const dOut = rel180(ob - hdg) >= 0 ? 1 : -1; turn(ob, dOut); fly(L); turn(hs.ib, -sgn); intercept(); }
+  else { turn(r.td, rel180(r.td - hdg) >= 0 ? 1 : -1); fly(L); turn(hs.ib, sgn); intercept(); }
   x = 0; y = 0; hdg = hs.ib; push();
   const iEntry = pts.length - 1;
   // Racetrack
