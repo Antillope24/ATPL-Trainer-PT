@@ -2041,8 +2041,36 @@ function makeAirlinerV2(s = 1) {
   g.scale.set(s, s, s);
   return g;
 }
+// ---------- Geladenes Modell (AC3D Binärformat aus obj2bin.py) ----------
+const AC3D_CACHE = {};
+function loadAC3D(url) {
+  if (AC3D_CACHE[url]) return AC3D_CACHE[url];
+  AC3D_CACHE[url] = fetch(url).then(r => { if (!r.ok) throw new Error(url + ' ' + r.status); return r.arrayBuffer(); }).then(buf => {
+    const dv = new DataView(buf); const hl = dv.getUint32(4, true); const hdr = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 8, hl)));
+    let off = 8 + hl; off += (4 - off % 4) % 4;
+    const pos = new Float32Array(buf, off, hdr.vcount * 3); off += hdr.vcount * 12;
+    const nrm = new Int8Array(buf, off, hdr.vcount * 4); off += hdr.vcount * 4;
+    const idx = new Uint32Array(buf, off, hdr.icount);
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(nrm, 4, true));
+    g.setIndex(new THREE.BufferAttribute(idx, 1));
+    const mats = hdr.groups.map((gr, i) => { g.addGroup(gr.start, gr.count, i); const m = new THREE.MeshPhongMaterial({color: new THREE.Color(...gr.color), shininess: 60, specular: 0x555555, side: THREE.DoubleSide}); if (gr.opacity < 1) { m.transparent = true; m.opacity = gr.opacity; } return m; });
+    return {geometry: g, materials: mats, hdr};
+  });
+  return AC3D_CACHE[url];
+}
+// Liefert sofort eine Gruppe; das Modell erscheint, sobald es geladen ist. opts.recolor: {name: hex} Materialfarben ueberschreiben
+function makeLoadedPlane(url, s = 1, opts = {}) {
+  const g = new THREE.Group(); g.scale.set(s, s, s);
+  loadAC3D(url).then(({geometry, materials, hdr}) => {
+    const mats = materials.map((m, i) => { const name = hdr.groups[i].name; if (opts.recolor && opts.recolor[name] != null) { const c = m.clone(); c.color.setHex(opts.recolor[name]); return c; } return m; });
+    const mesh = new THREE.Mesh(geometry, mats); if (opts.rotY) mesh.rotation.y = opts.rotY; g.add(mesh); if (opts.onload) opts.onload(mesh);
+  }).catch(e => { console.warn('Modell nicht geladen, Ersatz', e); g.add(opts.fallback ? opts.fallback() : makeBizJet(1)); });
+  return g;
+}
 
-function makeAirliner(s = 1) { return makeAirlinerV2(s); }
+function makeAirliner(s = 1) { return s >= 2 ? makeLoadedPlane('airliner.wasm', s, {fallback: () => makeAirlinerV2(1)}) : makeAirlinerV2(s); }
 /* ---------- Modul 3: Holding ---------- */
 const HOLD_T = {
 de: {
@@ -2067,7 +2095,7 @@ de: {
   memo:'Merkhilfen', memoList:['Standard Holding: Rechtskurven, 1 min Inbound bis 14 000 ft, 1,5 min darüber.','Einflugsektoren: 70° Linie durch den Fix auf der Holding Seite teilt Teardrop (70°) und Parallel (110°), der Rest (180°) ist Direct.','Windkorrektur: Inbound einfach, Outbound dreifach, Zeit nach Groundspeed.','Zeitnahme outbound: abeam Fix oder nach Erreichen der Outbound Kurve, je nachdem was später ist.','Kurven mit 25° Querlage oder 3°/s, was weniger ist.'],
   random:'Zufallsaufgabe', quizHint:'Erst im Kopf entscheiden, dann tippen. Sektoren und Einflugweg erscheinen nach deiner Antwort.', next:'Nächste Aufgabe', score:'Treffer', quiz:'Selbsttest', quizQ:'Welcher Einflug?', correct:'Richtig', wrongA:'Nicht ganz. Richtig ist: ',
   threeD:'3D Flug', video:'Video Modus', videoHint:'Video Modus: Vollbild, große Untertitel, Flugzeug fliegt Anflug, Einflug und Holding. Bildschirmaufnahme mit Mikrofon starten und draufsprechen.',
-  play:'Play', pause:'Pause', restart:'Neustart', follow:'Kamera folgt', top:'Draufsicht', speed:'Tempo', plane:'Flugzeug', jet:'Global 7500', airliner:'Airliner', sep:'SEP', exit:'Beenden', auto:'Untertitel automatisch', step:'Schritt',
+  play:'Play', pause:'Pause', restart:'Neustart', follow:'Kamera folgt', top:'Draufsicht', speed:'Tempo', plane:'Flugzeug', global:'Global 7500', airliner:'Airliner', jet:'Jet (einfach)', sep:'SEP', exit:'Beenden', auto:'Untertitel automatisch', step:'Schritt',
   phApproach:'Anflug zum Fix', phEntry:'Einflug', phHold:'Holding', tapHint:'Tippen zeigt die Steuerung, Leertaste pausiert, Pfeiltasten wechseln den Schritt, Esc beendet.',
   noGl:'3D nicht verfügbar (WebGL fehlt). Die Skizze oben zeigt alles.'
 },
@@ -2093,7 +2121,7 @@ en: {
   memo:'Memory hooks', memoList:['Standard hold: right turns, 1 min inbound up to 14 000 ft, 1.5 min above.','Entry sectors: the 70° line through the fix on the holding side splits teardrop (70°) and parallel (110°), the remaining 180° is direct.','Wind correction: single on the inbound, triple on the outbound, timing by groundspeed.','Start outbound timing abeam the fix or wings level, whichever is later.','Turns at 25° bank or 3°/s, whichever is less.'],
   random:'Random exercise', quizHint:'Decide in your head first, then tap. Sectors and entry path appear after your answer.', next:'Next task', score:'Score', quiz:'Self test', quizQ:'Which entry?', correct:'Correct', wrongA:'Not quite. Correct is: ',
   threeD:'3D flight', video:'Video mode', videoHint:'Video mode: full screen, large captions, the aircraft flies arrival, entry and hold. Start a screen recording with microphone and talk over it.',
-  play:'Play', pause:'Pause', restart:'Restart', follow:'Chase camera', top:'Top view', speed:'Speed', plane:'Aircraft', jet:'Global 7500', airliner:'Airliner', sep:'SEP', exit:'Exit', auto:'Auto captions', step:'Step',
+  play:'Play', pause:'Pause', restart:'Restart', follow:'Chase camera', top:'Top view', speed:'Speed', plane:'Aircraft', global:'Global 7500', airliner:'Airliner', jet:'Jet (simple)', sep:'SEP', exit:'Exit', auto:'Auto captions', step:'Step',
   phApproach:'Arrival to the fix', phEntry:'Entry', phHold:'Holding', tapHint:'Tap to show controls, space pauses, arrow keys change the step, Esc exits.',
   noGl:'3D not available (no WebGL). The sketch above shows everything.'
 },
@@ -2119,7 +2147,7 @@ fr: {
   memo:'Repères', memoList:['Attente standard : virages à droite, 1 min de rapprochement jusqu’à 14 000 ft, 1,5 min au-dessus.','Secteurs d’entrée : la ligne à 70° par le repère côté attente sépare goutte d’eau (70°) et parallèle (110°), le reste (180°) est direct.','Correction de vent : simple au rapprochement, triple à l’éloignement, temps selon la vitesse sol.','Chronométrage éloignement : par le travers du repère ou ailes à plat, le plus tardif.','Virages à 25° d’inclinaison ou 3°/s, la plus faible des deux.'],
   random:'Exercice aléatoire', quizHint:'Décidez d’abord de tête, puis touchez. Les secteurs et la trajectoire apparaissent après votre réponse.', next:'Exercice suivant', score:'Score', quiz:'Auto-test', quizQ:'Quelle entrée ?', correct:'Correct', wrongA:'Pas tout à fait. La bonne réponse : ',
   threeD:'Vol 3D', video:'Mode vidéo', videoHint:'Mode vidéo : plein écran, grands sous-titres, l’avion vole l’arrivée, l’entrée et l’attente. Lancez un enregistrement d’écran avec micro et commentez.',
-  play:'Lecture', pause:'Pause', restart:'Recommencer', follow:'Caméra de poursuite', top:'Vue de dessus', speed:'Vitesse', plane:'Avion', jet:'Global 7500', airliner:'Avion de ligne', sep:'SEP', exit:'Quitter', auto:'Sous-titres automatiques', step:'Étape',
+  play:'Lecture', pause:'Pause', restart:'Recommencer', follow:'Caméra de poursuite', top:'Vue de dessus', speed:'Vitesse', plane:'Avion', global:'Global 7500', airliner:'Avion de ligne', jet:'Jet (simple)', sep:'SEP', exit:'Quitter', auto:'Sous-titres automatiques', step:'Étape',
   phApproach:'Arrivée vers le repère', phEntry:'Entrée', phHold:'Attente', tapHint:'Toucher affiche les commandes, espace met en pause, flèches changent l’étape, Échap quitte.',
   noGl:'3D indisponible (pas de WebGL). Le schéma ci-dessus montre tout.'
 }
@@ -2223,6 +2251,7 @@ function renderHoldOut() {
     out.append(res);
     // 3D
     out.append(el('h3', '', HT('threeD')));
+    const psel = el('div', 'seg'); for (const t of PLANE_TYPES) { const b = el('button', '', HT(t)); b.setAttribute('aria-pressed', String(H3.planeType === t)); b.onclick = () => { H3.planeType = t; for (const x of psel.children) x.setAttribute('aria-pressed', String(x === b)); h3dBuild(); }; psel.append(b); } out.append(psel);
     const st = el('div', 'hstage'); st.id = 'hstage-page'; out.append(st);
     const vrow = el('div', 'row'); vrow.append(btn(HT('video'), () => openVideo(), 'btn'), btn(HT('restart'), () => h3dReset())); out.append(vrow, el('div', 'hint', HT('videoHint')));
     out.append(el('h3', '', HT('steps')));
@@ -2307,7 +2336,14 @@ function holdPath(r, {L, R}) {
   return {pts, hdgs, cum, iApproach, iEntry, iLoop, dApproach: cum[iApproach], dEntry: cum[iEntry], dLoop: cum[iLoop]};
 }
 /* ---------- 3D Szene ---------- */
-const H3 = {ready: false, scene: null, cam: null, ren: null, ctl: null, world: null, plane: null, planeType: 'jet', path: null, dist: 0, playing: true, speed: 1, follow: false, topView: false, last: 0, auto: true, step: 0, video: false, ro: null, key: '', center: null};
+const PLANE_TYPES = ['global', 'airliner', 'jet', 'sep'];
+function makePlane(type, s) {
+  if (type === 'global') return makeLoadedPlane('bizjet.wasm', s, {recolor: {Material4: 0x1aa3b8}, fallback: () => makeBizJet(1)});
+  if (type === 'airliner') return makeLoadedPlane('airliner.wasm', s, {fallback: () => makeAirlinerV2(1)});
+  if (type === 'jet') return makeBizJet(s);
+  return makeSEP(s * 1.6);
+}
+const H3 = {ready: false, scene: null, cam: null, ren: null, ctl: null, world: null, plane: null, planeType: 'global', path: null, dist: 0, playing: true, speed: 1, follow: false, topView: false, last: 0, auto: true, step: 0, video: false, ro: null, key: '', center: null};
 const ALT3 = 14;
 function h3dInit() {
   if (H3.ready) return true;
@@ -2372,7 +2408,7 @@ function h3dBuild() {
   const ap = P.pts[Math.floor(P.iApproach * 0.3)]; const al = textSprite('HDG ' + pad3(hs.hd) + '°', 0xd9742b, .04); al.position.copy(v3(ap, ALT3 + 4)); w.add(al);
   if (hs.ws > 0) { const wa = hs.wd * Math.PI / 180; const dir = new THREE.Vector3(-Math.sin(wa), 0, Math.cos(wa)); const org = new THREE.Vector3(Math.sin(wa) * 150, ALT3 + 30, -Math.cos(wa) * 150); w.add(new THREE.ArrowHelper(dir, org, 60, 0x5b6876, 14, 7)); const wl = textSprite(`${pad3(hs.wd)}° / ${hs.ws} kt`, 0x5b6876, .04); wl.position.copy(org).add(new THREE.Vector3(0, 6, 0)); w.add(wl); }
   w.add(new THREE.ArrowHelper(new THREE.Vector3(0, 0, -1), new THREE.Vector3(-170, 1, 160), 35, 0x17202b, 9, 5)); const nl = textSprite('N', 0x17202b, .04); nl.position.set(-170, 4, 118); w.add(nl);
-  H3.plane = H3.planeType === 'jet' ? makeBizJet(2.6) : H3.planeType === 'airliner' ? makeAirlinerV2(2.6) : makeSEP(4.2); w.add(H3.plane);
+  H3.plane = makePlane(H3.planeType, 2.6); w.add(H3.plane);
   // Kamera auf den Schwerpunkt des Racetracks
   const loop = P.pts.slice(P.iEntry, P.iLoop + 1); const cx = loop.reduce((a, p) => a + p[0], 0) / loop.length, cz = -loop.reduce((a, p) => a + p[1], 0) / loop.length; H3.center = new THREE.Vector3(cx, 0, cz);
   if (!H3.follow && !H3.topView) h3dHome();
@@ -2441,7 +2477,7 @@ function renderBar() {
     tb(HT('speed') + ' ' + H3.speed + '×', () => { H3.speed = H3.speed >= 2 ? .5 : H3.speed + .5; }),
     tb(HT('follow'), () => { H3.follow = !H3.follow; if (H3.follow) H3.topView = false; else h3dHome(); }, H3.follow),
     tb(HT('top'), () => { H3.topView = !H3.topView; H3.follow = false; if (H3.topView) { const c = H3.center || new THREE.Vector3(); H3.cam.position.set(c.x, 420, c.z + 0.1); H3.ctl.target.set(c.x, 0, c.z); } else h3dHome(); }, H3.topView),
-    tb(HT('plane') + ': ' + HT(H3.planeType), () => { H3.planeType = H3.planeType === 'jet' ? 'airliner' : H3.planeType === 'airliner' ? 'sep' : 'jet'; h3dBuild(); }),
+    tb(HT('plane') + ': ' + HT(H3.planeType), () => { H3.planeType = PLANE_TYPES[(PLANE_TYPES.indexOf(H3.planeType) + 1) % PLANE_TYPES.length]; h3dBuild(); }),
     tb('✕ ' + HT('exit'), () => closeVideo()));
 }
 function videoSync() {
