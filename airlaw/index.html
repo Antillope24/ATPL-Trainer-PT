@@ -1959,6 +1959,90 @@ function vmcSvg(r) {
   return s;
 }
 
+// ---------- Flugzeugmodelle (prozedural): Business Jet (Global 7500 Stil) und Airliner ----------
+const JET_COL = {white: 0xf7f9fb, teal: 0x1aa3b8, dark: 0x2b333d, grey: 0x9aa4ae, glass: 0x1c2630};
+function jetMat(c, shiny = 70) { return new THREE.MeshPhongMaterial({color: c, shininess: shiny, specular: 0x666666}); }
+// Rumpf aus Drehprofil: pts = [[x entlang Laengsachse, Radius], ...], Heck nach oben gezogen (upsweep ab xTail)
+function fuselage(pts, xTail, sweep, mat) {
+  const prof = pts.slice().reverse().map(p => new THREE.Vector2(p[1], p[0]));
+  const g = new THREE.LatheGeometry(prof, 28); g.rotateZ(-Math.PI / 2); // Achse -> +x
+  const pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++) { const x = pos.getX(i); if (x < xTail) pos.setY(i, pos.getY(i) + (xTail - x) * sweep); }
+  g.computeVertexNormals();
+  return new THREE.Mesh(g, mat);
+}
+// Fluegelhaelfte: Grundriss als Polygon [x, spannweite] in der Ebene, Dicke t; liegt in XZ, Spannweite nach +z
+function wingHalf(outline, t, mat) {
+  const sh = new THREE.Shape(outline.map(p => new THREE.Vector2(p[0], p[1])));
+  const g = new THREE.ExtrudeGeometry(sh, {depth: t, bevelEnabled: true, bevelThickness: t * 0.3, bevelSize: t * 0.6, bevelSegments: 2});
+  g.rotateX(Math.PI / 2); g.translate(0, t, 0);
+  return new THREE.Mesh(g, mat);
+}
+// Senkrechte Flaeche: Grundriss [x, hoehe] in XY, Dicke t in z
+function finPlate(outline, t, mat) {
+  const sh = new THREE.Shape(outline.map(p => new THREE.Vector2(p[0], p[1])));
+  const g = new THREE.ExtrudeGeometry(sh, {depth: t, bevelEnabled: true, bevelThickness: t * 0.3, bevelSize: t * 0.5, bevelSegments: 2});
+  g.translate(0, 0, -t / 2);
+  return new THREE.Mesh(g, mat);
+}
+function nacelle(r, len, mat, dark) {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.92, r, len, 20), mat); body.rotation.z = Math.PI / 2; g.add(body);
+  const lip = new THREE.Mesh(new THREE.TorusGeometry(r * 0.98, r * 0.08, 8, 24), mat); lip.rotation.y = Math.PI / 2; lip.position.x = len / 2; g.add(lip);
+  const fan = new THREE.Mesh(new THREE.CircleGeometry(r * 0.9, 20), dark); fan.rotation.y = Math.PI / 2; fan.position.x = len / 2 - r * 0.15; g.add(fan);
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(r * 0.55, len * 0.45, 16), dark); cone.rotation.z = Math.PI / 2; cone.position.x = -len / 2 - len * 0.1; g.add(cone);
+  return g;
+}
+function windows(g, x0, x1, n, y, z, w, h, mat) {
+  for (let i = 0; i < n; i++) { const x = x0 + (x1 - x0) * i / (n - 1); for (const s of [1, -1]) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.03), mat); m.position.set(x, y, s * z); g.add(m); } }
+}
+// Business Jet, Laenge ~10 bei s = 1, Nase bei +x
+function makeBizJet(s = 1) {
+  const g = new THREE.Group();
+  const white = jetMat(JET_COL.white), teal = jetMat(JET_COL.teal), dark = jetMat(JET_COL.dark, 20), glass = jetMat(JET_COL.glass, 120);
+  g.add(fuselage([[5.0, 0], [4.75, 0.14], [4.4, 0.28], [3.9, 0.42], [3.2, 0.5], [-1.4, 0.5], [-2.6, 0.45], [-3.8, 0.3], [-4.7, 0.12], [-5.0, 0]], -1.8, 0.11, white));
+  // Cockpitfenster: dunkles Band vorn
+  const cp = new THREE.Mesh(new THREE.CylinderGeometry(0.40, 0.44, 0.42, 20, 1, true, -0.95, 1.9), glass); cp.rotation.z = Math.PI / 2; cp.rotation.x = 0; cp.position.set(4.0, 0.12, 0); cp.scale.y = 1; g.add(cp);
+  windows(g, 2.6, -1.2, 9, 0.16, 0.49, 0.22, 0.16, glass);
+  // Zierstreifen und Logo Heck
+  const cheat = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.08, 1.015), teal); cheat.position.set(0.9, -0.03, 0); g.add(cheat);
+  // Fluegel: Wurzel bei x 0.6..-1.3, Spitze bei z 4.9, gepfeilt, mit Winglet
+  const wl = wingHalf([[0.6, 0], [-1.3, 0], [-3.1, 4.9], [-3.55, 4.9]], 0.07, white); wl.position.y = -0.25; wl.rotation.x = -0.06; g.add(wl);
+  const wr = wingHalf([[0.6, 0], [-1.3, 0], [-3.1, 4.9], [-3.55, 4.9]], 0.07, white); wr.position.y = -0.25; wr.scale.z = -1; wr.rotation.x = 0.06; g.add(wr);
+  for (const sd of [1, -1]) { const wg = finPlate([[-3.05, 0], [-3.55, 0], [-3.75, 0.7], [-3.5, 0.7]], 0.05, teal); wg.position.set(0, -0.25 + 0.29, sd * 4.92); wg.rotation.x = sd * 0.25; g.add(wg); }
+  // Fluegel Rumpf Verkleidung
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(0.62, 18, 12), white); belly.scale.set(1.9, 0.45, 0.9); belly.position.set(-0.4, -0.28, 0); g.add(belly);
+  // T Leitwerk
+  const fin = finPlate([[-3.3, 0.25], [-4.9, 0.25], [-5.6, 2.3], [-4.8, 2.3]], 0.09, teal); g.add(fin);
+  const hl = wingHalf([[-4.75, 0], [-5.55, 0], [-6.0, 1.9], [-5.75, 1.9]], 0.05, white); hl.position.y = 2.3; g.add(hl);
+  const hr = wingHalf([[-4.75, 0], [-5.55, 0], [-6.0, 1.9], [-5.75, 1.9]], 0.05, white); hr.position.y = 2.3; hr.scale.z = -1; g.add(hr);
+  const bullet = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), white); bullet.scale.set(3.5, 1, 1); bullet.position.set(-5.25, 2.3, 0); g.add(bullet);
+  // Hecktriebwerke mit Pylon
+  for (const sd of [1, -1]) { const n = nacelle(0.33, 1.5, white, dark); n.position.set(-2.9, 0.55, sd * 0.95); g.add(n); const py = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.35, 0.08), white); py.position.set(-2.9, 0.45, sd * 0.62); py.rotation.x = sd * 0.5; g.add(py); }
+  g.scale.set(s, s, s);
+  return g;
+}
+// Airliner (737 Stil), Laenge ~10 bei s = 1
+function makeAirlinerV2(s = 1) {
+  const g = new THREE.Group();
+  const white = jetMat(JET_COL.white), teal = jetMat(JET_COL.teal), dark = jetMat(JET_COL.dark, 20), glass = jetMat(JET_COL.glass, 120), grey = jetMat(JET_COL.grey, 30);
+  g.add(fuselage([[5.0, 0], [4.7, 0.3], [4.2, 0.52], [3.5, 0.66], [2.6, 0.7], [-2.0, 0.7], [-3.4, 0.58], [-4.4, 0.35], [-5.0, 0.12], [-5.1, 0]], -2.2, 0.13, white));
+  const cp = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.64, 0.4, 20, 1, true, -0.95, 1.9), glass); cp.rotation.z = Math.PI / 2; cp.position.set(4.05, 0.18, 0); g.add(cp);
+  windows(g, 3.0, -2.6, 16, 0.22, 0.69, 0.18, 0.2, glass);
+  const cheat = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.1, 1.415), teal); cheat.position.set(0.6, -0.06, 0); g.add(cheat);
+  const wl = wingHalf([[1.0, 0], [-1.4, 0], [-3.0, 5.2], [-3.5, 5.2]], 0.1, white); wl.position.y = -0.45; wl.rotation.x = -0.09; g.add(wl);
+  const wr = wingHalf([[1.0, 0], [-1.4, 0], [-3.0, 5.2], [-3.5, 5.2]], 0.1, white); wr.position.y = -0.45; wr.scale.z = -1; wr.rotation.x = 0.09; g.add(wr);
+  for (const sd of [1, -1]) { const wg = finPlate([[-2.95, 0], [-3.5, 0], [-3.7, 0.8], [-3.45, 0.8]], 0.05, teal); wg.position.set(0, -0.45 + 0.47, sd * 5.22); wg.rotation.x = sd * 0.2; g.add(wg); }
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(0.8, 18, 12), white); belly.scale.set(2.2, 0.45, 1); belly.position.set(-0.5, -0.45, 0); g.add(belly);
+  const fin = finPlate([[-3.0, 0.4], [-4.9, 0.4], [-5.9, 2.6], [-5.0, 2.6]], 0.1, teal); g.add(fin);
+  const hl = wingHalf([[-4.2, 0], [-5.1, 0], [-5.8, 2.1], [-5.5, 2.1]], 0.06, white); hl.position.y = 0.35; hl.rotation.x = -0.1; g.add(hl);
+  const hr = wingHalf([[-4.2, 0], [-5.1, 0], [-5.8, 2.1], [-5.5, 2.1]], 0.06, white); hr.position.y = 0.35; hr.scale.z = -1; hr.rotation.x = 0.1; g.add(hr);
+  for (const sd of [1, -1]) { const n = nacelle(0.42, 1.6, grey, dark); n.position.set(0.3, -0.95, sd * 1.9); g.add(n); const py = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.45, 0.1), white); py.position.set(-0.1, -0.65, sd * 1.9); g.add(py); }
+  g.scale.set(s, s, s);
+  return g;
+}
+
+function makeAirliner(s = 1) { return makeAirlinerV2(s); }
 /* ---------- Modul 3: Holding ---------- */
 const HOLD_T = {
 de: {
@@ -1983,7 +2067,7 @@ de: {
   memo:'Merkhilfen', memoList:['Standard Holding: Rechtskurven, 1 min Inbound bis 14 000 ft, 1,5 min darüber.','Einflugsektoren: 70° Linie durch den Fix auf der Holding Seite teilt Teardrop (70°) und Parallel (110°), der Rest (180°) ist Direct.','Windkorrektur: Inbound einfach, Outbound dreifach, Zeit nach Groundspeed.','Zeitnahme outbound: abeam Fix oder nach Erreichen der Outbound Kurve, je nachdem was später ist.','Kurven mit 25° Querlage oder 3°/s, was weniger ist.'],
   random:'Zufallsaufgabe', quizHint:'Erst im Kopf entscheiden, dann tippen. Sektoren und Einflugweg erscheinen nach deiner Antwort.', next:'Nächste Aufgabe', score:'Treffer', quiz:'Selbsttest', quizQ:'Welcher Einflug?', correct:'Richtig', wrongA:'Nicht ganz. Richtig ist: ',
   threeD:'3D Flug', video:'Video Modus', videoHint:'Video Modus: Vollbild, große Untertitel, Flugzeug fliegt Anflug, Einflug und Holding. Bildschirmaufnahme mit Mikrofon starten und draufsprechen.',
-  play:'Play', pause:'Pause', restart:'Neustart', follow:'Kamera folgt', top:'Draufsicht', speed:'Tempo', plane:'Flugzeug', jet:'Jet', sep:'SEP', exit:'Beenden', auto:'Untertitel automatisch', step:'Schritt',
+  play:'Play', pause:'Pause', restart:'Neustart', follow:'Kamera folgt', top:'Draufsicht', speed:'Tempo', plane:'Flugzeug', jet:'Global 7500', airliner:'Airliner', sep:'SEP', exit:'Beenden', auto:'Untertitel automatisch', step:'Schritt',
   phApproach:'Anflug zum Fix', phEntry:'Einflug', phHold:'Holding', tapHint:'Tippen zeigt die Steuerung, Leertaste pausiert, Pfeiltasten wechseln den Schritt, Esc beendet.',
   noGl:'3D nicht verfügbar (WebGL fehlt). Die Skizze oben zeigt alles.'
 },
@@ -2009,7 +2093,7 @@ en: {
   memo:'Memory hooks', memoList:['Standard hold: right turns, 1 min inbound up to 14 000 ft, 1.5 min above.','Entry sectors: the 70° line through the fix on the holding side splits teardrop (70°) and parallel (110°), the remaining 180° is direct.','Wind correction: single on the inbound, triple on the outbound, timing by groundspeed.','Start outbound timing abeam the fix or wings level, whichever is later.','Turns at 25° bank or 3°/s, whichever is less.'],
   random:'Random exercise', quizHint:'Decide in your head first, then tap. Sectors and entry path appear after your answer.', next:'Next task', score:'Score', quiz:'Self test', quizQ:'Which entry?', correct:'Correct', wrongA:'Not quite. Correct is: ',
   threeD:'3D flight', video:'Video mode', videoHint:'Video mode: full screen, large captions, the aircraft flies arrival, entry and hold. Start a screen recording with microphone and talk over it.',
-  play:'Play', pause:'Pause', restart:'Restart', follow:'Chase camera', top:'Top view', speed:'Speed', plane:'Aircraft', jet:'Jet', sep:'SEP', exit:'Exit', auto:'Auto captions', step:'Step',
+  play:'Play', pause:'Pause', restart:'Restart', follow:'Chase camera', top:'Top view', speed:'Speed', plane:'Aircraft', jet:'Global 7500', airliner:'Airliner', sep:'SEP', exit:'Exit', auto:'Auto captions', step:'Step',
   phApproach:'Arrival to the fix', phEntry:'Entry', phHold:'Holding', tapHint:'Tap to show controls, space pauses, arrow keys change the step, Esc exits.',
   noGl:'3D not available (no WebGL). The sketch above shows everything.'
 },
@@ -2035,7 +2119,7 @@ fr: {
   memo:'Repères', memoList:['Attente standard : virages à droite, 1 min de rapprochement jusqu’à 14 000 ft, 1,5 min au-dessus.','Secteurs d’entrée : la ligne à 70° par le repère côté attente sépare goutte d’eau (70°) et parallèle (110°), le reste (180°) est direct.','Correction de vent : simple au rapprochement, triple à l’éloignement, temps selon la vitesse sol.','Chronométrage éloignement : par le travers du repère ou ailes à plat, le plus tardif.','Virages à 25° d’inclinaison ou 3°/s, la plus faible des deux.'],
   random:'Exercice aléatoire', quizHint:'Décidez d’abord de tête, puis touchez. Les secteurs et la trajectoire apparaissent après votre réponse.', next:'Exercice suivant', score:'Score', quiz:'Auto-test', quizQ:'Quelle entrée ?', correct:'Correct', wrongA:'Pas tout à fait. La bonne réponse : ',
   threeD:'Vol 3D', video:'Mode vidéo', videoHint:'Mode vidéo : plein écran, grands sous-titres, l’avion vole l’arrivée, l’entrée et l’attente. Lancez un enregistrement d’écran avec micro et commentez.',
-  play:'Lecture', pause:'Pause', restart:'Recommencer', follow:'Caméra de poursuite', top:'Vue de dessus', speed:'Vitesse', plane:'Avion', jet:'Jet', sep:'SEP', exit:'Quitter', auto:'Sous-titres automatiques', step:'Étape',
+  play:'Lecture', pause:'Pause', restart:'Recommencer', follow:'Caméra de poursuite', top:'Vue de dessus', speed:'Vitesse', plane:'Avion', jet:'Global 7500', airliner:'Avion de ligne', sep:'SEP', exit:'Quitter', auto:'Sous-titres automatiques', step:'Étape',
   phApproach:'Arrivée vers le repère', phEntry:'Entrée', phHold:'Attente', tapHint:'Toucher affiche les commandes, espace met en pause, flèches changent l’étape, Échap quitte.',
   noGl:'3D indisponible (pas de WebGL). Le schéma ci-dessus montre tout.'
 }
@@ -2076,13 +2160,13 @@ function holdSteps(r) {
   const dirTxt = hs.dir === 'R' ? HT('right').split(' ')[0] : HT('left'); const dirOpp = hs.dir === 'R' ? HT('left') : HT('right').split(' ')[0];
   const tTxt = r.base === 60 ? '1 min' : '1,5 min';
   return [
-    fmt(HT('s1'), {ib: hs.ib, ob: r.ob}),
-    fmt(HT(hs.dir === 'R' ? 's2r' : 's2l'), {ob: r.ob, p1, t2, p2, t1}),
-    fmt(HT('s3'), {hd: hs.hd, rel: Math.abs(Math.round(r.a)), side, sec: HT(r.entry)}),
-    r.entry === 'direct' ? fmt(HT('s4d'), {dir: dirTxt}) : r.entry === 'parallel' ? fmt(HT('s4p'), {ob: r.ob, t: tTxt, dirOpp}) : fmt(HT('s4t'), {td: r.td, t: tTxt, dir: dirTxt, ib: hs.ib}),
-    fmt(HT('s5'), {wd: hs.wd, ws: hs.ws, ib: hs.ib, xw: Math.abs(r.xw).toFixed(0), xside: r.xw >= 0 ? HT('sideR') : HT('sideL'), hw: Math.abs(r.hw).toFixed(0), hwt: r.hw >= 0 ? HT('headwind') : HT('tailwind')}),
+    fmt(HT('s1'), {ib: pad3(hs.ib), ob: pad3(r.ob)}),
+    fmt(HT(hs.dir === 'R' ? 's2r' : 's2l'), {ob: pad3(r.ob), p1: pad3(p1), t2: pad3(t2), p2: pad3(p2), t1: pad3(t1)}),
+    fmt(HT('s3'), {hd: pad3(hs.hd), rel: Math.abs(Math.round(r.a)), side, sec: HT(r.entry)}),
+    r.entry === 'direct' ? fmt(HT('s4d'), {dir: dirTxt}) : r.entry === 'parallel' ? fmt(HT('s4p'), {ob: pad3(r.ob), t: tTxt, dirOpp}) : fmt(HT('s4t'), {td: pad3(r.td), t: tTxt, dir: dirTxt, ib: pad3(hs.ib)}),
+    fmt(HT('s5'), {wd: pad3(hs.wd), ws: hs.ws, ib: pad3(hs.ib), xw: Math.abs(r.xw).toFixed(0), xside: r.xw >= 0 ? HT('sideR') : HT('sideL'), hw: Math.abs(r.hw).toFixed(0), hwt: r.hw >= 0 ? HT('headwind') : HT('tailwind')}),
     fmt(HT('s6'), {xw: Math.abs(r.xw).toFixed(0), tas: hs.tas, wca: r.wca.toFixed(0), ibh: pad3(r.ibh), wcaS: (r.xw >= 0 ? '+' : '−') + r.wca.toFixed(0) + '°'}),
-    fmt(HT('s7'), {ob: r.ob, op: r.xw >= 0 ? '−' : '+', wca: r.wca.toFixed(0), obh: pad3(r.obh)}),
+    fmt(HT('s7'), {ob: pad3(r.ob), op: r.xw >= 0 ? '−' : '+', wca: r.wca.toFixed(0), obh: pad3(r.obh)}),
     fmt(HT('s8'), {base: r.base, gsi: r.gsi, gso: r.gso, tout: r.tout}),
     fmt(HT('s9'), {alt: hs.alt.toLocaleString('de-DE'), vmax: r.vmax, tas: hs.tas, ok: hs.tas <= r.vnum ? HT('okY') : HT('okN')}),
   ];
@@ -2250,7 +2334,7 @@ function h3dMount(container) {
   if (H3.ren.domElement.parentElement !== c) { if (H3.ren.domElement.parentElement) H3.ro.unobserve(H3.ren.domElement.parentElement); c.innerHTML = ''; c.appendChild(H3.ren.domElement); H3.ro.observe(c); }
   h3dBuild(); h3dResize();
 }
-function h3dHome() { const c = H3.center || new THREE.Vector3(); H3.cam.position.set(c.x - 130, 165, c.z + 215); H3.ctl.target.set(c.x, 0, c.z - 15); }
+function h3dHome() { const c = H3.center || new THREE.Vector3(); H3.cam.position.set(c.x - 110, 150, c.z + 205); H3.ctl.target.set(c.x, 0, c.z + 35); }
 function h3dReset() { H3.dist = 0; H3.playing = true; H3.step = 0; if (H3.video) videoCaption(); }
 function tube(points, color, radius = .45, dashed = false) {
   const g = new THREE.Group();
@@ -2288,7 +2372,7 @@ function h3dBuild() {
   const ap = P.pts[Math.floor(P.iApproach * 0.3)]; const al = textSprite('HDG ' + pad3(hs.hd) + '°', 0xd9742b, .04); al.position.copy(v3(ap, ALT3 + 4)); w.add(al);
   if (hs.ws > 0) { const wa = hs.wd * Math.PI / 180; const dir = new THREE.Vector3(-Math.sin(wa), 0, Math.cos(wa)); const org = new THREE.Vector3(Math.sin(wa) * 150, ALT3 + 30, -Math.cos(wa) * 150); w.add(new THREE.ArrowHelper(dir, org, 60, 0x5b6876, 14, 7)); const wl = textSprite(`${pad3(hs.wd)}° / ${hs.ws} kt`, 0x5b6876, .04); wl.position.copy(org).add(new THREE.Vector3(0, 6, 0)); w.add(wl); }
   w.add(new THREE.ArrowHelper(new THREE.Vector3(0, 0, -1), new THREE.Vector3(-170, 1, 160), 35, 0x17202b, 9, 5)); const nl = textSprite('N', 0x17202b, .04); nl.position.set(-170, 4, 118); w.add(nl);
-  H3.plane = H3.planeType === 'jet' ? makeAirliner(2.1) : makeSEP(3.6); w.add(H3.plane);
+  H3.plane = H3.planeType === 'jet' ? makeBizJet(2.6) : H3.planeType === 'airliner' ? makeAirlinerV2(2.6) : makeSEP(4.2); w.add(H3.plane);
   // Kamera auf den Schwerpunkt des Racetracks
   const loop = P.pts.slice(P.iEntry, P.iLoop + 1); const cx = loop.reduce((a, p) => a + p[0], 0) / loop.length, cz = -loop.reduce((a, p) => a + p[1], 0) / loop.length; H3.center = new THREE.Vector3(cx, 0, cz);
   if (!H3.follow && !H3.topView) h3dHome();
@@ -2357,7 +2441,7 @@ function renderBar() {
     tb(HT('speed') + ' ' + H3.speed + '×', () => { H3.speed = H3.speed >= 2 ? .5 : H3.speed + .5; }),
     tb(HT('follow'), () => { H3.follow = !H3.follow; if (H3.follow) H3.topView = false; else h3dHome(); }, H3.follow),
     tb(HT('top'), () => { H3.topView = !H3.topView; H3.follow = false; if (H3.topView) { const c = H3.center || new THREE.Vector3(); H3.cam.position.set(c.x, 420, c.z + 0.1); H3.ctl.target.set(c.x, 0, c.z); } else h3dHome(); }, H3.topView),
-    tb(HT('plane') + ': ' + (H3.planeType === 'jet' ? HT('jet') : HT('sep')), () => { H3.planeType = H3.planeType === 'jet' ? 'sep' : 'jet'; h3dBuild(); }),
+    tb(HT('plane') + ': ' + HT(H3.planeType), () => { H3.planeType = H3.planeType === 'jet' ? 'airliner' : H3.planeType === 'airliner' ? 'sep' : 'jet'; h3dBuild(); }),
     tb('✕ ' + HT('exit'), () => closeVideo()));
 }
 function videoSync() {
