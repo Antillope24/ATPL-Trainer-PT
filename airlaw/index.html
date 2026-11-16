@@ -2087,33 +2087,46 @@ function holdSteps(r) {
     fmt(HT('s9'), {alt: hs.alt.toLocaleString('de-DE'), vmax: r.vmax, tas: hs.tas, ok: hs.tas <= r.vnum ? HT('okY') : HT('okN')}),
   ];
 }
-function randomTask() { hs.ib = Math.floor(Math.random() * 36) * 10; hs.dir = Math.random() < .7 ? 'R' : 'L'; hs.hd = Math.floor(Math.random() * 36) * 10; hs.wd = Math.floor(Math.random() * 36) * 10; hs.ws = 5 + Math.floor(Math.random() * 8) * 5; hs.pick = null; renderHold(); }
+const HF = {inputs: {}, out: null, seg: null, raf: 0};
+function syncInputs() { for (const [k, [rg, nm]] of Object.entries(HF.inputs)) { rg.value = hs[k]; nm.value = hs[k]; } if (HF.seg) for (const b of HF.seg.children) b.setAttribute('aria-pressed', String(b.dataset.v === hs.dir)); }
+function randomTask() { hs.ib = Math.floor(Math.random() * 36) * 10; hs.dir = Math.random() < .7 ? 'R' : 'L'; hs.hd = Math.floor(Math.random() * 36) * 10; hs.wd = Math.floor(Math.random() * 36) * 10; hs.ws = 5 + Math.floor(Math.random() * 8) * 5; hs.pick = null; syncInputs(); renderHoldOut(); }
 function renderHold() {
   if (!holdEl) return;
-  holdEl.innerHTML = '';
-  const r = holdCalc();
+  holdEl.innerHTML = ''; HF.inputs = {};
   holdEl.append(el('div', 'eyebrow', T('module') + ' 4'), el('h2', '', HT('title')), el('p', 'muted', HT('intro')));
   const g = el('div', 'vmc');
   const form = el('div', 'card'); form.style.gap = '12px';
   const num = (label, key, min, max, step, unit) => {
     const l = el('label', 'f'); const head = el('span', 'numrow'); head.append(el('span', '', label));
-    const n = document.createElement('input'); n.type = 'number'; n.inputMode = 'decimal'; n.min = min; n.max = max; n.step = 'any'; n.value = hs[key]; n.className = 'numin'; n.setAttribute('aria-label', label);
-    const commit = v => { v = parseFloat(String(v).replace(',', '.')); if (!isFinite(v)) return; v = Math.min(max, Math.max(min, v)); hs[key] = key === 'ib' || key === 'hd' || key === 'wd' ? norm(v) : v; hs.pick = null; renderHold(); };
+    const n = document.createElement('input'); n.type = 'text'; n.inputMode = 'decimal'; n.autocomplete = 'off'; n.value = hs[key]; n.className = 'numin'; n.setAttribute('aria-label', label);
+    const i = document.createElement('input'); i.type = 'range'; i.min = min; i.max = max; i.step = step; i.value = hs[key];
+    const commit = v => { v = parseFloat(String(v).replace(',', '.')); if (!isFinite(v)) return; v = Math.min(max, Math.max(min, v)); hs[key] = key === 'ib' || key === 'hd' || key === 'wd' ? norm(v) : v; hs.pick = null; i.value = hs[key]; n.value = hs[key]; if (!HF.raf) HF.raf = requestAnimationFrame(() => { HF.raf = 0; renderHoldOut(); }); };
     n.onchange = () => commit(n.value); n.onkeydown = e => { if (e.key === 'Enter') { n.blur(); } };
     head.append(n, el('span', 'muted', unit.trim()));
-    const i = document.createElement('input'); i.type = 'range'; i.min = min; i.max = max; i.step = step; i.value = hs[key]; i.oninput = () => commit(i.value);
+    i.oninput = () => commit(i.value);
+    HF.inputs[key] = [i, n];
     l.append(head, i); return l; };
   form.append(num(HT('inbound'), 'ib', 0, 359, 1, '°'));
-  const seg = el('div', 'seg'); for (const [v, l] of [['R', HT('right')], ['L', HT('left')]]) { const b = el('button', '', l); b.setAttribute('aria-pressed', String(hs.dir === v)); b.onclick = () => { hs.dir = v; hs.pick = null; renderHold(); }; seg.append(b); } form.append(el('div', 'eyebrow', HT('turns')), seg);
+  const seg = el('div', 'seg'); for (const [v, l] of [['R', HT('right')], ['L', HT('left')]]) { const b = el('button', '', l); b.dataset.v = v; b.setAttribute('aria-pressed', String(hs.dir === v)); b.onclick = () => { hs.dir = v; hs.pick = null; syncInputs(); renderHoldOut(); }; seg.append(b); } HF.seg = seg; form.append(el('div', 'eyebrow', HT('turns')), seg);
   form.append(num(HT('heading'), 'hd', 0, 359, 1, '°'), num(HT('wind'), 'wd', 0, 359, 5, '°'), num(HT('windSpd'), 'ws', 0, 60, 1, ' kt'), num(HT('tas'), 'tas', 90, 300, 5, ' kt'), num(HT('alt'), 'alt', 1000, 40000, 500, ' ft'));
   const rrow = el('div', 'row'); rrow.append(btn(HT('random'), randomTask), btn(HT('quiz'), () => { hs.quiz = !hs.quiz; hs.pick = null; if (hs.quiz) randomTask(); else renderHold(); })); form.append(rrow);
   g.append(form);
-  const out = el('div', 'card');
+  const out = el('div', 'card'); HF.out = out;
+  g.append(out); holdEl.append(g);
+  renderHoldOut();
+  const sp = el('div', 'card'); sp.append(el('h3', '', HT('speeds')));
+  const tw = el('div', 'tablewrap'); const tb = document.createElement('table'); const body = document.createElement('tbody'); for (const [a, b] of HT('spdRows')) { const tr = document.createElement('tr'); tr.append(el('td', '', a), el('td', '', b)); body.append(tr); } tb.append(body); tw.append(tb); sp.append(tw);
+  const mm = el('div', 'card'); mm.append(el('h3', '', HT('memo'))); const ul = document.createElement('ul'); ul.style.paddingLeft = '20px'; for (const m of HT('memoList')) ul.append(el('li', '', m)); mm.append(ul);
+  holdEl.append(sp, mm);
+}
+function renderHoldOut() {
+  const out = HF.out; if (!out) return; out.innerHTML = '';
+  const r = holdCalc();
   const reveal = !hs.quiz || !!hs.pick; out.append(holdSvg(r, reveal));
   if (hs.quiz) {
     out.append(el('h3', '', HT('quizQ')));
     const row = el('div', 'row');
-    for (const e of ['direct', 'parallel', 'teardrop']) { const b = el('button', 'btn-s', HT(e)); b.disabled = !!hs.pick; b.onclick = () => { hs.pick = e; hs.score[1]++; if (e === r.entry) hs.score[0]++; renderHold(); }; if (hs.pick === e) b.style.borderColor = hs.pick === r.entry ? 'var(--good)' : 'var(--bad)'; row.append(b); }
+    for (const e of ['direct', 'parallel', 'teardrop']) { const b = el('button', 'btn-s', HT(e)); b.disabled = !!hs.pick; b.onclick = () => { hs.pick = e; hs.score[1]++; if (e === r.entry) hs.score[0]++; renderHoldOut(); }; if (hs.pick === e) b.style.borderColor = hs.pick === r.entry ? 'var(--good)' : 'var(--bad)'; row.append(b); }
     out.append(row, el('div', 'hint', hs.pick ? '' : HT('quizHint')));
     if (hs.pick) { const fb = el('div', 'row'); fb.append(el('div', hs.pick === r.entry ? 'ok' : 'no', (hs.pick === r.entry ? HT('correct') : HT('wrongA') + HT(r.entry)) + '.'), btn(HT('next') + ' ▶', randomTask, 'btn')); out.append(fb); }
     out.append(el('div', 'hint', `${HT('score')}: ${hs.score[0]} / ${hs.score[1]}`));
@@ -2133,11 +2146,6 @@ function renderHold() {
     for (const s of holdSteps(r)) ol.append(el('li', '', s));
     out.append(ol, el('div', 'hint', HT('tol') + ' ' + HT('legend')));
   }
-  g.append(out); holdEl.append(g);
-  const sp = el('div', 'card'); sp.append(el('h3', '', HT('speeds')));
-  const tw = el('div', 'tablewrap'); const tb = document.createElement('table'); const body = document.createElement('tbody'); for (const [a, b] of HT('spdRows')) { const tr = document.createElement('tr'); tr.append(el('td', '', a), el('td', '', b)); body.append(tr); } tb.append(body); tw.append(tb); sp.append(tw);
-  const mm = el('div', 'card'); mm.append(el('h3', '', HT('memo'))); const ul = document.createElement('ul'); ul.style.paddingLeft = '20px'; for (const m of HT('memoList')) ul.append(el('li', '', m)); mm.append(ul);
-  holdEl.append(sp, mm);
   if (view === 'hold' && !H3.video) h3dMount();
 }
 function holdSvg(r, reveal = true) {
