@@ -122,6 +122,20 @@ input[type=range]{width:100%}
 .res .card{gap:4px}
 .ok{color:var(--good)}.no{color:var(--bad)}
 svg text{font-family:var(--body)}
+.altgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.altform{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px}
+.altcol{display:flex;flex-direction:column;gap:12px;min-width:0}
+@media(max-width:720px){.altgrid,.altform{grid-template-columns:1fr}}
+.altsvg{width:100%;height:auto;display:block}
+.alts{border-radius:10px}
+.adial{max-width:360px;margin:0 auto;touch-action:none;outline-offset:3px}
+.apfd{max-width:240px;margin:0 auto}
+.knob{cursor:grab;touch-action:none}
+.knob:active{cursor:grabbing}
+.lgd{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.85rem}
+.lgd i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.btn-s[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+
 .numrow{display:flex;align-items:center;gap:8px}.numrow>span:first-child{flex:1}
 .numin{width:84px;font:inherit;font-variant-numeric:tabular-nums;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);text-align:right}
 .hstage{position:relative;width:100%;height:min(420px,55vh);border-radius:12px;overflow:hidden;background:var(--sky);border:1px solid var(--line);touch-action:none}
@@ -161,6 +175,7 @@ body.video-on header,body.video-on main{visibility:hidden}
   <section class="view" id="v-vmc" hidden><div class="wrap" id="vmc"></div></section>
   <section class="view" id="v-fl" hidden><div class="wrap" id="fl"></div></section>
   <section class="view" id="v-hold" hidden><div class="wrap" id="hold"></div></section>
+  <section class="view" id="v-alt" hidden><div class="wrap" id="alt"></div></section>
   <section class="view" id="v-soon" hidden><div class="wrap" id="soon"></div></section>
 </main>
 
@@ -1217,11 +1232,11 @@ body.video-on header,body.video-on main{visibility:hidden}
 <script>
 const I18N = {
 de: {
-  lang:'Deutsch', title:'Air Law Explorer', start:'Start', mAir:'Luftraumklassen', mVmc:'VMC Rechner', mFl:'Flugflächen', mHold:'Holding', mRow:'Ausweichregeln', mSig:'Signale', mLic:'Lizenzen', mIcao:'ICAO',
+  lang:'Deutsch', title:'Air Law Explorer', start:'Start', mAir:'Luftraumklassen', mVmc:'VMC Rechner', mFl:'Flugflächen', mHold:'Holding', mAlt:'Höhenmesser', mRow:'Ausweichregeln', mSig:'Signale', mLic:'Lizenzen', mIcao:'ICAO',
   soonT:'Kommt als Nächstes', soonP:'Dieses Modul ist geplant. Reihenfolge: Ausweichregeln, Signale, Lizenzen und Fristen, ICAO Struktur.',
   homeEyebrow:'ATPL 010 Air Law', homeT:'Nachschlagen, anschauen, verstehen', homeP:'Die trockenen Teile von Air Law als interaktive Werkzeuge. Jedes Modul ist für das iPad gebaut und läuft offline. Zum Üben der passenden Fragen geht es in den ATPL Progress Trainer.',
   module:'Modul', ready:'verfügbar', planned:'geplant', toTrainer:'Zum ATPL Progress Trainer',
-  mod:[['Luftraumklassen A bis G','ICAO Klassen und deutsche Struktur in 3D, Vergleichstabelle mit Freigabe, Staffelung, Funk, Transponder und VMC.'],['VMC Minima Rechner','Luftraum, Höhe und Geschwindigkeit einstellen, Flugsicht und Wolkenabstand ablesen, mit Skizze.'],['Flugflächen und Halbkreisregel','Kurs drehen, erlaubte Flugflächen sehen, Transition Altitude und Level, RVSM.'],['Holding Explainer und Rechner','Einflug nach ICAO, Windkorrektur, Outbound Zeit, Schritt für Schritt mit deinen Werten erklärt, in 3D vorgeflogen, mit Video Modus zum Besprechen.'],['Ausweichregeln','Szenen von oben: wer weicht aus? Mit Positionslichtern bei Nacht.'],['Signale und Zeichen','Lichtsignale, Bodensignale, Abfangsignale, Marshalling.'],['Lizenzen, Medical, Fristen','Zeitleiste mit Gültigkeiten und Recency nach Part-FCL und Part-MED.'],['ICAO und Annexe','Chicago Convention, 19 Annexe, Freiheiten der Luft.']],
+  mod:[['Luftraumklassen A bis G','ICAO Klassen und deutsche Struktur in 3D, Vergleichstabelle mit Freigabe, Staffelung, Funk, Transponder und VMC.'],['VMC Minima Rechner','Luftraum, Höhe und Geschwindigkeit einstellen, Flugsicht und Wolkenabstand ablesen, mit Skizze.'],['Flugflächen und Halbkreisregel','Kurs drehen, erlaubte Flugflächen sehen, Transition Altitude und Level, RVSM.'],['Holding Explainer und Rechner','Einflug nach ICAO, Windkorrektur, Outbound Zeit, Schritt für Schritt mit deinen Werten erklärt, in 3D vorgeflogen, mit Video Modus zum Besprechen.'],['Höhenmesser und Druckhöhen','QNH, QFE, 1013, Temperaturkorrektur, True, Indicated, Pressure und Density Altitude interaktiv, mit MUFL Rechner und Selbsttest.'],['Ausweichregeln','Szenen von oben: wer weicht aus? Mit Positionslichtern bei Nacht.'],['Signale und Zeichen','Lichtsignale, Bodensignale, Abfangsignale, Marshalling.'],['Lizenzen, Medical, Fristen','Zeitleiste mit Gültigkeiten und Recency nach Part-FCL und Part-MED.'],['ICAO und Annexe','Chicago Convention, 19 Annexe, Freiheiten der Luft.']],
   germany:'Deutschland', icao:'ICAO A bis G', zones:'Zonen', data:'Daten', compare:'Vergleich', help:'Hilfe', close:'Panel schließen', fab:'Zonen und Daten',
   views:['Übersicht','Von vorn','Flughafen','TMZ + CTR','Alpen','Von oben'], viewsIcao:['Übersicht','Von vorn','Unten (E bis G)','Oben (A bis C)'],
   hintIcao:'Die sieben ICAO Klassen als Stapel, A oben, G unten (schematisch, nicht maßstäblich). Antippen zeigt die Regeln.', hintDe:'Antippen zeigt die Daten und fliegt die Kamera hin. Das Auge blendet die Zone aus.',
@@ -1243,11 +1258,11 @@ de: {
   k:{lower:'Untergrenze', upper:'Obergrenze', clr:'Freigabe', sep:'Staffelung', tx:'Transponder', vmc:'VMC', note:'Hinweis', radio:'Funk'},
 },
 en: {
-  lang:'English', title:'Air Law Explorer', start:'Home', mAir:'Airspace classes', mVmc:'VMC calculator', mFl:'Flight levels', mHold:'Holding', mRow:'Right of way', mSig:'Signals', mLic:'Licences', mIcao:'ICAO',
+  lang:'English', title:'Air Law Explorer', start:'Home', mAir:'Airspace classes', mVmc:'VMC calculator', mFl:'Flight levels', mHold:'Holding', mAlt:'Altimetry', mRow:'Right of way', mSig:'Signals', mLic:'Licences', mIcao:'ICAO',
   soonT:'Coming next', soonP:'This module is planned. Order: right of way, signals, licences and validity, ICAO structure.',
   homeEyebrow:'ATPL 010 Air Law', homeT:'Look it up, see it, understand it', homeP:'The dry parts of Air Law as interactive tools. Every module is built for the iPad and works offline. To practise the matching questions, go to the ATPL Progress Trainer.',
   module:'Module', ready:'available', planned:'planned', toTrainer:'Open ATPL Progress Trainer',
-  mod:[['Airspace classes A to G','ICAO classes and the German structure in 3D, comparison table with clearance, separation, radio, transponder and VMC.'],['VMC minima calculator','Set airspace, altitude and speed, read flight visibility and cloud clearance, with a sketch.'],['Flight levels and semicircular rule','Turn the heading, see the allowed flight levels, transition altitude and level, RVSM.'],['Holding explainer and calculator','ICAO entry, wind correction, outbound time, explained step by step with your values, flown in 3D, with a video mode for voice-over.'],['Right of way','Scenes from above: who gives way? With navigation lights at night.'],['Signals','Light signals, ground signals, interception signals, marshalling.'],['Licences, medical, validity','Timeline with validity periods and recency under Part-FCL and Part-MED.'],['ICAO and annexes','Chicago Convention, 19 annexes, freedoms of the air.']],
+  mod:[['Airspace classes A to G','ICAO classes and the German structure in 3D, comparison table with clearance, separation, radio, transponder and VMC.'],['VMC minima calculator','Set airspace, altitude and speed, read flight visibility and cloud clearance, with a sketch.'],['Flight levels and semicircular rule','Turn the heading, see the allowed flight levels, transition altitude and level, RVSM.'],['Holding explainer and calculator','ICAO entry, wind correction, outbound time, explained step by step with your values, flown in 3D, with a video mode for voice-over.'],['Altimeter and altitudes','QNH, QFE, 1013, temperature correction, true, indicated, pressure and density altitude, interactive, with a MUFL calculator and self test.'],['Right of way','Scenes from above: who gives way? With navigation lights at night.'],['Signals','Light signals, ground signals, interception signals, marshalling.'],['Licences, medical, validity','Timeline with validity periods and recency under Part-FCL and Part-MED.'],['ICAO and annexes','Chicago Convention, 19 annexes, freedoms of the air.']],
   germany:'Germany', icao:'ICAO A to G', zones:'Zones', data:'Data', compare:'Compare', help:'Help', close:'Close panel', fab:'Zones and data',
   views:['Overview','From the front','Airport','TMZ + CTR','Alps','From above'], viewsIcao:['Overview','From the front','Lower (E to G)','Upper (A to C)'],
   hintIcao:'The seven ICAO classes as a stack, A on top, G at the bottom (schematic, not to scale). Tap to see the rules.', hintDe:'Tap to show the data and fly the camera there. The eye hides a zone.',
@@ -1269,11 +1284,11 @@ en: {
   k:{lower:'Lower limit', upper:'Upper limit', clr:'Clearance', sep:'Separation', tx:'Transponder', vmc:'VMC', note:'Note', radio:'Radio'},
 },
 fr: {
-  lang:'Français', title:'Air Law Explorer', start:'Accueil', mAir:'Classes d’espace', mVmc:'Calculateur VMC', mFl:'Niveaux de vol', mHold:'Attente', mRow:'Priorités', mSig:'Signaux', mLic:'Licences', mIcao:'OACI',
+  lang:'Français', title:'Air Law Explorer', start:'Accueil', mAir:'Classes d’espace', mVmc:'Calculateur VMC', mFl:'Niveaux de vol', mHold:'Attente', mAlt:'Altimétrie', mRow:'Priorités', mSig:'Signaux', mLic:'Licences', mIcao:'OACI',
   soonT:'À venir', soonP:'Ce module est prévu. Ordre : priorités, signaux, licences et validités, structure OACI.',
   homeEyebrow:'ATPL 010 Air Law', homeT:'Consulter, visualiser, comprendre', homeP:'Les parties arides du droit aérien sous forme d’outils interactifs. Chaque module est conçu pour l’iPad et fonctionne hors ligne. Pour s’entraîner sur les questions, direction l’ATPL Progress Trainer.',
   module:'Module', ready:'disponible', planned:'prévu', toTrainer:'Ouvrir l’ATPL Progress Trainer',
-  mod:[['Classes d’espace A à G','Classes OACI et structure allemande en 3D, tableau comparatif : clairance, séparation, radio, transpondeur et VMC.'],['Calculateur de minima VMC','Régler l’espace, l’altitude et la vitesse, lire la visibilité en vol et la distance aux nuages, avec schéma.'],['Niveaux de vol et règle semi-circulaire','Tourner le cap, voir les niveaux autorisés, altitude et niveau de transition, RVSM.'],['Attente : explications et calculateur','Entrée OACI, correction de vent, temps d’éloignement, expliqués pas à pas avec vos valeurs, volés en 3D, avec un mode vidéo pour commenter.'],['Règles de priorité','Scènes vues de dessus : qui s’écarte ? Avec feux de navigation la nuit.'],['Signaux','Signaux lumineux, signaux au sol, interception, signaux de guidage au sol.'],['Licences, médical, validités','Frise avec validités et expérience récente selon Part-FCL et Part-MED.'],['OACI et annexes','Convention de Chicago, 19 annexes, libertés de l’air.']],
+  mod:[['Classes d’espace A à G','Classes OACI et structure allemande en 3D, tableau comparatif : clairance, séparation, radio, transpondeur et VMC.'],['Calculateur de minima VMC','Régler l’espace, l’altitude et la vitesse, lire la visibilité en vol et la distance aux nuages, avec schéma.'],['Niveaux de vol et règle semi-circulaire','Tourner le cap, voir les niveaux autorisés, altitude et niveau de transition, RVSM.'],['Attente : explications et calculateur','Entrée OACI, correction de vent, temps d’éloignement, expliqués pas à pas avec vos valeurs, volés en 3D, avec un mode vidéo pour commenter.'],['Altimètre et altitudes','QNH, QFE, 1013, correction de température, altitude vraie, indiquée, pression et densité en interactif, avec calculateur MUFL et auto-test.'],['Règles de priorité','Scènes vues de dessus : qui s’écarte ? Avec feux de navigation la nuit.'],['Signaux','Signaux lumineux, signaux au sol, interception, signaux de guidage au sol.'],['Licences, médical, validités','Frise avec validités et expérience récente selon Part-FCL et Part-MED.'],['OACI et annexes','Convention de Chicago, 19 annexes, libertés de l’air.']],
   germany:'Allemagne', icao:'OACI A à G', zones:'Zones', data:'Données', compare:'Comparer', help:'Aide', close:'Fermer le panneau', fab:'Zones et données',
   views:['Vue d’ensemble','De face','Aéroport','TMZ + CTR','Alpes','Vue de dessus'], viewsIcao:['Vue d’ensemble','De face','Bas (E à G)','Haut (A à C)'],
   hintIcao:'Les sept classes OACI empilées, A en haut, G en bas (schéma, pas à l’échelle). Toucher pour voir les règles.', hintDe:'Toucher affiche les données et déplace la caméra. L’œil masque la zone.',
@@ -1434,20 +1449,20 @@ const sel = $('#lang');
 for (const [k, v] of Object.entries(I18N)) { const o = el('option', '', v.lang); o.value = k; o.selected = k === LANG; sel.append(o); }
 sel.onchange = () => { LANG = sel.value; try { localStorage.setItem('airlaw-lang', LANG); } catch (e) {} document.documentElement.lang = LANG; renderAll(); };
 let view = 'home';
-const NAV = [['home','start'],['air','mAir'],['vmc','mVmc'],['fl','mFl'],['hold','mHold'],['soon','mRow'],['soon','mSig'],['soon','mLic'],['soon','mIcao']];
+const NAV = [['home','start'],['air','mAir'],['vmc','mVmc'],['fl','mFl'],['hold','mHold'],['alt','mAlt'],['soon','mRow'],['soon','mSig'],['soon','mLic'],['soon','mIcao']];
 function renderNav() {
   const n = $('#nav'); n.innerHTML = '';
-  NAV.forEach(([v, k], i) => { const b = el('button', 'chip' + (v === 'soon' ? ' soon' : ''), T(k)); b.dataset.v = v; b.setAttribute('aria-pressed', v === view && (v !== 'soon' || i === 5)); b.onclick = () => go(v); n.append(b); });
+  NAV.forEach(([v, k], i) => { const b = el('button', 'chip' + (v === 'soon' ? ' soon' : ''), T(k)); b.dataset.v = v; b.setAttribute('aria-pressed', v === view && (v !== 'soon' || i === 6)); b.onclick = () => go(v); n.append(b); });
 }
 function go(v) { view = v; location.hash = v; for (const b of $('#nav').children) b.setAttribute('aria-pressed', b.dataset.v === v && v !== 'soon'); for (const s of document.querySelectorAll('.view')) s.hidden = s.id !== 'v-' + v; if (v === 'air') { initScene(); resize(); } if (v === 'hold') h3dMount(); }
-window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (['home','air','vmc','fl','hold','soon'].includes(v) && v !== view) go(v); });
+window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (['home','air','vmc','fl','hold','alt','soon'].includes(v) && v !== view) go(v); });
 
 function renderHome() {
   const h = $('#home'); h.innerHTML = '';
   h.append(el('div', 'eyebrow', T('homeEyebrow')), el('h2', '', T('homeT')), el('p', 'muted', T('homeP')));
   const g = el('div', 'grid');
   T('mod').forEach(([title, desc], i) => {
-    const v = NAV[i+1][0], ready = i < 4;
+    const v = NAV[i+1][0], ready = i < 5;
     const c = el('button', 'card link'); c.append(el('span', 'num', T('module') + ' ' + (i+1)), el('h3', '', title), el('span', 'muted', desc), el('span', 'tag', ready ? T('ready') : T('planned')));
     c.onclick = () => go(v); if (!ready) c.style.opacity = .6; g.append(c);
   });
@@ -1456,7 +1471,7 @@ function renderHome() {
   const so = $('#soon'); so.innerHTML = ''; so.append(el('h2', '', T('soonT')), el('p', 'muted', T('soonP')));
 }
 function renderAll() {
-  renderNav(); renderHome(); renderVmc(); renderFl(); renderHold();
+  renderNav(); renderHome(); renderVmc(); renderFl(); renderHold(); renderAlt();
   const m = $('#mode'); m.children[0].textContent = T('germany'); m.children[1].textContent = T('icao');
   $('#tab-list').textContent = T('zones'); $('#tab-info').textContent = T('data'); $('#tab-cmp').textContent = T('compare'); $('#tab-help').textContent = T('help'); $('#fab').textContent = T('fab'); $('#btn-close').setAttribute('aria-label', T('close'));
   renderViews(); if (sceneReady) renderBody();
@@ -2498,11 +2513,343 @@ function videoCaption() {
   VM.cap.append(el('span', 'vnum', `${HT('step')} ${H3.step + 1} / 9`), el('div', '', steps[H3.step]));
 }
 
+/* ---------- Modul 5: Höhenmesser, Druck und Temperatur ---------- */
+const ALT_T = {
+de: {
+  title:'Höhenmesser, Druck und Temperatur', intro:'Verstell QNH, Subskala, Temperatur und Flughöhe. Die App zeigt den Höhenmesser (analog und Airbus), die Seitenansicht mit allen Höhen und erklärt jeden Wert mit deinen Zahlen. Wahre Höhe ist die Realität, alles andere ist das, was dein Instrument daraus macht.',
+  inputs:'Einstellungen', ta:'Wahre Höhe (True Altitude, MSL)', set:'Subskala (eingestellter Druck)', qnh:'Tatsächlicher QNH am Platz', elev:'Platzhöhe', dev:'Temperatur: Abweichung von ISA', ter:'Hindernis oder Gelände (MSL)', clr:'Geforderte Freiheit', trans:'Transition Altitude', fp:'Faustformel Druck', rule:'Pro Grad ISA Abweichung gilt: 4 ft pro 1000 ft Höhe über dem Platz (das sind 0,4 % pro °C).',
+  unitL:'Einheit', knobHint:'Drehknopf ziehen, Mausrad oder Pfeiltasten verstellen die Subskala.', modes:'Schnell setzen', std:'STD (1013,25)',
+  scen:'Szenarien', sc1:'QNH zu hoch eingestellt', sc2:'Kalter Tag', sc3:'Von hoch nach tief', sc4:'Heißer Platz', sc5:'Gebirge', sc6:'Standardatmosphäre',
+  dial:'Analoger Höhenmesser', pfd:'Airbus PFD Höhenband', side:'Seitenansicht', sideHint:'Grün: wahre Höhe des Flugzeugs. Orange gestrichelt: die Ebene, die dein Höhenmesser als 0 ft ansieht. Violett gestrichelt: Druckflächen alle 1000 oder 5000 ft nach Standard (Pressure Altitude), die sich bei Kälte zusammenschieben. Rechts stehen die Zahlenwerte.',
+  ia:'Angezeigte Höhe', taR:'Wahre Höhe', pa:'Pressure Altitude', da:'Density Altitude', fl:'Flight Level', qfe:'QFE', hgt:'Höhe über Platz', oat:'OAT hier', pAt:'Luftdruck hier', err:'Angezeigt minus wahr', tl:'Transition Level ca.', ifrFl:'FL',
+  ctrue:'Wahre Freiheit', cind:'Angezeigte Freiheit', belowT:'Unter dem Hindernis!',
+  steps:'So kommst du drauf',
+  a1:'Druckfehler: Eingestellt {set} hPa, tatsächlicher QNH {qnh} hPa. Differenz {dp} hPa × {fp} ft/hPa = {pe} ft. {pdir}',
+  pOver:'Du hast zu hoch eingestellt, der Höhenmesser zeigt zu viel an, die wahre Höhe ist niedriger.', pUnder:'Du hast zu niedrig eingestellt, der Höhenmesser zeigt zu wenig an, die wahre Höhe ist höher.', pZero:'Subskala passt, kein Druckfehler.',
+  a2:'Temperatur: In {pa} ft Pressure Altitude wären nach ISA {isa} °C, es sind {oat} °C, also ISA {devs}. Korrektur ≈ 4 ft × {dev} °C × {h} / 1000 = {tc} ft. {tdir}',
+  tCold:'Kalte Luft ist dichter, die Druckflächen liegen enger beieinander, die wahre Höhe ist niedriger als die angezeigte.', tWarm:'Warme Luft zieht die Druckflächen auseinander, die wahre Höhe ist höher als die angezeigte.', tZero:'Standardtemperatur, keine Korrektur.',
+  a3:'Ergebnis: Der Höhenmesser zeigt {ia} ft. Die wahre Höhe ist {ta} ft. Angezeigt minus wahr = {err} ft.',
+  a4:'Pressure Altitude ist die Höhe, die der Höhenmesser mit 1013,25 hPa anzeigt: {pa} ft, also FL {fl}. Density Altitude = PA + 120 × ISA Abweichung = {pa} + 120 × {dev} = {da} ft. Je höher die Density Altitude, desto schlechter die Leistung.',
+  a5:'QFE = QNH − Platzhöhe / {fp} = {qnh} − {elev} / {fp} = {qfe} hPa. Mit QFE zeigt der Höhenmesser am Boden 0 ft und in der Luft die Höhe über dem Platz.',
+  a6:'Hindernis {ter} ft: Wahre Freiheit = {ta} − {ter} = {ct} ft. Auf dem Höhenmesser wären es {ci} ft.',
+  mufl:'MUFL: Minimum Usable Flight Level', mufl0:'Rechne rückwärts vom Gelände zur Flugfläche. Nimm Hindernis, Freiheit und QNH aus den Einstellungen oben.', rnd:'Aufrunden auf',
+  m1:'Benötigte wahre Höhe = Hindernis + Freiheit = {ter} + {clr} = {req} ft.',
+  m2:'Temperaturkorrektur bei Kälte: 4 ft × {cold} °C × ({req} − {elev}) / 1000 = {tc} ft. Das ist die Höhe, die du auf dem Höhenmesser (mit QNH) mindestens brauchst: {iaq} ft.', m2w:'Nicht kälter als ISA, also keine Zuschläge nötig. Höhe auf dem Höhenmesser mit QNH: {iaq} ft.',
+  m3:'Auf Standard umrechnen: (1013,25 − {qnh}) × {fp} = {pq} ft. Pressure Altitude = {iaq} + ({pq}) = {pa} ft.',
+  m4:'Nächste Flugfläche ab {pa} ft, aufgerundet auf {rnd} ft: MUFL = FL {mufl}.',
+  mufl5:'Zum Üben stell im Szenario Gebirge kalte Luft und niedrigen QNH ein und beobachte, wie MUFL steigt.',
+  quiz:'Selbsttest', next:'Nächste Aufgabe', score:'Treffer', correct:'Richtig.', wrongA:'Nicht ganz. Richtig ist ', pick:'Wähle eine Antwort.',
+  q1:'Der tatsächliche QNH ist {qnh} hPa, du hast {set} hPa eingestellt. Der Höhenmesser zeigt {ia} ft. Wie hoch bist du wirklich (nur Druckfehler, ISA, 27 ft/hPa)?',
+  q1e:'Differenz {dp} hPa × 27 = {pe} ft. {dir} Wahre Höhe = {ia} {sg} {pe} = {ans} ft.', q1hi:'Zu hoch eingestellt: du bist tiefer als angezeigt.', q1lo:'Zu niedrig eingestellt: du bist höher als angezeigt.',
+  q2:'QNH eingestellt, Platz auf Meereshöhe. Der Höhenmesser zeigt {ia} ft, die Temperatur ist ISA {devs}. Wie hoch bist du wirklich (4 ft pro 1000 ft pro °C)?',
+  q2e:'Korrektur 4 ft × {dev} × {ia} / 1000 = {tc} ft. Wahre Höhe = {ia} {sg} {atc} = {ans} ft. {dir}', q2c:'Kalt: du bist tiefer als angezeigt.', q2w:'Warm: du bist höher als angezeigt.',
+  q3:'Hindernis {ter} ft, geforderte Freiheit {clr} ft, QNH {qnh} hPa, ISA {devs}, Platz auf Meereshöhe. Niedrigstes brauchbares FL (aufgerundet auf 500 ft)?',
+  q3e:'Benötigt {req} ft, Kältekorrektur {tc} ft, QNH Höhe {iaq} ft. Plus (1013,25 − {qnh}) × 27 = {pq} ft ergibt PA {pa} ft, aufgerundet FL {ans}.',
+  memoT:'Merksätze', mem:[
+    'From high to low, or from hot to cold, look out below. (Flying into lower pressure or colder air without changing anything: you are lower than indicated.)',
+    'Cold air, fly higher, beware: true altitude below indicated.',
+    'Set high, reads high, but you are low.',
+    'QNH = height above sea level. QFE = height above the field, reads 0 on the ground. QNE = 1013.25, flight levels.',
+    '1 hPa is about 27 ft (30 ft is the rough exam value). Higher setting: higher reading.',
+    '4 ft per 1000 ft per °C ISA deviation (that is 0.4 % per °C), applied to the height above the aerodrome.',
+    'Density altitude = pressure altitude + 120 ft × ISA deviation.',
+    'ISA: 15 °C and 1013.25 hPa at sea level, minus 2 °C (1.98) per 1000 ft, up to the tropopause at 36 090 ft.',
+    'Below transition altitude QNH, above transition level 1013.25 (standard). In between: the transition layer.',
+    'MUFL: add clearance, add cold correction, convert to standard with QNH, round up to the next flight level.',
+    'Low QNH raises the flight level you need: a low pressure setting means the 1013 plane sits below the sea level.'
+  ]
+},
+en: {
+  title:'Altimeter, pressure and temperature', intro:'Change QNH, altimeter setting, temperature and flight altitude. The app shows the altimeter (analog and Airbus), a side view with all altitudes and explains every value with your numbers. True altitude is reality, everything else is what your instrument makes of it.',
+  inputs:'Settings', ta:'True altitude (MSL)', set:'Altimeter setting (subscale)', qnh:'Actual QNH at the aerodrome', elev:'Aerodrome elevation', dev:'Temperature: deviation from ISA', ter:'Obstacle or terrain (MSL)', clr:'Required clearance', trans:'Transition altitude', fp:'Pressure rule of thumb', rule:'Per degree of ISA deviation: 4 ft per 1000 ft height above the aerodrome (0.4 % per °C).',
+  unitL:'Unit', knobHint:'Drag the knob, use the mouse wheel or arrow keys to change the setting.', modes:'Quick set', std:'STD (1013.25)',
+  scen:'Scenarios', sc1:'QNH set too high', sc2:'Cold day', sc3:'High to low', sc4:'Hot aerodrome', sc5:'Mountains', sc6:'Standard atmosphere',
+  dial:'Analog altimeter', pfd:'Airbus PFD altitude tape', side:'Side view', sideHint:'Green: true altitude of the aircraft. Dashed orange: the level your altimeter treats as 0 ft. Dashed purple: standard pressure levels every 1000 or 5000 ft (pressure altitude), which squeeze together in cold air. The numbers are listed on the right.',
+  ia:'Indicated altitude', taR:'True altitude', pa:'Pressure altitude', da:'Density altitude', fl:'Flight level', qfe:'QFE', hgt:'Height above aerodrome', oat:'OAT here', pAt:'Pressure here', err:'Indicated minus true', tl:'Transition level approx.', ifrFl:'FL',
+  ctrue:'True clearance', cind:'Indicated clearance', belowT:'Below the obstacle!',
+  steps:'How to work it out',
+  a1:'Pressure error: setting {set} hPa, actual QNH {qnh} hPa. Difference {dp} hPa × {fp} ft/hPa = {pe} ft. {pdir}',
+  pOver:'Setting too high: the altimeter over-reads, true altitude is lower.', pUnder:'Setting too low: the altimeter under-reads, true altitude is higher.', pZero:'Setting matches, no pressure error.',
+  a2:'Temperature: at {pa} ft pressure altitude ISA would be {isa} °C, it is {oat} °C, so ISA {devs}. Correction ≈ 4 ft × {dev} °C × {h} / 1000 = {tc} ft. {tdir}',
+  tCold:'Cold air is denser, pressure levels sit closer together, true altitude is lower than indicated.', tWarm:'Warm air spreads the pressure levels apart, true altitude is higher than indicated.', tZero:'Standard temperature, no correction.',
+  a3:'Result: the altimeter reads {ia} ft. True altitude is {ta} ft. Indicated minus true = {err} ft.',
+  a4:'Pressure altitude is what the altimeter shows with 1013.25 hPa set: {pa} ft, so FL {fl}. Density altitude = PA + 120 × ISA deviation = {pa} + 120 × {dev} = {da} ft. The higher the density altitude, the worse the performance.',
+  a5:'QFE = QNH − elevation / {fp} = {qnh} − {elev} / {fp} = {qfe} hPa. With QFE the altimeter reads 0 ft on the ground and height above the aerodrome in the air.',
+  a6:'Obstacle {ter} ft: true clearance = {ta} − {ter} = {ct} ft. On the altimeter it would look like {ci} ft.',
+  mufl:'MUFL: minimum usable flight level', mufl0:'Work backwards from the terrain to the flight level. Obstacle, clearance and QNH come from the settings above.', rnd:'Round up to',
+  m1:'Required true altitude = obstacle + clearance = {ter} + {clr} = {req} ft.',
+  m2:'Cold temperature correction: 4 ft × {cold} °C × ({req} − {elev}) / 1000 = {tc} ft. This is the minimum altimeter reading (QNH set): {iaq} ft.', m2w:'Not colder than ISA, so no addition needed. Altimeter reading with QNH: {iaq} ft.',
+  m3:'Convert to standard: (1013.25 − {qnh}) × {fp} = {pq} ft. Pressure altitude = {iaq} + ({pq}) = {pa} ft.',
+  m4:'Next flight level at or above {pa} ft, rounded up to {rnd} ft: MUFL = FL {mufl}.',
+  mufl5:'To practise, choose the Mountains scenario, then try cold air and low QNH and watch the MUFL rise.',
+  quiz:'Self test', next:'Next task', score:'Score', correct:'Correct.', wrongA:'Not quite. Correct is ', pick:'Choose an answer.',
+  q1:'Actual QNH is {qnh} hPa, you have {set} hPa set. The altimeter reads {ia} ft. What is your true altitude (pressure error only, ISA, 27 ft/hPa)?',
+  q1e:'Difference {dp} hPa × 27 = {pe} ft. {dir} True altitude = {ia} {sg} {pe} = {ans} ft.', q1hi:'Set too high: you are lower than indicated.', q1lo:'Set too low: you are higher than indicated.',
+  q2:'QNH set, aerodrome at sea level. The altimeter reads {ia} ft, temperature is ISA {devs}. What is your true altitude (4 ft per 1000 ft per °C)?',
+  q2e:'Correction 4 ft × {dev} × {ia} / 1000 = {tc} ft. True altitude = {ia} {sg} {atc} = {ans} ft. {dir}', q2c:'Cold: you are lower than indicated.', q2w:'Warm: you are higher than indicated.',
+  q3:'Obstacle {ter} ft, required clearance {clr} ft, QNH {qnh} hPa, ISA {devs}, aerodrome at sea level. Lowest usable FL (rounded up to 500 ft)?',
+  q3e:'Required {req} ft, cold correction {tc} ft, QNH altitude {iaq} ft. Plus (1013.25 − {qnh}) × 27 = {pq} ft gives PA {pa} ft, rounded up FL {ans}.',
+  memoT:'Memory hooks', mem:null
+},
+fr: {
+  title:'Altimètre, pression et température', intro:'Modifiez le QNH, le calage, la température et l’altitude. L’application montre l’altimètre (analogique et Airbus), une vue de côté avec toutes les altitudes et explique chaque valeur avec vos chiffres. L’altitude vraie est la réalité, le reste est ce que votre instrument en fait.',
+  inputs:'Réglages', ta:'Altitude vraie (MSL)', set:'Calage (échelle barométrique)', qnh:'QNH réel sur l’aérodrome', elev:'Altitude de l’aérodrome', dev:'Température : écart par rapport à l’ISA', ter:'Obstacle ou relief (MSL)', clr:'Marge exigée', trans:'Altitude de transition', fp:'Règle de pression', rule:'Par degré d’écart ISA : 4 ft par 1000 ft de hauteur au-dessus de l’aérodrome (0,4 % par °C).',
+  unitL:'Unité', knobHint:'Tirez le bouton, utilisez la molette ou les flèches pour régler le calage.', modes:'Réglage rapide', std:'STD (1013,25)',
+  scen:'Scénarios', sc1:'QNH calé trop haut', sc2:'Jour froid', sc3:'De haut en bas', sc4:'Aérodrome chaud', sc5:'Montagne', sc6:'Atmosphère standard',
+  dial:'Altimètre analogique', pfd:'Bande d’altitude Airbus PFD', side:'Vue de côté', sideHint:'Vert : altitude vraie de l’avion. Orange en tirets : le niveau que l’altimètre prend pour 0 ft. Violet en tirets : niveaux de pression standard tous les 1000 ou 5000 ft (altitude pression), qui se resserrent par temps froid. Les valeurs sont à droite.',
+  ia:'Altitude indiquée', taR:'Altitude vraie', pa:'Altitude pression', da:'Altitude densité', fl:'Niveau de vol', qfe:'QFE', hgt:'Hauteur au-dessus de l’aérodrome', oat:'OAT ici', pAt:'Pression ici', err:'Indiquée moins vraie', tl:'Niveau de transition env.', ifrFl:'FL',
+  ctrue:'Marge vraie', cind:'Marge indiquée', belowT:'Sous l’obstacle !',
+  steps:'Comment on y arrive',
+  a1:'Erreur de pression : calage {set} hPa, QNH réel {qnh} hPa. Écart {dp} hPa × {fp} ft/hPa = {pe} ft. {pdir}',
+  pOver:'Calage trop haut : l’altimètre surestime, l’altitude vraie est plus basse.', pUnder:'Calage trop bas : l’altimètre sous-estime, l’altitude vraie est plus haute.', pZero:'Calage correct, pas d’erreur de pression.',
+  a2:'Température : à {pa} ft d’altitude pression l’ISA serait {isa} °C, il fait {oat} °C, donc ISA {devs}. Correction ≈ 4 ft × {dev} °C × {h} / 1000 = {tc} ft. {tdir}',
+  tCold:'L’air froid est plus dense, les niveaux de pression se rapprochent, l’altitude vraie est plus basse que l’indiquée.', tWarm:'L’air chaud écarte les niveaux de pression, l’altitude vraie est plus haute que l’indiquée.', tZero:'Température standard, pas de correction.',
+  a3:'Résultat : l’altimètre indique {ia} ft. L’altitude vraie est {ta} ft. Indiquée moins vraie = {err} ft.',
+  a4:'L’altitude pression est ce que l’altimètre indique avec 1013,25 hPa calés : {pa} ft, soit FL {fl}. Altitude densité = AP + 120 × écart ISA = {pa} + 120 × {dev} = {da} ft. Plus elle est haute, moins bonnes sont les performances.',
+  a5:'QFE = QNH − altitude / {fp} = {qnh} − {elev} / {fp} = {qfe} hPa. Avec le QFE, l’altimètre indique 0 ft au sol et la hauteur au-dessus de l’aérodrome en vol.',
+  a6:'Obstacle {ter} ft : marge vraie = {ta} − {ter} = {ct} ft. Sur l’altimètre cela ressemblerait à {ci} ft.',
+  mufl:'MUFL : niveau de vol minimal utilisable', mufl0:'Remontez du relief au niveau de vol. Obstacle, marge et QNH viennent des réglages ci-dessus.', rnd:'Arrondir à',
+  m1:'Altitude vraie requise = obstacle + marge = {ter} + {clr} = {req} ft.',
+  m2:'Correction de froid : 4 ft × {cold} °C × ({req} − {elev}) / 1000 = {tc} ft. Indication minimale de l’altimètre (QNH calé) : {iaq} ft.', m2w:'Pas plus froid que l’ISA, donc aucun ajout. Indication avec QNH : {iaq} ft.',
+  m3:'Conversion en standard : (1013,25 − {qnh}) × {fp} = {pq} ft. Altitude pression = {iaq} + ({pq}) = {pa} ft.',
+  m4:'Premier niveau de vol à partir de {pa} ft, arrondi à {rnd} ft : MUFL = FL {mufl}.',
+  mufl5:'Pour t’entraîner, choisis le scénario Montagne, puis essaie air froid et QNH bas et observe la hausse du MUFL.',
+  quiz:'Auto-test', next:'Tâche suivante', score:'Score', correct:'Exact.', wrongA:'Pas tout à fait. Bonne réponse : ', pick:'Choisissez une réponse.',
+  q1:'Le QNH réel est {qnh} hPa, vous avez calé {set} hPa. L’altimètre indique {ia} ft. Quelle est votre altitude vraie (erreur de pression seule, ISA, 27 ft/hPa) ?',
+  q1e:'Écart {dp} hPa × 27 = {pe} ft. {dir} Altitude vraie = {ia} {sg} {pe} = {ans} ft.', q1hi:'Calé trop haut : vous êtes plus bas que l’indication.', q1lo:'Calé trop bas : vous êtes plus haut que l’indication.',
+  q2:'QNH calé, aérodrome au niveau de la mer. L’altimètre indique {ia} ft, température ISA {devs}. Quelle est votre altitude vraie (4 ft par 1000 ft par °C) ?',
+  q2e:'Correction 4 ft × {dev} × {ia} / 1000 = {tc} ft. Altitude vraie = {ia} {sg} {atc} = {ans} ft. {dir}', q2c:'Froid : vous êtes plus bas que l’indication.', q2w:'Chaud : vous êtes plus haut que l’indication.',
+  q3:'Obstacle {ter} ft, marge {clr} ft, QNH {qnh} hPa, ISA {devs}, aérodrome au niveau de la mer. Plus bas FL utilisable (arrondi à 500 ft) ?',
+  q3e:'Requis {req} ft, correction de froid {tc} ft, altitude QNH {iaq} ft. Plus (1013,25 − {qnh}) × 27 = {pq} ft donne AP {pa} ft, arrondi FL {ans}.',
+  memoT:'Aide-mémoire', mem:null
+}
+};
+ALT_T.en.mem = ALT_T.de.mem; ALT_T.fr.mem = ALT_T.de.mem;
+const AT = k => ALT_T[LANG][k] ?? ALT_T.de[k];
+const altEl = $('#alt');
+const HPA0 = 1013.25, INHG = 33.8639;
+const AS = {ta: 5000, set: 1013.25, qnh: 1013.25, elev: 0, dev: 0, ter: 3000, clr: 1000, trans: 5000, unit: 'hPa', fp: 27, rnd: 500, quiz: null, pick: null, score: [0, 0]};
+const nf = (v, d = 0) => (Math.abs(v) < 0.5 * Math.pow(10, -d) ? 0 : v).toLocaleString(LANG === 'en' ? 'en-US' : LANG === 'fr' ? 'fr-FR' : 'de-DE', {minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: false});
+const nfp = v => nf(v, Math.abs(v - Math.round(v)) < 0.005 ? 0 : 2);
+const sgn = (v, d = 0) => (v > 0 ? '+' : v < 0 ? '−' : '') + nf(Math.abs(v), d);
+const r1 = v => Math.round(v);
+function altCalc(s = AS) {
+  const k = 0.004 * s.dev, fp = s.fp;
+  const iaq = s.elev + (s.ta - s.elev) / (1 + k);
+  const pe = (s.set - s.qnh) * fp;
+  const ia = iaq + pe;
+  const pa = iaq + (HPA0 - s.qnh) * fp;
+  const qfe = s.qnh - s.elev / fp;
+  const isa = 15 - 1.98 * pa / 1000;
+  const oat = isa + s.dev;
+  const da = pa + 120 * s.dev;
+  const press = HPA0 * Math.pow(Math.max(0.01, 1 - 6.8756e-6 * pa), 5.2559);
+  const tc = s.ta - iaq;
+  const planeTrue = P => s.elev + (P - (HPA0 - s.qnh) * fp - s.elev) * (1 + k);
+  const paTrans = s.trans + (HPA0 - s.qnh) * fp;
+  const tl = Math.ceil((paTrans + 1000) / 1000) * 10;
+  const mufl = muflCalc(s);
+  return {k, iaq, pe, ia, pa, qfe, isa, oat, da, press, tc, err: ia - s.ta, hgt: s.ta - s.elev, planeTrue, tl, mufl, ctrue: s.ta - s.ter, cind: ia - s.ter, setPlane: s.elev + ((-pe) - s.elev) * (1 + k), stdPlane: planeTrue(0)};
+}
+function muflCalc(s) {
+  const req = s.ter + s.clr, cold = Math.max(0, -s.dev), tc = 0.004 * cold * Math.max(0, req - s.elev), iaq = req + tc, pq = (HPA0 - s.qnh) * s.fp, pa = iaq + pq;
+  const step = s.rnd, mufl = Math.ceil(pa / step - 1e-9) * step / 100;
+  return {req, cold, tc, iaq, pq, pa, mufl};
+}
+const svgNS = 'http://www.w3.org/2000/svg';
+function sv(tag, attrs, parent, text) { const e = document.createElementNS(svgNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; if (parent) parent.append(e); return e; }
+const polar = (r, a, c = 150) => [c + r * Math.sin(a * Math.PI / 180), c - r * Math.cos(a * Math.PI / 180)];
+const quant = hpa => AS.unit === 'inHg' ? Math.round(hpa / INHG * 100) / 100 * INHG : Math.round(hpa);
+const clampSet = v => Math.min(1100, Math.max(900, v));
+function altModeOf() { const s = AS.set; if (Math.abs(s - HPA0) < 0.013 || Math.abs(s - 1013) < 0.001) return 'STD'; if (Math.abs(s - AS.qnh) < 0.013) return 'QNH'; if (AS.elev > 0 && Math.abs(s - Math.round(AS.qnh - AS.elev / AS.fp)) < 0.013) return 'QFE'; return 'SET'; }
+/* ---- Analoges Instrument ---- */
+function buildDial() {
+  const svg = sv('svg', {viewBox: '0 0 300 300', class: 'altsvg adial', role: 'img', tabindex: 0}); const D = {svg};
+  sv('circle', {cx: 150, cy: 150, r: 147, fill: '#2c3038'}, svg); sv('circle', {cx: 150, cy: 150, r: 135, fill: '#0d0f12'}, svg);
+  for (let i = 0; i < 50; i++) { const maj = i % 5 === 0, a = i * 7.2; const [x1, y1] = polar(131, a), [x2, y2] = polar(maj ? 117 : 124, a); sv('line', {x1, y1, x2, y2, stroke: '#f3f3f3', 'stroke-width': maj ? 3 : 1.4}, svg); if (maj) { const [tx, ty] = polar(100, a); sv('text', {x: tx, y: ty + 9, 'text-anchor': 'middle', 'font-size': 28, 'font-weight': 600, fill: '#f3f3f3', style: 'font-family:var(--display)'}, svg, String(i / 5)); } }
+  sv('text', {x: 150, y: 80, 'text-anchor': 'middle', 'font-size': 10, fill: '#aab', 'letter-spacing': 1}, svg, 'ALT · FEET');
+  // Kollsman Fenster
+  sv('rect', {x: 184, y: 135, width: 58, height: 30, rx: 3, fill: '#000', stroke: '#9aa'}, svg); D.w1 = sv('text', {x: 213, y: 157, 'text-anchor': 'middle', 'font-size': 20, fill: '#ffb84d', style: 'font-family:var(--mono)'}, svg, ''); sv('text', {x: 213, y: 131, 'text-anchor': 'middle', 'font-size': 10, fill: '#aab'}, svg, 'hPa');
+  sv('rect', {x: 90, y: 186, width: 60, height: 24, rx: 3, fill: '#000', stroke: '#9aa'}, svg); D.w2 = sv('text', {x: 120, y: 204, 'text-anchor': 'middle', 'font-size': 16, fill: '#ffb84d', style: 'font-family:var(--mono)'}, svg, ''); sv('text', {x: 120, y: 182, 'text-anchor': 'middle', 'font-size': 10, fill: '#aab'}, svg, 'inHg');
+  D.tri = sv('path', {d: 'M150 18 L142 33 L158 33Z', fill: '#f3f3f3'}, svg);
+  D.hand2 = sv('path', {d: 'M150 76 L160 98 L154 98 L154 150 L146 150 L146 98 L140 98Z', fill: '#f3f3f3', stroke: '#000', 'stroke-width': .6}, svg);
+  D.hand1 = sv('path', {d: 'M150 34 L154 140 L150 166 L146 140Z', fill: '#fff', stroke: '#000', 'stroke-width': .6}, svg);
+  sv('circle', {cx: 150, cy: 150, r: 8, fill: '#555', stroke: '#222'}, svg);
+  // Drehknopf
+  D.knob = sv('g', {class: 'knob', transform: 'translate(46 246)', role: 'slider', 'aria-label': 'Subscale knob'}, svg); sv('circle', {r: 25, fill: '#3b414b', stroke: '#8a93a0', 'stroke-width': 2}, D.knob); D.kr = sv('g', {}, D.knob); for (let i = 0; i < 12; i++) { const a = i * 30; const [x1, y1] = polar(25, a, 0), [x2, y2] = polar(19, a, 0); sv('line', {x1, y1, x2, y2, stroke: '#8a93a0', 'stroke-width': 3}, D.kr); } sv('path', {d: 'M0 -12 L6 0 L-6 0Z', fill: '#ffb84d'}, D.kr); sv('text', {x: 0, y: 41, 'text-anchor': 'middle', 'font-size': 11, fill: '#aab'}, D.knob, 'SET');
+  D.acc = 0; D.rot = 0; let last = null, dragging = false;
+  const ang = e => { const r = D.knob.getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI; };
+  D.knob.addEventListener('pointerdown', e => { dragging = true; last = ang(e); D.knob.setPointerCapture(e.pointerId); e.preventDefault(); });
+  D.knob.addEventListener('pointermove', e => { if (!dragging) return; const a = ang(e); let d = a - last; if (d > 180) d -= 360; if (d < -180) d += 360; last = a; D.rot += d; D.kr.setAttribute('transform', `rotate(${D.rot})`); D.acc += d / 360 * 30; const stepH = AS.unit === 'inHg' ? 0.01 * INHG : 1; const n = Math.trunc(D.acc / stepH); if (n) { D.acc -= n * stepH; AS.set = clampSet(quant(AS.set + n * stepH)); altSync(); } });
+  const end = () => { dragging = false; }; D.knob.addEventListener('pointerup', end); D.knob.addEventListener('pointercancel', end);
+  svg.addEventListener('wheel', e => { e.preventDefault(); const st = AS.unit === 'inHg' ? 0.01 * INHG : 1; AS.set = clampSet(quant(AS.set + (e.deltaY < 0 ? st : -st))); D.rot += e.deltaY < 0 ? 12 : -12; D.kr.setAttribute('transform', `rotate(${D.rot})`); altSync(); }, {passive: false});
+  svg.addEventListener('keydown', e => { const st = AS.unit === 'inHg' ? 0.01 * INHG : 1; if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { AS.set = clampSet(quant(AS.set + st)); altSync(); e.preventDefault(); } if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { AS.set = clampSet(quant(AS.set - st)); altSync(); e.preventDefault(); } });
+  D.update = c => { const ia = c.ia; const m = (v, p) => ((v % p) + p) % p; D.hand1.setAttribute('transform', `rotate(${m(ia, 1000) / 1000 * 360} 150 150)`); D.hand2.setAttribute('transform', `rotate(${m(ia, 10000) / 10000 * 360} 150 150)`); D.tri.setAttribute('transform', `rotate(${m(ia, 100000) / 100000 * 360} 150 150)`); D.w1.textContent = AS.set >= 999.5 ? String(Math.round(AS.set)) : nf(AS.set, 0); D.w2.textContent = (AS.set / INHG).toFixed(2); svg.setAttribute('aria-label', `${AT('dial')}: ${Math.round(ia)} ft, ${Math.round(AS.set)} hPa`); };
+  return D;
+}
+/* ---- Airbus PFD Höhenband ---- */
+function buildPfd() {
+  const svg = sv('svg', {viewBox: '0 0 220 430', class: 'altsvg apfd', role: 'img'}); const P = {svg};
+  sv('rect', {x: 0, y: 0, width: 220, height: 430, rx: 12, fill: '#0b0f14'}, svg);
+  const defs = sv('defs', {}, svg); const cp = sv('clipPath', {id: 'pfdclip'}, defs); sv('rect', {x: 20, y: 40, width: 110, height: 320}, cp);
+  sv('rect', {x: 20, y: 40, width: 110, height: 320, fill: '#2a2f36'}, svg);
+  P.tape = sv('g', {'clip-path': 'url(#pfdclip)'}, svg);
+  P.box = sv('g', {}, svg); sv('path', {d: 'M18 178 H108 V163 L130 163 V237 L108 237 V222 H18Z', fill: '#000', stroke: '#ffd23f', 'stroke-width': 2}, P.box);
+  P.big = sv('text', {x: 20, y: 214, 'font-size': 38, fill: '#7dff9a', style: 'font-family:var(--mono)', 'font-weight': 700}, P.box, ''); P.small = sv('text', {x: 84, y: 214, 'font-size': 30, fill: '#7dff9a', style: 'font-family:var(--mono)', 'font-weight': 700}, P.box, '');
+  sv('text', {x: 75, y: 30, 'text-anchor': 'middle', 'font-size': 14, fill: '#cfd6df'}, svg, 'ALT');
+  sv('rect', {x: 20, y: 372, width: 110, height: 28, rx: 4, fill: '#000', stroke: '#394553'}, svg); P.baro = sv('text', {x: 75, y: 392, 'text-anchor': 'middle', 'font-size': 20, fill: '#35e0ff', style: 'font-family:var(--mono)', 'font-weight': 700}, svg, '');
+  P.metric = sv('text', {x: 75, y: 421, 'text-anchor': 'middle', 'font-size': 13, fill: '#7dff9a', style: 'font-family:var(--mono)'}, svg, '');
+  P.ref = sv('text', {x: 180, y: 90, 'text-anchor': 'middle', 'font-size': 12, fill: '#cfd6df'}, svg, ''); P.refv = sv('text', {x: 180, y: 108, 'text-anchor': 'middle', 'font-size': 12, fill: '#35e0ff'}, svg, '');
+  P.update = (c, mode) => {
+    const ia = c.ia, ppf = 0.4; // Pixel pro ft
+    P.tape.replaceChildren(); const lo = Math.floor((ia - 420) / 20) * 20, hi = ia + 420;
+    for (let v = lo; v <= hi; v += 20) { const y = 200 - (v - ia) * ppf; const hund = v % 100 === 0; sv('line', {x1: 130, y1: y, x2: hund ? 108 : 118, y2: y, stroke: '#f2f5f8', 'stroke-width': hund ? 2 : 1.2}, P.tape); if (hund) sv('text', {x: 64, y: y + 6, 'text-anchor': 'middle', 'font-size': 17, fill: '#f2f5f8', style: 'font-family:var(--mono)'}, P.tape, String(v)); }
+    const a = Math.round(ia / 20) * 20, neg = a < 0, ab = Math.abs(a), h = Math.floor(ab / 100), t = ab % 100; P.big.textContent = (neg ? '−' : '') + h; P.big.setAttribute('x', neg ? 14 : 22); P.small.textContent = String(t).padStart(2, '0'); P.small.setAttribute('x', Math.max(70, 22 + String(h).length * 23 + (neg ? 6 : 0)));
+    P.baro.textContent = mode === 'STD' ? 'STD' : (AS.unit === 'inHg' ? (AS.set / INHG).toFixed(2) : String(Math.round(AS.set)));
+    P.metric.textContent = nf(ia * 0.3048, 0) + ' m'; P.ref.textContent = mode === 'STD' ? 'STD' : mode === 'QFE' ? 'QFE' : mode === 'QNH' ? 'QNH' : 'BARO'; P.refv.textContent = AS.unit === 'inHg' ? 'inHg' : 'hPa';
+    svg.setAttribute('aria-label', `${AT('pfd')}: ${Math.round(ia)} ft`);
+  };
+  return P;
+}
+/* ---- Seitenansicht ---- */
+function declutter(items, minGap, lo, hi) { items.sort((a, b) => a.y - b.y); let prev = lo - minGap; for (const it of items) { it.ty = Math.max(it.y, prev + minGap); prev = it.ty; } let nx = hi + minGap; for (let i = items.length - 1; i >= 0; i--) { items[i].ty = Math.min(items[i].ty, nx - minGap); nx = items[i].ty; } return items; }
+function altSideSvg(c) {
+  const s = AS, W = 780, H = 500, L = 62, R = 530, Tp = 14, B = H - 30;
+  const hiV = Math.max(s.ta, s.ter, s.elev, c.ia, c.pa, c.da, 1000) + 1200, steps = [4000, 6000, 8000, 12000, 16000, 20000, 26000, 32000, 40000, 50000, 60000];
+  const ymax = steps.find(v => v >= hiV) || 60000; const loV = Math.min(0, c.setPlane, c.stdPlane, c.ia, c.da) - 500; const ymin = Math.floor(loV / 1000) * 1000;
+  const Y = ft => Tp + (ymax - ft) / (ymax - ymin) * (B - Tp), clipY = v => Math.min(B, Math.max(Tp, Y(v)));
+  const col = {ta: 'var(--good)', ia: '#e07a1f', pa: '#8a5cc2', da: 'var(--bad)'};
+  let o = `<svg class="altsvg alts" viewBox="0 0 ${W} ${H}" role="img" aria-label="${AT('side')}"><rect x="0" y="0" width="${W}" height="${H}" fill="var(--sky)"/>`;
+  // Achse links
+  const tick = ymax - ymin > 30000 ? 10000 : ymax - ymin > 14000 ? 2000 : 1000;
+  for (let v = Math.ceil(ymin / tick) * tick; v <= ymax; v += tick) o += `<line x1="${L}" x2="${R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width=".6"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${nf(v)}</text>`;
+  o += `<text x="14" y="${(Tp + B) / 2}" transform="rotate(-90 14 ${(Tp + B) / 2})" text-anchor="middle" font-size="11" fill="var(--muted)">ft MSL</text>`;
+  // Druckflächen
+  const pstep = ymax - ymin > 30000 ? 5000 : ymax - ymin > 14000 ? 2000 : 1000;
+  for (let P = -2000; P <= 60000; P += pstep) { const y = c.planeTrue(P); if (y < ymin || y > ymax) continue; o += `<line x1="${L}" x2="${R}" y1="${Y(y)}" y2="${Y(y)}" stroke="${col.pa}" stroke-width="1" stroke-dasharray="3 4" opacity=".6"/><text x="${R - 4}" y="${Y(y) - 3}" text-anchor="end" font-size="10" fill="${col.pa}">${P >= 0 ? 'FL ' + String(Math.round(P / 100)).padStart(3, '0') : ''}</text>`; }
+  // Geländekörper
+  const xA = L + .3 * (R - L), xP = L + .78 * (R - L), top = Math.max(s.ter, s.elev), mid = s.elev + (top - s.elev) * .45;
+  o += `<path d="M${L} ${Y(ymin)} L${L} ${Y(s.elev)} L${xA} ${Y(s.elev)} L${xA + .12 * (R - L)} ${Y(mid)} L${xP} ${Y(top)} L${xP + .1 * (R - L)} ${Y(mid)} L${R} ${Y(s.elev + (top - s.elev) * .2)} L${R} ${Y(ymin)}Z" fill="#7b6a53" opacity=".9"/>`;
+  o += `<line x1="${L}" x2="${R}" y1="${Y(0)}" y2="${Y(0)}" stroke="#2f78c4" stroke-width="2"/><text x="${L + 4}" y="${Y(0) - 4}" font-size="11" fill="#2f78c4" style="paint-order:stroke;stroke:var(--sky);stroke-width:3px">MSL 0 ft</text>`;
+  if (s.elev > 0) o += `<text x="${L + 6}" y="${Y(s.elev) - 6}" font-size="11" fill="#fff" style="paint-order:stroke;stroke:#00000088;stroke-width:3px">AD ${nf(s.elev)} ft</text>`;
+  const zy = c.setPlane; if (zy >= ymin && zy <= ymax) o += `<line x1="${L}" x2="${R}" y1="${Y(zy)}" y2="${Y(zy)}" stroke="${col.ia}" stroke-width="2" stroke-dasharray="7 5"/><text x="${L + 250}" y="${Y(zy) + 14}" font-size="11" fill="${col.ia}" style="paint-order:stroke;stroke:var(--sky);stroke-width:3px">IA = 0 ft (${nf(AS.set, 0)} hPa)</text>`;
+  const sy = c.stdPlane; if (sy >= ymin && sy <= ymax) o += `<line x1="${L}" x2="${R}" y1="${Y(sy)}" y2="${Y(sy)}" stroke="${col.pa}" stroke-width="2"/><text x="${L + 120}" y="${Y(sy) + 14}" font-size="11" fill="${col.pa}" style="paint-order:stroke;stroke:var(--sky);stroke-width:3px">PA = 0 ft (1013,25 hPa)</text>`;
+  // Hindernis Klammer
+  if (s.ta > top + 10 || s.ta < top - 10) { const bad = s.ta < s.ter; o += `<line x1="${xP}" x2="${xP}" y1="${Y(top)}" y2="${Y(s.ta)}" stroke="${bad ? 'var(--bad)' : 'var(--good)'}" stroke-width="2"/><line x1="${xP - 6}" x2="${xP + 6}" y1="${Y(s.ta)}" y2="${Y(s.ta)}" stroke="${bad ? 'var(--bad)' : 'var(--good)'}" stroke-width="2"/><text x="${xP + 8}" y="${(Y(top) + Y(s.ta)) / 2 + 4}" font-size="11" font-weight="700" fill="${bad ? 'var(--bad)' : 'var(--good)'}" style="paint-order:stroke;stroke:var(--sky);stroke-width:3px">${bad ? AT('belowT') : nf(c.ctrue) + ' ft'}</text>`; }
+  // Flugzeug
+  const ax = L + .2 * (R - L), ay = clipY(s.ta);
+  o += `<line x1="${ax}" x2="${R}" y1="${ay}" y2="${ay}" stroke="${col.ta}" stroke-width="2"/><g transform="translate(${ax} ${ay}) scale(1.5)"><path d="M-36 2 C-36 -5 -24 -7 -8 -7 H22 Q36 -6 40 0 Q36 6 22 6 H-20 Q-36 6 -36 2Z" fill="#f4f6f8" stroke="#44505e"/><path d="M-36 -1 L-44 -17 H-36 L-24 -5Z" fill="#f4f6f8" stroke="#44505e"/><path d="M-2 4 L-16 17 H-6 L14 5Z" fill="#cfd6de" stroke="#44505e"/><ellipse cx="6" cy="9" rx="7" ry="3" fill="#8e99a6"/><circle cx="30" cy="-1.5" r="1.4" fill="#44505e"/></g>`;
+  o += `<path d="M${ax + 66} ${ay} h22 m-6 -5 l6 5 l-6 5" stroke="var(--muted)" fill="none" stroke-width="1.5"/>`;
+  // Werte rechts
+  const items = [{v: s.ta, y: Y(s.ta), c: col.ta, t: AT('taR') + ' ' + nf(s.ta)}, {v: c.ia, y: Y(c.ia), c: col.ia, t: AT('ia') + ' ' + nf(c.ia)}, {v: c.pa, y: Y(c.pa), c: col.pa, t: AT('pa') + ' ' + nf(c.pa)}, {v: c.da, y: Y(c.da), c: col.da, t: AT('da') + ' ' + nf(c.da)}];
+  declutter(items.map(i => ({...i, y: Math.min(B, Math.max(Tp, i.y))})), 17, Tp + 8, B - 4).forEach(it => { o += `<path d="M${R + 6} ${it.y} l9 -5 v10Z" fill="${it.c}"/><line x1="${R + 15}" y1="${it.y}" x2="${R + 26}" y2="${it.ty}" stroke="${it.c}" stroke-width="1"/><text x="${R + 29}" y="${it.ty + 4}" font-size="12" font-weight="600" fill="${it.c}">${it.t} ft</text>`; });
+  o += `<line x1="${R + 6}" y1="${Tp}" x2="${R + 6}" y2="${B}" stroke="var(--line)"/></svg>`;
+  return o;
+}
+/* ---- Aufbau ---- */
+const AF = {inputs: {}, out: null, dial: null, pfd: null, side: null, mufl: null, quiz: null, modeBtns: {}, unitSeg: null, raf: 0};
+const ALT_FIELDS = {ta: [0, 45000, 100, ' ft'], set: [900, 1100, 1, ''], qnh: [940, 1060, 1, ' hPa'], elev: [0, 9000, 50, ' ft'], dev: [-40, 40, 1, ' °C'], ter: [0, 18000, 100, ' ft'], clr: [0, 3000, 100, ' ft'], trans: [2000, 20000, 500, ' ft']};
+function fieldVal(key) { return key === 'set' && AS.unit === 'inHg' ? (AS.set / INHG) : AS[key]; }
+function fmtField(key) { if (key === 'set') return AS.unit === 'inHg' ? (AS.set / INHG).toFixed(2) : String(Math.round(AS.set * 100) / 100); return String(AS[key]); }
+function altSync() { for (const [k, [rg, nm]] of Object.entries(AF.inputs)) { const v = fieldVal(k); if (k === 'set') { rg.min = AS.unit === 'inHg' ? 26.6 : 900; rg.max = AS.unit === 'inHg' ? 32.5 : 1100; rg.step = AS.unit === 'inHg' ? 0.01 : 1; } rg.value = v; nm.value = fmtField(k); } for (const [m, b] of Object.entries(AF.modeBtns)) b.setAttribute('aria-pressed', String(altModeOf() === m)); if (AF.unitSeg) for (const b of AF.unitSeg.children) b.setAttribute('aria-pressed', String(b.dataset.v === AS.unit)); if (!AF.raf) AF.raf = requestAnimationFrame(() => { AF.raf = 0; renderAltOut(); }); }
+function altNum(label, key) {
+  const [min, max, step, unit] = ALT_FIELDS[key];
+  const l = el('label', 'f'), head = el('span', 'numrow'); head.append(el('span', '', label));
+  const n = document.createElement('input'); n.type = 'text'; n.inputMode = 'decimal'; n.autocomplete = 'off'; n.className = 'numin'; n.setAttribute('aria-label', label);
+  const i = document.createElement('input'); i.type = 'range'; i.min = min; i.max = max; i.step = step;
+  const u = el('span', 'muted', key === 'set' ? (AS.unit === 'inHg' ? ' inHg' : ' hPa') : unit.trim()); if (key === 'set') u.id = 'altSetUnit';
+  const commit = v => { v = parseFloat(String(v).replace(',', '.')); if (!isFinite(v)) return; if (key === 'set') { v = AS.unit === 'inHg' ? v * INHG : v; v = clampSet(v); } else v = Math.min(max, Math.max(min, v)); AS[key] = v; if (key === 'elev' && AS.ta < v) AS.ta = v; altSync(); };
+  n.onchange = () => commit(n.value); n.onkeydown = e => { if (e.key === 'Enter') n.blur(); }; i.oninput = () => commit(i.value);
+  head.append(n, u); l.append(head, i); AF.inputs[key] = [i, n]; return l;
+}
+const SCEN = {
+  sc1: {ta: 3000, qnh: 1003, set: 1023, dev: 0, elev: 0, ter: 1000},
+  sc2: {ta: 6000, qnh: 1013.25, set: 1013.25, dev: -25, elev: 0, ter: 3000},
+  sc3: {ta: 4000, qnh: 985, set: 1013.25, dev: 0, elev: 0},
+  sc4: {ta: 9000, qnh: 1013.25, set: 1013.25, dev: 25, elev: 5000},
+  sc5: {ta: 12000, qnh: 995, set: 995, dev: -15, elev: 0, ter: 11000, clr: 1000},
+  sc6: {ta: 5000, qnh: 1013.25, set: 1013.25, dev: 0, elev: 0}
+};
+function renderAlt() {
+  if (!altEl) return;
+  altEl.innerHTML = ''; AF.inputs = {}; AF.modeBtns = {};
+  altEl.append(el('div', 'eyebrow', T('module') + ' 5'), el('h2', '', AT('title')), el('p', 'muted', AT('intro')));
+  const form = el('div', 'card'); form.style.gap = '12px'; form.append(el('h3', '', AT('inputs')));
+  const sc = el('div', 'row'); sc.style.flexWrap = 'wrap'; sc.append(el('span', 'eyebrow', AT('scen'))); for (const k of Object.keys(SCEN)) sc.append(btn(AT(k), () => { Object.assign(AS, SCEN[k]); AS.pick = null; altSync(); })); form.append(sc);
+  const cols = el('div', 'altform'); const c1 = el('div', 'altcol'), c2 = el('div', 'altcol');
+  c1.append(altNum(AT('ta'), 'ta'), altNum(AT('qnh'), 'qnh'), altNum(AT('set'), 'set'));
+  const modes = el('div', 'row'); modes.style.flexWrap = 'wrap'; modes.append(el('span', 'eyebrow', AT('modes')));
+  const mb = (m, fn) => { const b = btn(m, fn); b.setAttribute('aria-pressed', 'false'); AF.modeBtns[m] = b; modes.append(b); };
+  mb('QNH', () => { AS.set = AS.qnh; altSync(); }); mb('QFE', () => { AS.set = Math.round(AS.qnh - AS.elev / AS.fp); altSync(); }); mb('STD', () => { AS.set = HPA0; altSync(); });
+  const useg = el('div', 'seg'); for (const u of ['hPa', 'inHg']) { const b = el('button', '', u); b.dataset.v = u; b.onclick = () => { AS.unit = u; const su = $('#altSetUnit'); if (su) su.textContent = ' ' + u; altSync(); }; useg.append(b); } AF.unitSeg = useg; modes.append(useg);
+  c1.append(modes);
+  c2.append(altNum(AT('dev'), 'dev'), altNum(AT('elev'), 'elev'), altNum(AT('ter'), 'ter'), altNum(AT('clr'), 'clr'), altNum(AT('trans'), 'trans'));
+  cols.append(c1, c2); form.append(cols);
+  const fps = el('div', 'row'); fps.style.flexWrap = 'wrap'; fps.append(el('span', 'eyebrow', AT('fp'))); const fseg = el('div', 'seg'); for (const v of [27, 30]) { const b = el('button', '', v + ' ft/hPa'); b.setAttribute('aria-pressed', String(AS.fp === v)); b.onclick = () => { AS.fp = v; for (const x of fseg.children) x.setAttribute('aria-pressed', String(x === b)); altSync(); }; fseg.append(b); } fps.append(fseg); form.append(fps, el('div', 'hint', AT('rule') + ' ' + AT('knobHint')));
+  altEl.append(form);
+  const grid = el('div', 'altgrid'); const d1 = el('div', 'card'), d2 = el('div', 'card'); AF.dial = buildDial(); AF.pfd = buildPfd();
+  d1.append(el('h3', '', AT('dial')), AF.dial.svg); d2.append(el('h3', '', AT('pfd')), AF.pfd.svg); grid.append(d1, d2); altEl.append(grid);
+  const sd = el('div', 'card'); sd.append(el('h3', '', AT('side'))); AF.side = el('div', ''); sd.append(AF.side, el('div', 'hint', AT('sideHint'))); altEl.append(sd);
+  AF.out = el('div', 'card'); altEl.append(AF.out);
+  AF.mufl = el('div', 'card'); altEl.append(AF.mufl);
+  AF.quiz = el('div', 'card'); altEl.append(AF.quiz);
+  const mm = el('div', 'card'); mm.append(el('h3', '', AT('memoT'))); const ul = document.createElement('ul'); ul.style.paddingLeft = '20px'; for (const m of AT('mem')) ul.append(el('li', '', m)); mm.append(ul); altEl.append(mm);
+  altSync();
+}
+function renderAltOut() {
+  if (!AF.out) return; const c = altCalc(), mode = altModeOf();
+  AF.dial.update(c); AF.pfd.update(c, mode); AF.side.innerHTML = altSideSvg(c);
+  const out = AF.out; out.innerHTML = '';
+  const res = el('div', 'res');
+  const card = (lbl, val, sub, color) => { const cd = el('div', 'card'); cd.style.padding = '12px'; cd.append(el('span', 'eyebrow', lbl)); const b = el('div', 'big', val); b.style.fontSize = '1.5rem'; if (color) b.style.color = color; cd.append(b); if (sub) cd.append(el('span', 'muted', sub)); return cd; };
+  res.append(card(AT('ia'), nf(c.ia) + ' ft', mode + ' ' + nf(AS.set, 0) + ' hPa', '#e07a1f'), card(AT('taR'), nf(AS.ta) + ' ft', AT('err') + ' ' + sgn(c.err), 'var(--good)'), card(AT('pa'), nf(c.pa) + ' ft', AT('fl') + ' ' + String(Math.round(c.pa / 100)).padStart(3, '0'), '#8a5cc2'), card(AT('da'), nf(c.da) + ' ft', 'ISA ' + sgn(AS.dev) + ' °C', 'var(--bad)'));
+  res.append(card(AT('qfe'), nf(c.qfe, 1) + ' hPa', AT('hgt') + ' ' + nf(c.hgt) + ' ft'), card(AT('oat'), nf(c.oat, 1) + ' °C', AT('pAt') + ' ' + nf(c.press, 0) + ' hPa'), card(AT('tl'), AT('ifrFl') + ' ' + c.tl, AT('trans') + ' ' + nf(AS.trans) + ' ft'), card(AT('ctrue'), AS.ta < AS.ter ? AT('belowT') : nf(c.ctrue) + ' ft', AT('cind') + ' ' + nf(c.cind) + ' ft', AS.ta < AS.ter ? 'var(--bad)' : null));
+  out.append(res);
+  const legend = el('div', 'lgd'); for (const [t, cl] of [[AT('taR'), 'var(--good)'], [AT('ia'), '#e07a1f'], [AT('pa'), '#8a5cc2'], [AT('da'), 'var(--bad)']]) { const sp = el('span'); const i = document.createElement('i'); i.style.background = cl; sp.append(i, t); legend.append(sp); } out.append(legend);
+  out.append(el('h3', '', AT('steps')));
+  const dp = AS.set - AS.qnh, pe = c.pe, h = Math.max(0, c.iaq - AS.elev);
+  const S = [fmt(AT('a1'), {set: nfp(AS.set), qnh: nfp(AS.qnh), dp: sgn(dp, Math.abs(dp - Math.round(dp)) < 0.005 ? 0 : 2), fp: AS.fp, pe: sgn(pe), pdir: Math.abs(dp) < 0.05 ? AT('pZero') : dp > 0 ? AT('pOver') : AT('pUnder')}),
+    fmt(AT('a2'), {pa: nf(c.pa), isa: nf(c.isa, 1), oat: nf(c.oat, 1), devs: sgn(AS.dev), dev: sgn(AS.dev), h: nf(h), tc: sgn(c.tc), tdir: AS.dev < 0 ? AT('tCold') : AS.dev > 0 ? AT('tWarm') : AT('tZero')}),
+    fmt(AT('a3'), {ia: nf(c.ia), ta: nf(AS.ta), err: sgn(c.err)}),
+    fmt(AT('a4'), {pa: nf(c.pa), fl: String(Math.round(c.pa / 100)).padStart(3, '0'), dev: sgn(AS.dev), da: nf(c.da)}),
+    fmt(AT('a5'), {fp: AS.fp, qnh: nfp(AS.qnh), elev: nf(AS.elev), qfe: nf(c.qfe, 1)}),
+    fmt(AT('a6'), {ter: nf(AS.ter), ta: nf(AS.ta), ct: nf(c.ctrue), ci: nf(c.cind)})];
+  const ol = document.createElement('ol'); ol.style.cssText = 'padding-left:20px;display:flex;flex-direction:column;gap:8px'; for (const t of S) ol.append(el('li', '', t)); out.append(ol);
+  renderAltMufl(c); renderAltQuiz();
+}
+function renderAltMufl(c) {
+  const m = c.mufl, box = AF.mufl; box.innerHTML = ''; box.append(el('h3', '', AT('mufl')), el('p', 'muted', AT('mufl0')));
+  const row = el('div', 'row'); row.style.flexWrap = 'wrap'; row.append(el('span', 'eyebrow', AT('rnd'))); const seg = el('div', 'seg'); for (const v of [100, 500, 1000]) { const b = el('button', '', v + ' ft'); b.setAttribute('aria-pressed', String(AS.rnd === v)); b.onclick = () => { AS.rnd = v; altSync(); }; seg.append(b); } row.append(seg); box.append(row);
+  const big = el('div', 'big', 'MUFL  FL ' + String(m.mufl).padStart(3, '0')); big.style.color = '#8a5cc2'; box.append(big);
+  const ol = document.createElement('ol'); ol.style.cssText = 'padding-left:20px;display:flex;flex-direction:column;gap:8px';
+  const v = {ter: nf(AS.ter), clr: nf(AS.clr), req: nf(m.req), cold: nf(m.cold), elev: nf(AS.elev), tc: nf(m.tc), iaq: nf(m.iaq), qnh: nfp(AS.qnh), fp: AS.fp, pq: sgn(m.pq), pa: nf(m.pa), rnd: AS.rnd, mufl: String(m.mufl).padStart(3, '0')};
+  for (const t of [fmt(AT('m1'), v), fmt(m.cold > 0 ? AT('m2') : AT('m2w'), v), fmt(AT('m3'), v), fmt(AT('m4'), v)]) ol.append(el('li', '', t)); box.append(ol, el('div', 'hint', AT('mufl5')));
+}
+/* ---- Selbsttest ---- */
+const rint = (a, b, st = 1) => a + st * Math.floor(Math.random() * ((b - a) / st + 1));
+function altQuizNew() {
+  const t = rint(1, 3), L = {};
+  if (t === 1) { const qnh = rint(990, 1030), d = rint(5, 20) * (Math.random() < .5 ? -1 : 1), set = qnh + d, ia = rint(20, 90) * 100, pe = Math.abs(d) * 27, ans = ia - d * 27; const wr = [ia + d * 27, ia - d * 10, ia - d * 54]; L.q = fmt(AT('q1'), {qnh, set, ia: nf(ia)}); L.ans = ans; L.opts = [ans, ...wr]; L.e = fmt(AT('q1e'), {dp: sgn(d), pe: nf(pe), dir: d > 0 ? AT('q1hi') : AT('q1lo'), ia: nf(ia), sg: d > 0 ? '−' : '+', ans: nf(ans)}); }
+  else if (t === 2) { const dev = rint(-30, 20, 5) || -15, ia = rint(3, 12) * 1000, tc = Math.round(0.004 * dev * ia), ans = ia + tc; L.q = fmt(AT('q2'), {ia: nf(ia), devs: sgn(dev)}); L.ans = ans; L.opts = [ans, ia - tc, ia, ia + Math.round(tc / 2)]; L.e = fmt(AT('q2e'), {dev: sgn(dev), ia: nf(ia), tc: sgn(tc), atc: nf(Math.abs(tc)), sg: dev < 0 ? '−' : '+', ans: nf(ans), dir: dev < 0 ? AT('q2c') : AT('q2w')}); }
+  else { const q = {qnh: rint(985, 1030), dev: rint(-25, 5, 5), ter: rint(4, 14) * 1000, clr: 1000, elev: 0, fp: 27, rnd: 500}; const m = muflCalc(q); const ans = m.mufl; L.q = fmt(AT('q3'), {ter: nf(q.ter), clr: nf(q.clr), qnh: q.qnh, devs: sgn(q.dev)}); L.ans = ans; const noT = Math.ceil((m.req + (HPA0 - q.qnh) * 27) / 500 - 1e-9) * 5, wrongQ = Math.ceil((m.iaq - (HPA0 - q.qnh) * 27) / 500 - 1e-9) * 5, down = Math.floor(m.pa / 500) * 5; L.opts = [ans, noT, wrongQ, down]; L.e = fmt(AT('q3e'), {req: nf(m.req), tc: nf(m.tc), iaq: nf(m.iaq), qnh: q.qnh, pq: sgn(m.pq), pa: nf(m.pa), ans: String(ans).padStart(3, '0')}); L.fl = true; }
+  const uniq = []; for (const o of L.opts) if (!uniq.includes(o)) uniq.push(o); let k = 1; while (uniq.length < 4) { const o = L.ans + (L.fl ? 5 * k : 200 * k); if (!uniq.includes(o)) uniq.push(o); k = k > 0 ? -k : -k + 1; }
+  L.options = uniq.slice(0, 4).sort(() => Math.random() - .5); return L;
+}
+function renderAltQuiz() {
+  const box = AF.quiz; if (!box) return; box.innerHTML = ''; box.append(el('h3', '', AT('quiz')));
+  if (!AS.quiz) AS.quiz = altQuizNew(); const Q = AS.quiz; box.append(el('p', '', Q.q));
+  const row = el('div', 'row'); row.style.flexWrap = 'wrap';
+  for (const o of Q.options) { const lab = Q.fl ? 'FL ' + String(o).padStart(3, '0') : nf(o) + ' ft'; const b = el('button', 'btn-s', lab); b.disabled = AS.pick != null; if (AS.pick != null) { if (o === Q.ans) b.style.borderColor = 'var(--good)'; else if (o === AS.pick) b.style.borderColor = 'var(--bad)'; } b.onclick = () => { AS.pick = o; AS.score[1]++; if (o === Q.ans) AS.score[0]++; renderAltQuiz(); }; row.append(b); }
+  box.append(row);
+  if (AS.pick != null) { const ok = AS.pick === Q.ans; const fb = el('div', 'row'); fb.append(el('div', ok ? 'ok' : 'no', ok ? AT('correct') : AT('wrongA') + (Q.fl ? 'FL ' + String(Q.ans).padStart(3, '0') : nf(Q.ans) + ' ft') + '.'), btn(AT('next') + ' ▶', () => { AS.quiz = altQuizNew(); AS.pick = null; renderAltQuiz(); }, 'btn')); box.append(fb, el('p', 'muted', Q.e)); } else box.append(el('div', 'hint', AT('pick')));
+  box.append(el('div', 'hint', `${AT('score')}: ${AS.score[0]} / ${AS.score[1]}`));
+}
+
 /* ---------- Start ---------- */
 document.documentElement.lang = LANG;
 renderAll();
 const v0 = location.hash.slice(1);
-go(['home','air','vmc','fl','hold','soon'].includes(v0) ? v0 : 'home');
+go(['home','air','vmc','fl','hold','alt','soon'].includes(v0) ? v0 : 'home');
 })();
 </script>
 <script>if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)location.reload();});navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update().catch(()=>{});}).catch(()=>{});}</script></body></html>
