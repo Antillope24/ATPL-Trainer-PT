@@ -128,8 +128,8 @@ svg text{font-family:var(--body)}
 @media(max-width:720px){.altgrid,.altform{grid-template-columns:1fr}}
 .altsvg{width:100%;height:auto;display:block}
 .alts{border-radius:10px}
-.adial{max-width:360px;margin:0 auto;touch-action:none;outline-offset:3px}
-.apfd{max-width:240px;margin:0 auto}
+.adial{max-width:250px;width:100%;margin:0 auto;touch-action:none;outline-offset:3px}
+.apfd{max-width:150px;width:100%;margin:0 auto}
 .knob{cursor:grab;touch-action:none}
 .knob:active{cursor:grabbing}
 .lgd{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.85rem}
@@ -144,6 +144,30 @@ svg text{font-family:var(--body)}
 .qopt.ok{border-color:var(--good);border-width:2px;opacity:1;color:var(--fg);background:color-mix(in srgb,var(--good) 12%,var(--surface))}
 .qopt.no{border-color:var(--bad);border-width:2px;opacity:1;color:var(--fg);background:color-mix(in srgb,var(--bad) 12%,var(--surface))}
 .qexp{line-height:1.55}
+.altintro{margin:2px 0 6px}
+.alttabs{flex-wrap:wrap;margin-bottom:12px}
+.altpanel{display:flex;flex-direction:column;gap:14px}
+.altpanel[hidden]{display:none}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.altsel{font:inherit;font-size:.9rem;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.cockpit{display:grid;grid-template-columns:minmax(170px,250px) minmax(100px,150px) minmax(0,1fr);gap:16px;align-items:center}
+@media(max-width:820px){.cockpit{grid-template-columns:1fr 1fr}.cockpit .vals{grid-column:1/-1}}
+.vals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.vals>div{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0;line-height:1.25}
+.vals span{display:block;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vals b{font-size:1.02rem;font-variant-numeric:tabular-nums}
+.vals small{color:var(--muted);font-size:.74rem;margin-left:6px;white-space:nowrap}
+.simgrid{display:grid;grid-template-columns:minmax(0,3fr) minmax(250px,2fr);gap:14px;align-items:start}
+@media(max-width:900px){.simgrid{grid-template-columns:1fr}}
+.ctl{gap:6px!important}
+.ctl h3{margin:0 0 2px}
+.ctl .numrow{font-size:.85rem}
+.ctl .numin{width:76px}
+details.steps summary{cursor:pointer;font-weight:600}
+details summary.hint{cursor:pointer}
+.steplist{padding-left:20px;display:flex;flex-direction:column;gap:6px;margin:8px 0 0;line-height:1.5}
+.memlist{columns:2 320px;column-gap:28px;padding-left:18px;margin:0}
+.memlist li{break-inside:avoid;margin-bottom:6px}
 
 .numrow{display:flex;align-items:center;gap:8px}.numrow>span:first-child{flex:1}
 .numin{width:84px;font:inherit;font-variant-numeric:tabular-nums;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);text-align:right}
@@ -2525,8 +2549,8 @@ function videoCaption() {
 /* ---------- Modul 5: Höhenmesser, Druck und Temperatur ---------- */
 const ALT_T = {
 de: {
-  title:'Höhenmesser, Druck und Temperatur', intro:'Verstell QNH, Subskala, Temperatur und Flughöhe. Die App zeigt den Höhenmesser (analog und Airbus), die Seitenansicht mit allen Höhen und erklärt jeden Wert mit deinen Zahlen. Wahre Höhe ist die Realität, alles andere ist das, was dein Instrument daraus macht.',
-  inputs:'Einstellungen', ta:'Wahre Höhe (True Altitude, MSL)', set:'Subskala (eingestellter Druck)', qnh:'Tatsächlicher QNH am Platz', elev:'Platzhöhe', dev:'Temperatur: Abweichung von ISA', ter:'Hindernis oder Gelände (MSL)', clr:'Geforderte Freiheit', trans:'Transition Altitude', fp:'Faustformel Druck', rule:'Pro Grad ISA Abweichung gilt: 4 ft pro 1000 ft Höhe über dem Platz (das sind 0,4 % pro °C).',
+  title:'Höhenmesser, Druck und Temperatur', intro:'Wahre Höhe ist die Realität, alles andere ist das, was dein Höhenmesser daraus macht. Verstell QNH, Subskala und Temperatur und sieh zu.',
+  tabSim:'Simulator', tabMufl:'MUFL Rechner', tabQuiz:'Prüfungsaufgaben', inputs:'Einstellungen', ta:'Wahre Höhe (True Altitude, MSL)', set:'Subskala (eingestellter Druck)', qnh:'Tatsächlicher QNH am Platz', elev:'Platzhöhe', dev:'Temperatur: Abweichung von ISA', ter:'Hindernis oder Gelände (MSL)', clr:'Geforderte Freiheit', trans:'Transition Altitude', fp:'Faustformel Druck', rule:'Pro Grad ISA Abweichung gilt: 4 ft pro 1000 ft Höhe über dem Platz (das sind 0,4 % pro °C).',
   unitL:'Einheit', knobHint:'Drehknopf ziehen, Mausrad oder Pfeiltasten verstellen die Subskala.', modes:'Schnell setzen', std:'STD (1013,25)',
   scen:'Szenarien', sc1:'QNH zu hoch eingestellt', sc2:'Kalter Tag', sc3:'Von hoch nach tief', sc4:'Heißer Platz', sc5:'Gebirge', sc6:'Standardatmosphäre',
   dial:'Analoger Höhenmesser', pfd:'Airbus PFD Höhenband', side:'Seitenansicht', sideHint:'Grün: wahre Höhe des Flugzeugs. Orange gestrichelt: die Ebene, die dein Höhenmesser als 0 ft ansieht. Violett gestrichelt: Druckflächen alle 1000 oder 5000 ft nach Standard (Pressure Altitude), die sich bei Kälte zusammenschieben. Rechts stehen die Zahlenwerte.',
@@ -2541,13 +2565,13 @@ de: {
   a4:'Pressure Altitude ist die Höhe, die der Höhenmesser mit 1013,25 hPa anzeigt: {pa} ft, also FL {fl}. Density Altitude = PA + 120 × ISA Abweichung = {pa} + 120 × {dev} = {da} ft. Je höher die Density Altitude, desto schlechter die Leistung.',
   a5:'QFE = QNH − Platzhöhe / {fp} = {qnh} − {elev} / {fp} = {qfe} hPa. Mit QFE zeigt der Höhenmesser am Boden 0 ft und in der Luft die Höhe über dem Platz.',
   a6:'Hindernis {ter} ft: Wahre Freiheit = {ta} − {ter} = {ct} ft. Auf dem Höhenmesser wären es {ci} ft.',
-  mufl:'MUFL: Minimum Usable Flight Level', mufl0:'Rechne rückwärts vom Gelände zur Flugfläche. Nimm Hindernis, Freiheit und QNH aus den Einstellungen oben.', rnd:'Aufrunden auf',
+  mufl:'MUFL: Minimum Usable Flight Level', mufl0:'Rechne rückwärts vom Gelände zur Flugfläche. Die Werte stellst du daneben ein, sie gelten auch im Simulator.', rnd:'Aufrunden auf',
   m1:'Benötigte wahre Höhe = Hindernis + Freiheit = {ter} + {clr} = {req} ft.',
   m2:'Temperaturkorrektur bei Kälte: 4 ft × {cold} °C × ({req} − {elev}) / 1000 = {tc} ft. Das ist die Höhe, die du auf dem Höhenmesser (mit QNH) mindestens brauchst: {iaq} ft.', m2w:'Nicht kälter als ISA, also keine Zuschläge nötig. Höhe auf dem Höhenmesser mit QNH: {iaq} ft.',
   m3:'Auf Standard umrechnen: (1013,25 − {qnh}) × {fp} = {pq} ft. Pressure Altitude = {iaq} + ({pq}) = {pa} ft.',
   m4:'Nächste Flugfläche ab {pa} ft, aufgerundet auf {rnd} ft: MUFL = FL {mufl}.',
   mufl5:'Zum Üben stell im Szenario Gebirge kalte Luft und niedrigen QNH ein und beobachte, wie MUFL steigt.',
-  quiz:'Prüfungsaufgaben', qNote:'Aufgaben im Stil der ATPL Prüfung, auf Englisch wie in der Prüfung. Jede Aufgabe kommt mit neuen Zufallszahlen. Nach dem Antworten kannst du die Situation im Simulator oben ansehen.', tAll:'Alle', tPress:'Druck und Subskala', tTemp:'Temperatur', tMufl:'MUFL', tWind:'Wind und Luftdruck', simBtn:'Im Simulator zeigen', next:'Nächste Aufgabe', score:'Treffer', correct:'Richtig.', wrongA:'Nicht ganz. Richtig ist ', pick:'Wähle eine Antwort.',
+  quiz:'Prüfungsaufgaben', qNote:'Aufgaben im Stil der ATPL Prüfung, auf Englisch wie in der Prüfung. Jede Aufgabe kommt mit neuen Zufallszahlen. Nach dem Antworten kannst du die Situation im Simulator ansehen.', tAll:'Alle', tPress:'Druck und Subskala', tTemp:'Temperatur', tMufl:'MUFL', tWind:'Wind und Luftdruck', simBtn:'Im Simulator zeigen', next:'Nächste Aufgabe', score:'Treffer', correct:'Richtig.', wrongA:'Nicht ganz. Richtig ist ', pick:'Wähle eine Antwort.',
   q1:'Der tatsächliche QNH ist {qnh} hPa, du hast {set} hPa eingestellt. Der Höhenmesser zeigt {ia} ft. Wie hoch bist du wirklich (nur Druckfehler, ISA, 30 ft/hPa)?',
   q1e:'Differenz {dp} hPa × 30 = {pe} ft. {dir} Wahre Höhe = {ia} {sg} {pe} = {ans} ft.', q1hi:'Zu hoch eingestellt: du bist tiefer als angezeigt.', q1lo:'Zu niedrig eingestellt: du bist höher als angezeigt.',
   q2:'QNH eingestellt, Platz auf Meereshöhe. Der Höhenmesser zeigt {ia} ft, die Temperatur ist ISA {devs}. Wie hoch bist du wirklich (4 ft pro 1000 ft pro °C)?',
@@ -2569,8 +2593,8 @@ de: {
   ]
 },
 en: {
-  title:'Altimeter, pressure and temperature', intro:'Change QNH, altimeter setting, temperature and flight altitude. The app shows the altimeter (analog and Airbus), a side view with all altitudes and explains every value with your numbers. True altitude is reality, everything else is what your instrument makes of it.',
-  inputs:'Settings', ta:'True altitude (MSL)', set:'Altimeter setting (subscale)', qnh:'Actual QNH at the aerodrome', elev:'Aerodrome elevation', dev:'Temperature: deviation from ISA', ter:'Obstacle or terrain (MSL)', clr:'Required clearance', trans:'Transition altitude', fp:'Pressure rule of thumb', rule:'Per degree of ISA deviation: 4 ft per 1000 ft height above the aerodrome (0.4 % per °C).',
+  title:'Altimeter, pressure and temperature', intro:'True altitude is reality, everything else is what your altimeter makes of it. Change QNH, subscale and temperature and watch.',
+  tabSim:'Simulator', tabMufl:'MUFL calculator', tabQuiz:'Exam tasks', inputs:'Settings', ta:'True altitude (MSL)', set:'Altimeter setting (subscale)', qnh:'Actual QNH at the aerodrome', elev:'Aerodrome elevation', dev:'Temperature: deviation from ISA', ter:'Obstacle or terrain (MSL)', clr:'Required clearance', trans:'Transition altitude', fp:'Pressure rule of thumb', rule:'Per degree of ISA deviation: 4 ft per 1000 ft height above the aerodrome (0.4 % per °C).',
   unitL:'Unit', knobHint:'Drag the knob, use the mouse wheel or arrow keys to change the setting.', modes:'Quick set', std:'STD (1013.25)',
   scen:'Scenarios', sc1:'QNH set too high', sc2:'Cold day', sc3:'High to low', sc4:'Hot aerodrome', sc5:'Mountains', sc6:'Standard atmosphere',
   dial:'Analog altimeter', pfd:'Airbus PFD altitude tape', side:'Side view', sideHint:'Green: true altitude of the aircraft. Dashed orange: the level your altimeter treats as 0 ft. Dashed purple: standard pressure levels every 1000 or 5000 ft (pressure altitude), which squeeze together in cold air. The numbers are listed on the right.',
@@ -2585,13 +2609,13 @@ en: {
   a4:'Pressure altitude is what the altimeter shows with 1013.25 hPa set: {pa} ft, so FL {fl}. Density altitude = PA + 120 × ISA deviation = {pa} + 120 × {dev} = {da} ft. The higher the density altitude, the worse the performance.',
   a5:'QFE = QNH − elevation / {fp} = {qnh} − {elev} / {fp} = {qfe} hPa. With QFE the altimeter reads 0 ft on the ground and height above the aerodrome in the air.',
   a6:'Obstacle {ter} ft: true clearance = {ta} − {ter} = {ct} ft. On the altimeter it would look like {ci} ft.',
-  mufl:'MUFL: minimum usable flight level', mufl0:'Work backwards from the terrain to the flight level. Obstacle, clearance and QNH come from the settings above.', rnd:'Round up to',
+  mufl:'MUFL: minimum usable flight level', mufl0:'Work backwards from the terrain to the flight level. Set the values alongside, they also apply in the simulator.', rnd:'Round up to',
   m1:'Required true altitude = obstacle + clearance = {ter} + {clr} = {req} ft.',
   m2:'Cold temperature correction: 4 ft × {cold} °C × ({req} − {elev}) / 1000 = {tc} ft. This is the minimum altimeter reading (QNH set): {iaq} ft.', m2w:'Not colder than ISA, so no addition needed. Altimeter reading with QNH: {iaq} ft.',
   m3:'Convert to standard: (1013.25 − {qnh}) × {fp} = {pq} ft. Pressure altitude = {iaq} + ({pq}) = {pa} ft.',
   m4:'Next flight level at or above {pa} ft, rounded up to {rnd} ft: MUFL = FL {mufl}.',
   mufl5:'To practise, choose the Mountains scenario, then try cold air and low QNH and watch the MUFL rise.',
-  quiz:'Exam style tasks', qNote:'Tasks in the style of the ATPL exam, in English like the exam. Every task comes with new random numbers. After answering you can view the situation in the simulator above.', tAll:'All', tPress:'Pressure and subscale', tTemp:'Temperature', tMufl:'MUFL', tWind:'Wind and pressure', simBtn:'Show in simulator', next:'Next task', score:'Score', correct:'Correct.', wrongA:'Not quite. Correct is ', pick:'Choose an answer.',
+  quiz:'Exam style tasks', qNote:'Tasks in the style of the ATPL exam, in English like the exam. Every task comes with new random numbers. After answering you can view the situation in the simulator.', tAll:'All', tPress:'Pressure and subscale', tTemp:'Temperature', tMufl:'MUFL', tWind:'Wind and pressure', simBtn:'Show in simulator', next:'Next task', score:'Score', correct:'Correct.', wrongA:'Not quite. Correct is ', pick:'Choose an answer.',
   q1:'Actual QNH is {qnh} hPa, you have {set} hPa set. The altimeter reads {ia} ft. What is your true altitude (pressure error only, ISA, 30 ft/hPa)?',
   q1e:'Difference {dp} hPa × 30 = {pe} ft. {dir} True altitude = {ia} {sg} {pe} = {ans} ft.', q1hi:'Set too high: you are lower than indicated.', q1lo:'Set too low: you are higher than indicated.',
   q2:'QNH set, aerodrome at sea level. The altimeter reads {ia} ft, temperature is ISA {devs}. What is your true altitude (4 ft per 1000 ft per °C)?',
@@ -2601,8 +2625,8 @@ en: {
   memoT:'Memory hooks', mem:null
 },
 fr: {
-  title:'Altimètre, pression et température', intro:'Modifiez le QNH, le calage, la température et l’altitude. L’application montre l’altimètre (analogique et Airbus), une vue de côté avec toutes les altitudes et explique chaque valeur avec vos chiffres. L’altitude vraie est la réalité, le reste est ce que votre instrument en fait.',
-  inputs:'Réglages', ta:'Altitude vraie (MSL)', set:'Calage (échelle barométrique)', qnh:'QNH réel sur l’aérodrome', elev:'Altitude de l’aérodrome', dev:'Température : écart par rapport à l’ISA', ter:'Obstacle ou relief (MSL)', clr:'Marge exigée', trans:'Altitude de transition', fp:'Règle de pression', rule:'Par degré d’écart ISA : 4 ft par 1000 ft de hauteur au-dessus de l’aérodrome (0,4 % par °C).',
+  title:'Altimètre, pression et température', intro:'L’altitude vraie est la réalité, le reste est ce que votre altimètre en fait. Modifiez QNH, calage et température et observez.',
+  tabSim:'Simulateur', tabMufl:'Calcul MUFL', tabQuiz:'Questions d’examen', inputs:'Réglages', ta:'Altitude vraie (MSL)', set:'Calage (échelle barométrique)', qnh:'QNH réel sur l’aérodrome', elev:'Altitude de l’aérodrome', dev:'Température : écart par rapport à l’ISA', ter:'Obstacle ou relief (MSL)', clr:'Marge exigée', trans:'Altitude de transition', fp:'Règle de pression', rule:'Par degré d’écart ISA : 4 ft par 1000 ft de hauteur au-dessus de l’aérodrome (0,4 % par °C).',
   unitL:'Unité', knobHint:'Tirez le bouton, utilisez la molette ou les flèches pour régler le calage.', modes:'Réglage rapide', std:'STD (1013,25)',
   scen:'Scénarios', sc1:'QNH calé trop haut', sc2:'Jour froid', sc3:'De haut en bas', sc4:'Aérodrome chaud', sc5:'Montagne', sc6:'Atmosphère standard',
   dial:'Altimètre analogique', pfd:'Bande d’altitude Airbus PFD', side:'Vue de côté', sideHint:'Vert : altitude vraie de l’avion. Orange en tirets : le niveau que l’altimètre prend pour 0 ft. Violet en tirets : niveaux de pression standard tous les 1000 ou 5000 ft (altitude pression), qui se resserrent par temps froid. Les valeurs sont à droite.',
@@ -2617,7 +2641,7 @@ fr: {
   a4:'L’altitude pression est ce que l’altimètre indique avec 1013,25 hPa calés : {pa} ft, soit FL {fl}. Altitude densité = AP + 120 × écart ISA = {pa} + 120 × {dev} = {da} ft. Plus elle est haute, moins bonnes sont les performances.',
   a5:'QFE = QNH − altitude / {fp} = {qnh} − {elev} / {fp} = {qfe} hPa. Avec le QFE, l’altimètre indique 0 ft au sol et la hauteur au-dessus de l’aérodrome en vol.',
   a6:'Obstacle {ter} ft : marge vraie = {ta} − {ter} = {ct} ft. Sur l’altimètre cela ressemblerait à {ci} ft.',
-  mufl:'MUFL : niveau de vol minimal utilisable', mufl0:'Remontez du relief au niveau de vol. Obstacle, marge et QNH viennent des réglages ci-dessus.', rnd:'Arrondir à',
+  mufl:'MUFL : niveau de vol minimal utilisable', mufl0:'Remontez du relief au niveau de vol. Réglez les valeurs à côté, elles valent aussi dans le simulateur.', rnd:'Arrondir à',
   m1:'Altitude vraie requise = obstacle + marge = {ter} + {clr} = {req} ft.',
   m2:'Correction de froid : 4 ft × {cold} °C × ({req} − {elev}) / 1000 = {tc} ft. Indication minimale de l’altimètre (QNH calé) : {iaq} ft.', m2w:'Pas plus froid que l’ISA, donc aucun ajout. Indication avec QNH : {iaq} ft.',
   m3:'Conversion en standard : (1013,25 − {qnh}) × {fp} = {pq} ft. Altitude pression = {iaq} + ({pq}) = {pa} ft.',
@@ -2723,7 +2747,7 @@ function buildPfd() {
 /* ---- Seitenansicht ---- */
 function declutter(items, minGap, lo, hi) { items.sort((a, b) => a.y - b.y); let prev = lo - minGap; for (const it of items) { it.ty = Math.max(it.y, prev + minGap); prev = it.ty; } let nx = hi + minGap; for (let i = items.length - 1; i >= 0; i--) { items[i].ty = Math.min(items[i].ty, nx - minGap); nx = items[i].ty; } return items; }
 function altSideSvg(c) {
-  const s = AS, W = 780, H = 500, L = 62, R = 530, Tp = 14, B = H - 30;
+  const s = AS, cw = (AF.side && AF.side.clientWidth) || 600, W = Math.round(Math.max(400, Math.min(760, cw))), H = W < 520 ? 470 : 520, L = 50, R = W - 182, Tp = 14, B = H - 30;
   const hiV = Math.max(s.ta, s.ter, s.elev, c.ia, c.pa, c.da, 1000) + 1200, steps = [4000, 6000, 8000, 12000, 16000, 20000, 26000, 32000, 40000, 50000, 60000];
   const ymax = steps.find(v => v >= hiV) || 60000; const loV = Math.min(0, c.setPlane, c.stdPlane, c.ia, c.da) - 500; const ymin = Math.floor(loV / 1000) * 1000;
   const Y = ft => Tp + (ymax - ft) / (ymax - ymin) * (B - Tp), clipY = v => Math.min(B, Math.max(Tp, Y(v)));
@@ -2741,8 +2765,8 @@ function altSideSvg(c) {
   o += `<path d="M${L} ${Y(ymin)} L${L} ${Y(s.elev)} L${xA} ${Y(s.elev)} L${xA + .12 * (R - L)} ${Y(mid)} L${xP} ${Y(top)} L${xP + .1 * (R - L)} ${Y(mid)} L${R} ${Y(s.elev + (top - s.elev) * .2)} L${R} ${Y(ymin)}Z" fill="#7b6a53" opacity=".9"/>`;
   o += `<line x1="${L}" x2="${R}" y1="${Y(0)}" y2="${Y(0)}" stroke="#2f78c4" stroke-width="2"/><text x="${L + 4}" y="${Y(0) - 4}" font-size="11" fill="#2f78c4" style="paint-order:stroke;stroke:var(--sky);stroke-width:3px">MSL 0 ft</text>`;
   if (s.elev > 0) o += `<text x="${L + 6}" y="${Y(s.elev) - 6}" font-size="11" fill="#fff" style="paint-order:stroke;stroke:#00000088;stroke-width:3px">AD ${nf(s.elev)} ft</text>`;
-  const zy = c.setPlane; if (zy >= ymin && zy <= ymax) o += `<line x1="${L}" x2="${R}" y1="${Y(zy)}" y2="${Y(zy)}" stroke="${col.ia}" stroke-width="2" stroke-dasharray="7 5"/><text x="${L + 250}" y="${Y(zy) + 14}" font-size="11" fill="${col.ia}" style="paint-order:stroke;stroke:var(--sky);stroke-width:3px">IA = 0 ft (${nf(AS.set, 0)} hPa)</text>`;
-  const sy = c.stdPlane; if (sy >= ymin && sy <= ymax) o += `<line x1="${L}" x2="${R}" y1="${Y(sy)}" y2="${Y(sy)}" stroke="${col.pa}" stroke-width="2"/><text x="${L + 120}" y="${Y(sy) + 14}" font-size="11" fill="${col.pa}" style="paint-order:stroke;stroke:var(--sky);stroke-width:3px">PA = 0 ft (1013,25 hPa)</text>`;
+  const zy = c.setPlane; if (zy >= ymin && zy <= ymax) o += `<line x1="${L}" x2="${R}" y1="${Y(zy)}" y2="${Y(zy)}" stroke="${col.ia}" stroke-width="2" stroke-dasharray="7 5"/><text x="${L + (R - L) * .3}" y="${Y(zy) + 14}" font-size="11" fill="${col.ia}" style="paint-order:stroke;stroke:var(--sky);stroke-width:3px">IA = 0 ft (${nf(AS.set, 0)} hPa)</text>`;
+  const sy = c.stdPlane; if (sy >= ymin && sy <= ymax) o += `<line x1="${L}" x2="${R}" y1="${Y(sy)}" y2="${Y(sy)}" stroke="${col.pa}" stroke-width="2"/><text x="${L + (R - L) * .3}" y="${Y(sy) - 5}" font-size="11" fill="${col.pa}" style="paint-order:stroke;stroke:var(--sky);stroke-width:3px">PA = 0 ft (1013,25 hPa)</text>`;
   // Hindernis Klammer
   if (s.ta > top + 10 || s.ta < top - 10) { const bad = s.ta < s.ter; o += `<line x1="${xP}" x2="${xP}" y1="${Y(top)}" y2="${Y(s.ta)}" stroke="${bad ? 'var(--bad)' : 'var(--good)'}" stroke-width="2"/><line x1="${xP - 6}" x2="${xP + 6}" y1="${Y(s.ta)}" y2="${Y(s.ta)}" stroke="${bad ? 'var(--bad)' : 'var(--good)'}" stroke-width="2"/><text x="${xP + 8}" y="${(Y(top) + Y(s.ta)) / 2 + 4}" font-size="11" font-weight="700" fill="${bad ? 'var(--bad)' : 'var(--good)'}" style="paint-order:stroke;stroke:var(--sky);stroke-width:3px">${bad ? AT('belowT') : nf(c.ctrue) + ' ft'}</text>`; }
   // Flugzeug
@@ -2756,20 +2780,20 @@ function altSideSvg(c) {
   return o;
 }
 /* ---- Aufbau ---- */
-const AF = {inputs: {}, out: null, dial: null, pfd: null, side: null, mufl: null, quiz: null, modeBtns: {}, unitSeg: null, raf: 0};
+const AF = {inputs: {}, vals: null, out: null, dial: null, pfd: null, side: null, mufl: null, quiz: null, modeBtns: {}, unitSeg: null, raf: 0};
 const ALT_FIELDS = {ta: [0, 45000, 100, ' ft'], set: [900, 1100, 1, ''], qnh: [940, 1060, 1, ' hPa'], elev: [0, 9000, 50, ' ft'], dev: [-40, 40, 1, ' °C'], ter: [0, 18000, 100, ' ft'], clr: [0, 3000, 100, ' ft'], trans: [2000, 20000, 500, ' ft']};
 function fieldVal(key) { return key === 'set' && AS.unit === 'inHg' ? (AS.set / INHG) : AS[key]; }
 function fmtField(key) { if (key === 'set') return AS.unit === 'inHg' ? (AS.set / INHG).toFixed(2) : String(Math.round(AS.set * 100) / 100); return String(AS[key]); }
-function altSync() { for (const [k, [rg, nm]] of Object.entries(AF.inputs)) { const v = fieldVal(k); if (k === 'set') { rg.min = AS.unit === 'inHg' ? 26.6 : 900; rg.max = AS.unit === 'inHg' ? 32.5 : 1100; rg.step = AS.unit === 'inHg' ? 0.01 : 1; } rg.value = v; nm.value = fmtField(k); } for (const [m, b] of Object.entries(AF.modeBtns)) b.setAttribute('aria-pressed', String(altModeOf() === m)); if (AF.unitSeg) for (const b of AF.unitSeg.children) b.setAttribute('aria-pressed', String(b.dataset.v === AS.unit)); if (!AF.raf) AF.raf = requestAnimationFrame(() => { AF.raf = 0; renderAltOut(); }); }
+function altSync() { for (const [k, pairs] of Object.entries(AF.inputs)) for (const [rg, nm] of pairs) { const v = fieldVal(k); if (k === 'set') { rg.min = AS.unit === 'inHg' ? 26.6 : 900; rg.max = AS.unit === 'inHg' ? 32.5 : 1100; rg.step = AS.unit === 'inHg' ? 0.01 : 1; } rg.value = v; if (document.activeElement !== nm) nm.value = fmtField(k); } for (const [m, b] of Object.entries(AF.modeBtns)) b.setAttribute('aria-pressed', String(altModeOf() === m)); if (AF.unitSeg) for (const b of AF.unitSeg.children) b.setAttribute('aria-pressed', String(b.dataset.v === AS.unit)); document.querySelectorAll('.altSetUnit').forEach(u => u.textContent = AS.unit); if (!AF.raf) AF.raf = requestAnimationFrame(() => { AF.raf = 0; renderAltOut(); }); }
 function altNum(label, key) {
   const [min, max, step, unit] = ALT_FIELDS[key];
   const l = el('label', 'f'), head = el('span', 'numrow'); head.append(el('span', '', label));
   const n = document.createElement('input'); n.type = 'text'; n.inputMode = 'decimal'; n.autocomplete = 'off'; n.className = 'numin'; n.setAttribute('aria-label', label);
   const i = document.createElement('input'); i.type = 'range'; i.min = min; i.max = max; i.step = step;
-  const u = el('span', 'muted', key === 'set' ? (AS.unit === 'inHg' ? ' inHg' : ' hPa') : unit.trim()); if (key === 'set') u.id = 'altSetUnit';
+  const u = el('span', 'muted' + (key === 'set' ? ' altSetUnit' : ''), key === 'set' ? AS.unit : unit.trim());
   const commit = v => { v = parseFloat(String(v).replace(',', '.')); if (!isFinite(v)) return; if (key === 'set') { v = AS.unit === 'inHg' ? v * INHG : v; v = clampSet(v); } else v = Math.min(max, Math.max(min, v)); AS[key] = v; if (key === 'elev' && AS.ta < v) AS.ta = v; altSync(); };
-  n.onchange = () => commit(n.value); n.onkeydown = e => { if (e.key === 'Enter') n.blur(); }; i.oninput = () => commit(i.value);
-  head.append(n, u); l.append(head, i); AF.inputs[key] = [i, n]; return l;
+  n.onchange = () => { commit(n.value); n.value = fmtField(key); }; n.onkeydown = e => { if (e.key === 'Enter') n.blur(); }; i.oninput = () => commit(i.value);
+  head.append(n, u); l.append(head, i); (AF.inputs[key] = AF.inputs[key] || []).push([i, n]); return l;
 }
 const SCEN = {
   sc1: {ta: 3000, qnh: 1003, set: 1023, dev: 0, elev: 0, ter: 1000},
@@ -2781,58 +2805,68 @@ const SCEN = {
 };
 function renderAlt() {
   if (!altEl) return;
-  altEl.innerHTML = ''; AF.inputs = {}; AF.modeBtns = {};
-  altEl.append(el('div', 'eyebrow', T('module') + ' 5'), el('h2', '', AT('title')), el('p', 'muted', AT('intro')));
-  const form = el('div', 'card'); form.style.gap = '12px'; form.append(el('h3', '', AT('inputs')));
-  const sc = el('div', 'row'); sc.style.flexWrap = 'wrap'; sc.append(el('span', 'eyebrow', AT('scen'))); for (const k of Object.keys(SCEN)) sc.append(btn(AT(k), () => { Object.assign(AS, SCEN[k]); AS.pick = null; altSync(); })); form.append(sc);
-  const cols = el('div', 'altform'); const c1 = el('div', 'altcol'), c2 = el('div', 'altcol');
-  c1.append(altNum(AT('ta'), 'ta'), altNum(AT('qnh'), 'qnh'), altNum(AT('set'), 'set'));
-  const modes = el('div', 'row'); modes.style.flexWrap = 'wrap'; modes.append(el('span', 'eyebrow', AT('modes')));
-  const mb = (m, fn) => { const b = btn(m, fn); b.setAttribute('aria-pressed', 'false'); AF.modeBtns[m] = b; modes.append(b); };
-  mb('QNH', () => { AS.set = AS.qnh; altSync(); }); mb('QFE', () => { AS.set = Math.round(AS.qnh - AS.elev / AS.fp); altSync(); }); mb('STD', () => { AS.set = HPA0; altSync(); });
-  const useg = el('div', 'seg'); for (const u of ['hPa', 'inHg']) { const b = el('button', '', u); b.dataset.v = u; b.onclick = () => { AS.unit = u; const su = $('#altSetUnit'); if (su) su.textContent = ' ' + u; altSync(); }; useg.append(b); } AF.unitSeg = useg; modes.append(useg);
-  c1.append(modes);
-  c2.append(altNum(AT('dev'), 'dev'), altNum(AT('elev'), 'elev'), altNum(AT('ter'), 'ter'), altNum(AT('clr'), 'clr'), altNum(AT('trans'), 'trans'));
-  cols.append(c1, c2); form.append(cols);
-  const fps = el('div', 'row'); fps.style.flexWrap = 'wrap'; fps.append(el('span', 'eyebrow', AT('fp'))); const fseg = el('div', 'seg'); for (const v of [27, 30]) { const b = el('button', '', v + ' ft/hPa'); b.setAttribute('aria-pressed', String(AS.fp === v)); b.onclick = () => { AS.fp = v; for (const x of fseg.children) x.setAttribute('aria-pressed', String(x === b)); altSync(); }; fseg.append(b); } fps.append(fseg); form.append(fps, el('div', 'hint', AT('rule') + ' ' + AT('knobHint')));
-  altEl.append(form);
-  const grid = el('div', 'altgrid'); const d1 = el('div', 'card'), d2 = el('div', 'card'); AF.dial = buildDial(); AF.pfd = buildPfd();
-  d1.append(el('h3', '', AT('dial')), AF.dial.svg); d2.append(el('h3', '', AT('pfd')), AF.pfd.svg); grid.append(d1, d2); altEl.append(grid);
-  const sd = el('div', 'card'); sd.append(el('h3', '', AT('side'))); AF.side = el('div', ''); sd.append(AF.side, el('div', 'hint', AT('sideHint'))); altEl.append(sd);
-  AF.out = el('div', 'card'); altEl.append(AF.out);
-  AF.mufl = el('div', 'card'); altEl.append(AF.mufl);
-  AF.quiz = el('div', 'card'); altEl.append(AF.quiz);
-  const mm = el('div', 'card'); mm.append(el('h3', '', AT('memoT'))); const ul = document.createElement('ul'); ul.style.paddingLeft = '20px'; for (const m of AT('mem')) ul.append(el('li', '', m)); mm.append(ul); altEl.append(mm);
+  altEl.innerHTML = ''; AF.inputs = {}; AF.modeBtns = {}; AS.tab = AS.tab || 'sim';
+  altEl.append(el('div', 'eyebrow', T('module') + ' 5'), el('h2', '', AT('title')), el('p', 'muted altintro', AT('intro')));
+  const tabs = el('div', 'seg alttabs'), panels = {};
+  for (const [k, l] of [['sim', 'tabSim'], ['mufl', 'tabMufl'], ['quiz', 'tabQuiz'], ['mem', 'memoT']]) { const b = el('button', '', AT(l)); b.dataset.t = k; b.onclick = () => { AS.tab = k; for (const x of tabs.children) x.setAttribute('aria-pressed', String(x.dataset.t === k)); for (const [pk, p] of Object.entries(panels)) p.hidden = pk !== k; if (k === 'sim') AF.side.innerHTML = altSideSvg(altCalc()); }; tabs.append(b); panels[k] = el('div', 'altpanel'); }
+  altEl.append(tabs);
+  /* Simulator */
+  const P = panels.sim;
+  const ck = el('div', 'card'); ck.style.gap = '12px';
+  const tb = el('div', 'toolbar');
+  const sel = document.createElement('select'); sel.className = 'altsel'; sel.setAttribute('aria-label', AT('scen')); sel.append(new Option(AT('scen') + ' …', '')); for (const k of Object.keys(SCEN)) sel.append(new Option(AT(k), k)); sel.onchange = () => { if (SCEN[sel.value]) { Object.assign(AS, SCEN[sel.value]); altSync(); } sel.value = ''; }; tb.append(sel);
+  const modes = el('div', 'seg'); const mb = m => { const b = el('button', '', m); b.onclick = () => { AS.set = m === 'QNH' ? AS.qnh : m === 'QFE' ? Math.round(AS.qnh - AS.elev / AS.fp) : HPA0; altSync(); }; AF.modeBtns[m] = b; modes.append(b); }; mb('QNH'); mb('QFE'); mb('STD'); tb.append(modes);
+  const useg = el('div', 'seg'); for (const u of ['hPa', 'inHg']) { const b = el('button', '', u); b.dataset.v = u; b.onclick = () => { AS.unit = u; altSync(); }; useg.append(b); } AF.unitSeg = useg; tb.append(useg);
+  const fseg = el('div', 'seg'); fseg.title = AT('fp'); for (const v of [27, 30]) { const b = el('button', '', v + ' ft/hPa'); b.setAttribute('aria-pressed', String(AS.fp === v)); b.onclick = () => { AS.fp = v; for (const x of fseg.children) x.setAttribute('aria-pressed', String(x === b)); altSync(); }; fseg.append(b); } tb.append(fseg);
+  ck.append(tb);
+  const cp = el('div', 'cockpit'); AF.dial = buildDial(); AF.pfd = buildPfd(); AF.vals = el('div', 'vals'); cp.append(AF.dial.svg, AF.pfd.svg, AF.vals); ck.append(cp, el('div', 'hint', AT('knobHint')));
+  P.append(ck);
+  const sg = el('div', 'simgrid');
+  const sd = el('div', 'card'); sd.style.gap = '8px'; AF.side = el('div', ''); const lg = el('div', 'lgd'); for (const [t, cl] of [[AT('taR'), 'var(--good)'], [AT('ia'), '#e07a1f'], [AT('pa'), '#8a5cc2'], [AT('da'), 'var(--bad)']]) { const sp = el('span'); const i = document.createElement('i'); i.style.background = cl; sp.append(i, t); lg.append(sp); }
+  const sh = document.createElement('details'); sh.append(el('summary', 'hint', 'ⓘ ' + AT('side')), el('div', 'hint', AT('sideHint')));
+  sd.append(AF.side, lg, sh);
+  const ctl = el('div', 'card ctl'); ctl.append(el('h3', '', AT('inputs')), altNum(AT('ta'), 'ta'), altNum(AT('set'), 'set'), altNum(AT('qnh'), 'qnh'), altNum(AT('dev'), 'dev'), altNum(AT('elev'), 'elev'), altNum(AT('ter'), 'ter'), altNum(AT('trans'), 'trans'), el('div', 'hint', AT('rule')));
+  sg.append(sd, ctl); P.append(sg);
+  const st = document.createElement('details'); st.className = 'card steps'; st.open = !!AS.stepsOpen; st.ontoggle = () => { AS.stepsOpen = st.open; }; st.append(el('summary', '', AT('steps'))); AF.out = el('ol', 'steplist'); st.append(AF.out); P.append(st);
+  /* MUFL */
+  const mc = el('div', 'simgrid'); AF.mufl = el('div', 'card'); const mi = el('div', 'card ctl'); mi.append(el('h3', '', AT('inputs')), altNum(AT('ter'), 'ter'), altNum(AT('clr'), 'clr'), altNum(AT('qnh'), 'qnh'), altNum(AT('dev'), 'dev'), altNum(AT('elev'), 'elev')); mc.append(AF.mufl, mi); panels.mufl.append(mc);
+  /* Aufgaben */
+  AF.quiz = el('div', 'card'); panels.quiz.append(AF.quiz);
+  /* Merksätze */
+  const mm = el('div', 'card'); const ul = el('ul', 'memlist'); for (const m of AT('mem')) ul.append(el('li', '', m)); mm.append(ul); panels.mem.append(mm);
+  for (const [k, p] of Object.entries(panels)) { p.hidden = k !== AS.tab; altEl.append(p); }
+  for (const x of tabs.children) x.setAttribute('aria-pressed', String(x.dataset.t === AS.tab));
   altSync();
 }
+let altRz = 0; addEventListener('resize', () => { clearTimeout(altRz); altRz = setTimeout(() => { if (AF.side && AF.side.offsetParent) AF.side.innerHTML = altSideSvg(altCalc()); }, 150); });
 function renderAltOut() {
   if (!AF.out) return; const c = altCalc(), mode = altModeOf();
   AF.dial.update(c); AF.pfd.update(c, mode); AF.side.innerHTML = altSideSvg(c);
-  const out = AF.out; out.innerHTML = '';
-  const res = el('div', 'res');
-  const card = (lbl, val, sub, color) => { const cd = el('div', 'card'); cd.style.padding = '12px'; cd.append(el('span', 'eyebrow', lbl)); const b = el('div', 'big', val); b.style.fontSize = '1.5rem'; if (color) b.style.color = color; cd.append(b); if (sub) cd.append(el('span', 'muted', sub)); return cd; };
-  res.append(card(AT('ia'), nf(c.ia) + ' ft', mode + ' ' + nf(AS.set, 0) + ' hPa', '#e07a1f'), card(AT('taR'), nf(AS.ta) + ' ft', AT('err') + ' ' + sgn(c.err), 'var(--good)'), card(AT('pa'), nf(c.pa) + ' ft', AT('fl') + ' ' + String(Math.round(c.pa / 100)).padStart(3, '0'), '#8a5cc2'), card(AT('da'), nf(c.da) + ' ft', 'ISA ' + sgn(AS.dev) + ' °C', 'var(--bad)'));
-  res.append(card(AT('qfe'), nf(c.qfe, 1) + ' hPa', AT('hgt') + ' ' + nf(c.hgt) + ' ft'), card(AT('oat'), nf(c.oat, 1) + ' °C', AT('pAt') + ' ' + nf(c.press, 0) + ' hPa'), card(AT('tl'), AT('ifrFl') + ' ' + c.tl, AT('trans') + ' ' + nf(AS.trans) + ' ft'), card(AT('ctrue'), AS.ta < AS.ter ? AT('belowT') : nf(c.ctrue) + ' ft', AT('cind') + ' ' + nf(c.cind) + ' ft', AS.ta < AS.ter ? 'var(--bad)' : null));
-  out.append(res);
-  const legend = el('div', 'lgd'); for (const [t, cl] of [[AT('taR'), 'var(--good)'], [AT('ia'), '#e07a1f'], [AT('pa'), '#8a5cc2'], [AT('da'), 'var(--bad)']]) { const sp = el('span'); const i = document.createElement('i'); i.style.background = cl; sp.append(i, t); legend.append(sp); } out.append(legend);
-  out.append(el('h3', '', AT('steps')));
-  const dp = AS.set - AS.qnh, pe = c.pe, h = Math.max(0, c.iaq - AS.elev);
-  const S = [fmt(AT('a1'), {set: nfp(AS.set), qnh: nfp(AS.qnh), dp: sgn(dp, Math.abs(dp - Math.round(dp)) < 0.005 ? 0 : 2), fp: AS.fp, pe: sgn(pe), pdir: Math.abs(dp) < 0.05 ? AT('pZero') : dp > 0 ? AT('pOver') : AT('pUnder')}),
+  const V = AF.vals; V.innerHTML = '';
+  const tile = (lbl, val, sub, color) => { const d = el('div'); d.append(el('span', '', lbl)); const b = el('b', '', val); if (color) b.style.color = color; d.append(b); if (sub) d.append(el('small', '', sub)); V.append(d); };
+  const bad = AS.ta < AS.ter;
+  tile(AT('ia'), nf(c.ia) + ' ft', mode === 'SET' ? nfp(AS.set) : mode, '#e07a1f'); tile(AT('taR'), nf(AS.ta) + ' ft', 'Δ ' + sgn(-c.err), 'var(--good)');
+  tile(AT('pa'), nf(c.pa) + ' ft', 'FL' + String(Math.round(c.pa / 100)).padStart(3, '0'), '#8a5cc2'); tile(AT('da'), nf(c.da) + ' ft', 'ISA ' + sgn(AS.dev) + '°', 'var(--bad)');
+  tile(AT('qfe'), nf(c.qfe, 1) + ' hPa', nf(c.hgt) + ' ft AGL'); tile(AT('oat'), nf(c.oat, 1) + ' °C', nf(c.press, 0) + ' hPa');
+  tile(AT('tl'), 'FL' + String(c.tl).padStart(3, '0'), 'TA ' + nf(AS.trans)); tile(AT('ctrue'), bad ? AT('belowT') : nf(c.ctrue) + ' ft', AT('cind').split(' ')[0] + ' ' + nf(c.cind), bad ? 'var(--bad)' : null);
+  const dp = AS.set - AS.qnh, h = Math.max(0, c.iaq - AS.elev);
+  const S = [fmt(AT('a1'), {set: nfp(AS.set), qnh: nfp(AS.qnh), dp: sgn(dp, Math.abs(dp - Math.round(dp)) < 0.005 ? 0 : 2), fp: AS.fp, pe: sgn(c.pe), pdir: Math.abs(dp) < 0.05 ? AT('pZero') : dp > 0 ? AT('pOver') : AT('pUnder')}),
     fmt(AT('a2'), {pa: nf(c.pa), isa: nf(c.isa, 1), oat: nf(c.oat, 1), devs: sgn(AS.dev), dev: sgn(AS.dev), h: nf(h), tc: sgn(c.tc), tdir: AS.dev < 0 ? AT('tCold') : AS.dev > 0 ? AT('tWarm') : AT('tZero')}),
     fmt(AT('a3'), {ia: nf(c.ia), ta: nf(AS.ta), err: sgn(c.err)}),
     fmt(AT('a4'), {pa: nf(c.pa), fl: String(Math.round(c.pa / 100)).padStart(3, '0'), dev: sgn(AS.dev), da: nf(c.da)}),
     fmt(AT('a5'), {fp: AS.fp, qnh: nfp(AS.qnh), elev: nf(AS.elev), qfe: nf(c.qfe, 1)}),
     fmt(AT('a6'), {ter: nf(AS.ter), ta: nf(AS.ta), ct: nf(c.ctrue), ci: nf(c.cind)})];
-  const ol = document.createElement('ol'); ol.style.cssText = 'padding-left:20px;display:flex;flex-direction:column;gap:8px'; for (const t of S) ol.append(el('li', '', t)); out.append(ol);
-  renderAltMufl(c); renderAltQuiz();
+  AF.out.innerHTML = ''; for (const t of S) AF.out.append(el('li', '', t));
+  renderAltMufl(c); if (!AF.quiz.firstChild) renderAltQuiz();
 }
 function renderAltMufl(c) {
-  const m = c.mufl, box = AF.mufl; box.innerHTML = ''; box.append(el('h3', '', AT('mufl')), el('p', 'muted', AT('mufl0')));
-  const row = el('div', 'row'); row.style.flexWrap = 'wrap'; row.append(el('span', 'eyebrow', AT('rnd'))); const seg = el('div', 'seg'); for (const v of [100, 500, 1000]) { const b = el('button', '', v + ' ft'); b.setAttribute('aria-pressed', String(AS.rnd === v)); b.onclick = () => { AS.rnd = v; altSync(); }; seg.append(b); } row.append(seg); box.append(row);
-  const big = el('div', 'big', 'MUFL  FL ' + String(m.mufl).padStart(3, '0')); big.style.color = '#8a5cc2'; box.append(big);
-  const ol = document.createElement('ol'); ol.style.cssText = 'padding-left:20px;display:flex;flex-direction:column;gap:8px';
+  const m = c.mufl, box = AF.mufl; box.innerHTML = ''; box.style.gap = '10px';
+  const top = el('div', 'toolbar'); top.style.justifyContent = 'space-between'; const big = el('div', 'big', 'FL' + String(m.mufl).padStart(3, '0')); big.style.color = '#8a5cc2';
+  const seg = el('div', 'seg'); seg.title = AT('rnd'); for (const v of [100, 500, 1000]) { const b = el('button', '', v + ' ft'); b.setAttribute('aria-pressed', String(AS.rnd === v)); b.onclick = () => { AS.rnd = v; altSync(); }; seg.append(b); }
+  const hl = el('div'); hl.append(el('span', 'eyebrow', AT('mufl')), big); top.append(hl, seg); box.append(top, el('p', 'muted', AT('mufl0')));
+  const ol = el('ol', 'steplist');
   const v = {ter: nf(AS.ter), clr: nf(AS.clr), req: nf(m.req), cold: nf(m.cold), elev: nf(AS.elev), tc: nf(m.tc), iaq: nf(m.iaq), qnh: nfp(AS.qnh), fp: AS.fp, pq: sgn(m.pq), pa: nf(m.pa), rnd: AS.rnd, mufl: String(m.mufl).padStart(3, '0')};
-  for (const t of [fmt(AT('m1'), v), fmt(m.cold > 0 ? AT('m2') : AT('m2w'), v), fmt(AT('m3'), v), fmt(AT('m4'), v)]) ol.append(el('li', '', t)); box.append(ol, el('div', 'hint', AT('mufl5')));
+  for (const t of [fmt(AT('m1'), v), fmt(m.cold > 0 ? AT('m2') : AT('m2w'), v), fmt(AT('m3'), v), fmt(AT('m4'), v)]) ol.append(el('li', '', t)); box.append(ol);
 }
 /* ---- Prüfungsaufgaben (randomisiert, englisch wie in der Prüfung) ---- */
 const rint = (a, b, st = 1) => a + st * Math.floor(Math.random() * ((b - a) / st + 1));
@@ -2926,7 +2960,7 @@ const QGEN = {
 const QTOP = {press: ['standby', 'qfe2qnh', 'hill', 'trans', 'landing', 'pressNum'], temp: ['isaLevel', 'ftPerHpa', 'airmass', 'tempInd', 'tempNum'], mufl: ['mufl'], wind: ['wind']};
 function altQuizNew() { const t = AS.topic || 'all', pool = t === 'all' ? Object.values(QTOP).flat() : QTOP[t]; let k; do { k = pickA(pool); } while (pool.length > 1 && k === AS.lastQ); AS.lastQ = k; return QGEN[k](); }
 function renderAltQuiz() {
-  const box = AF.quiz; if (!box) return; box.innerHTML = ''; box.append(el('h3', '', AT('quiz')), el('p', 'muted', AT('qNote')));
+  const box = AF.quiz; if (!box) return; box.innerHTML = ''; box.append(el('p', 'muted', AT('qNote')));
   const seg = el('div', 'seg'); seg.style.flexWrap = 'wrap'; for (const [k, l] of [['all', 'tAll'], ['press', 'tPress'], ['temp', 'tTemp'], ['mufl', 'tMufl'], ['wind', 'tWind']]) { const b = el('button', '', AT(l)); b.setAttribute('aria-pressed', String((AS.topic || 'all') === k)); b.onclick = () => { AS.topic = k; AS.quiz = altQuizNew(); AS.pick = null; renderAltQuiz(); }; seg.append(b); } box.append(seg);
   if (!AS.quiz) AS.quiz = altQuizNew(); const Q = AS.quiz;
   box.append(el('p', 'qtext', Q.q));
@@ -2934,8 +2968,8 @@ function renderAltQuiz() {
   Q.opts.forEach((o, i) => { const b = el('button', 'qopt'); b.append(el('b', '', 'ABCD'[i]), el('span', '', o)); if (AS.pick != null) { b.disabled = true; if (i === Q.ans) b.classList.add('ok'); else if (i === AS.pick) b.classList.add('no'); } b.onclick = () => { AS.pick = i; AS.score[1]++; if (i === Q.ans) AS.score[0]++; renderAltQuiz(); }; list.append(b); });
   box.append(list);
   if (AS.pick != null) { const ok = AS.pick === Q.ans; box.append(el('div', ok ? 'ok' : 'no', ok ? AT('correct') : AT('wrongA') + 'ABCD'[Q.ans] + '.'), el('p', 'qexp', Q.e));
-    const row = el('div', 'row'); row.style.flexWrap = 'wrap'; row.append(btn(AT('next') + ' ▶', () => { AS.quiz = altQuizNew(); AS.pick = null; renderAltQuiz(); AF.quiz.scrollIntoView({block: 'start', behavior: 'smooth'}); }, 'btn'));
-    if (Q.sim) row.append(btn(AT('simBtn'), () => { const keep = {quiz: AS.quiz, pick: AS.pick}; Object.assign(AS, {ter: AS.ter, clr: AS.clr}, Q.sim, keep); renderAlt(); setTimeout(() => AF.dial.svg.closest('.altgrid').scrollIntoView({behavior: 'smooth', block: 'start'}), 50); }, 'btn-s'));
+    const row = el('div', 'row'); row.style.flexWrap = 'wrap'; row.append(btn(AT('next') + ' ▶', () => { AS.quiz = altQuizNew(); AS.pick = null; renderAltQuiz(); altEl.querySelector('.alttabs').scrollIntoView({block: 'start', behavior: 'smooth'}); }, 'btn'));
+    if (Q.sim) row.append(btn(AT('simBtn'), () => { const keep = {quiz: AS.quiz, pick: AS.pick}; Object.assign(AS, Q.sim, keep, {tab: 'sim'}); renderAlt(); renderAltQuiz(); setTimeout(() => altEl.querySelector('.alttabs').scrollIntoView({behavior: 'smooth', block: 'start'}), 50); }, 'btn-s'));
     box.append(row); } else box.append(el('div', 'hint', AT('pick')));
   box.append(el('div', 'hint', `${AT('score')}: ${AS.score[0]} / ${AS.score[1]}`));
 }
