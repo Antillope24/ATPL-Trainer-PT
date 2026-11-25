@@ -71,6 +71,8 @@ main{flex:1;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-le
 .q .head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
 .q .text{font-size:1.12rem;line-height:1.45;max-width:65ch}
 .q .img{background:var(--warn-soft);color:var(--fg);border-radius:8px;padding:8px 12px;font-size:.88rem}
+.notewrap{display:flex;flex-direction:column;gap:10px}
+.qnote{background:var(--warn-soft);color:var(--fg);border-radius:8px;padding:8px 12px;font-size:.88rem}
 .opts{display:flex;flex-direction:column;gap:8px}
 .opt{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);text-align:left;width:100%;line-height:1.4}
 .opt .l{font-family:var(--mono);font-size:.8rem;color:var(--muted);min-width:1.4em;padding-top:.2em}
@@ -272,7 +274,7 @@ function renderNav() {
   $('#hdr-count').textContent = DATA ? DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ' + T('questions') : '';
 }
 
-const VERSION = '2026.11.18-0808';
+const VERSION = '2026.11.25-1848';
 $('#ver').textContent = 'v' + VERSION;
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
@@ -393,9 +395,15 @@ function fig(f, q, thumb) {
   if (im.complete && im.naturalWidth) el.classList.add('ready');
   return el;
 }
-function pics(q, thumb) {
+function pics0(q, thumb) {
   if (!q.pics || !q.pics.length) return q.img && !thumb ? h('div', {class:'img'}, T('imgnote') + q.img) : null;
   return h('div', {class: thumb ? 'pics thumbs' : 'pics'}, q.pics.map(f => fig(f, q, thumb)));
+}
+function pics(q, thumb) {
+  const p = pics0(q, thumb);
+  if (!q.note || thumb) return p;
+  const n = h('div', {class:'img qnote'}, 'ⓘ ' + q.note);
+  return p ? h('div', {class:'notewrap'}, p, n) : n;
 }
 function zoom(src) {
   const im = h('img', {src, alt: '', draggable: 'false'});
