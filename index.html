@@ -37,6 +37,7 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var
 nav{display:flex;gap:4px}
 nav button{background:none;border:0;padding:8px 12px;border-radius:8px;font-weight:600;color:var(--muted)}
 nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.themebtn{display:inline-flex;align-items:center;justify-content:center;line-height:1;min-width:36px;border:1px solid var(--line)!important;background:var(--surface)!important;padding:6px 8px!important}
 .langsel{font:inherit;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin-left:4px}
 nav button:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 main{flex:1;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -221,7 +222,7 @@ de: { weak:'Schwachstellen', weakHint:'Die Fragen mit den meisten Fehlern in die
  qfrom:'{n} Fragen aus {t} Progress Tests', due:'fällig', lasttest:'Letzter Test', back:'← Fächer', learned:'gelernt', of:'von',
  cardsall:'Karteikarten ganzes Fach', cardshint:'Fällige Karten zuerst, dann neue. Mehr als 40 pro Durchgang gibt es nicht.', pts:'Progress Tests', mc:'Multiple Choice',
  test:'Test ({n} Fragen)', cards:'Karteikarten', testhint:'Der Test zieht zufällige Multiple Choice Fragen aus diesem PT, Auswertung erst am Ende, Bestehensgrenze 75 %. Falsch beantwortete Fragen landen im Karteikasten wieder auf Kasten 0.',
- exam:'Test', timer:'Timer', qof:'Frage {i} von {n}', correctN:'{n} richtige', flagged:'⚑ markiert', flag:'⚐ markieren', imgnote:'Zu dieser Frage gehört eine Abbildung: ', prev:'← Zurück', next:'Weiter →', answered:'{a} von {n} beantwortet',
+ exam:'Test', timer:'Timer', theme:'Design', th_auto:'automatisch', th_light:'hell', th_dark:'dunkel', qof:'Frage {i} von {n}', correctN:'{n} richtige', flagged:'⚑ markiert', flag:'⚐ markieren', imgnote:'Zu dieser Frage gehört eine Abbildung: ', prev:'← Zurück', next:'Weiter →', answered:'{a} von {n} beantwortet',
  openq:'{n} Fragen sind noch offen. Trotzdem abgeben?', submitq:'Test jetzt abgeben?', yes:'Ja, abgeben', backtest:'Zurück zum Test', submit:'Test abgeben', cancel:'Abbrechen',
  result:'Ergebnis', pass:'Bestanden', fail:'Nicht bestanden', right:'Richtig', ofq:'von {n} Fragen', dur:'Dauer', passmark:'Bestehensgrenze 75 %', newtest:'Neuer Test aus {t}', backsub:'Zurück zum Fach', review:'Alle Fragen im Rückblick', q:'Frage {n}', ok:'richtig', wrong:'falsch', img:'Abbildung: ', missed:' (richtig, nicht gewählt)',
  nothing:'Nichts fällig. Alle Karten in diesem Bereich sind in Bearbeitung und noch nicht wieder dran.', whole:'Ganzes Fach', done:'Durchgang beendet', good:'Gut', hard:'Schwer', again:'Nochmal', nextrun:'Nächster Durchgang', endrun:'Durchgang beenden', cardof:'Karte {i} von {n}', box:'Kasten {b}', new:'neu', reveal:'Antwort aufdecken', answer:'Antwort', today:'heute wieder', stays:'Kasten bleibt', learnedS:'gelernt', inDays:'in {d} {u}', day:'Tag', days:'Tagen',
@@ -231,7 +232,7 @@ en: { weak:'Weak spots', weakHint:'The questions with the most mistakes in this 
  qfrom:'{n} questions from {t} progress tests', due:'due', lasttest:'Last test', back:'← Subjects', learned:'learned', of:'of',
  cardsall:'Flashcards whole subject', cardshint:'Due cards first, then new ones. No more than 40 per round.', pts:'Progress tests', mc:'multiple choice',
  test:'Test ({n} questions)', cards:'Flashcards', testhint:'The test draws random multiple choice questions from this PT, graded at the end, pass mark 75 %. Wrong answers go back to box 0 in the flashcards.',
- exam:'Test', timer:'Timer', qof:'Question {i} of {n}', correctN:'{n} correct', flagged:'⚑ flagged', flag:'⚐ flag', imgnote:'This question refers to a figure: ', prev:'← Back', next:'Next →', answered:'{a} of {n} answered',
+ exam:'Test', timer:'Timer', theme:'Theme', th_auto:'automatic', th_light:'light', th_dark:'dark', qof:'Question {i} of {n}', correctN:'{n} correct', flagged:'⚑ flagged', flag:'⚐ flag', imgnote:'This question refers to a figure: ', prev:'← Back', next:'Next →', answered:'{a} of {n} answered',
  openq:'{n} questions are still open. Submit anyway?', submitq:'Submit the test now?', yes:'Yes, submit', backtest:'Back to test', submit:'Submit test', cancel:'Cancel',
  result:'Result', pass:'Passed', fail:'Failed', right:'Correct', ofq:'of {n} questions', dur:'Time', passmark:'Pass mark 75 %', newtest:'New test from {t}', backsub:'Back to subject', review:'Review all questions', q:'Question {n}', ok:'correct', wrong:'wrong', img:'Figure: ', missed:' (correct, not chosen)',
  nothing:'Nothing due. All cards in this area are in progress and not up yet.', whole:'Whole subject', done:'Round finished', good:'Good', hard:'Hard', again:'Again', nextrun:'Next round', endrun:'End round', cardof:'Card {i} of {n}', box:'Box {b}', new:'new', reveal:'Reveal answer', answer:'Answer', today:'again today', stays:'box stays', learnedS:'learned', inDays:'in {d} {u}', day:'day', days:'days',
@@ -241,7 +242,7 @@ fr: { weak:'Points faibles', weakHint:'Les questions avec le plus d’erreurs da
  qfrom:'{n} questions issues de {t} progress tests', due:'à revoir', lasttest:'Dernier test', back:'← Matières', learned:'acquises', of:'sur',
  cardsall:'Cartes de toute la matière', cardshint:'Les cartes à revoir d’abord, puis les nouvelles. 40 au maximum par série.', pts:'Progress tests', mc:'choix multiple',
  test:'Test ({n} questions)', cards:'Cartes', testhint:'Le test tire des questions à choix multiple au hasard dans ce PT, correction à la fin, seuil de réussite 75 %. Les erreurs reviennent dans la boîte 0 des cartes.',
- exam:'Test', timer:'Chrono', qof:'Question {i} sur {n}', correctN:'{n} bonnes réponses', flagged:'⚑ marquée', flag:'⚐ marquer', imgnote:'Cette question renvoie à une figure : ', prev:'← Retour', next:'Suivant →', answered:'{a} sur {n} répondues',
+ exam:'Test', timer:'Chrono', theme:'Thème', th_auto:'automatique', th_light:'clair', th_dark:'sombre', qof:'Question {i} sur {n}', correctN:'{n} bonnes réponses', flagged:'⚑ marquée', flag:'⚐ marquer', imgnote:'Cette question renvoie à une figure : ', prev:'← Retour', next:'Suivant →', answered:'{a} sur {n} répondues',
  openq:'{n} questions restent sans réponse. Rendre quand même ?', submitq:'Rendre le test maintenant ?', yes:'Oui, rendre', backtest:'Retour au test', submit:'Rendre le test', cancel:'Annuler',
  result:'Résultat', pass:'Réussi', fail:'Échoué', right:'Bonnes réponses', ofq:'sur {n} questions', dur:'Durée', passmark:'Seuil de réussite 75 %', newtest:'Nouveau test de {t}', backsub:'Retour à la matière', review:'Toutes les questions', q:'Question {n}', ok:'juste', wrong:'faux', img:'Figure : ', missed:' (juste, non choisie)',
  nothing:'Rien à revoir. Toutes les cartes de cette zone sont en cours et pas encore dues.', whole:'Toute la matière', done:'Série terminée', good:'Bien', hard:'Difficile', again:'Encore', nextrun:'Série suivante', endrun:'Terminer la série', cardof:'Carte {i} sur {n}', box:'Boîte {b}', new:'nouvelle', reveal:'Voir la réponse', answer:'Réponse', today:'à nouveau aujourd’hui', stays:'boîte inchangée', learnedS:'acquise', inDays:'dans {d} {u}', day:'jour', days:'jours',
@@ -251,7 +252,7 @@ ksh: { weak:'Schwachstelle', weakHint:'De Froore met de miehste Fähler en däm 
  qfrom:'{n} Froore us {t} Progress Tests', due:'dran', lasttest:'Letzte Tess', back:'← Fächer', learned:'jelernt', of:'vun',
  cardsall:'Kaate för et janze Fach', cardshint:'Eets dat, wat dran es, dann et Neue. Mih wie 40 pro Rund jitt et nit.', pts:'Progress Tests', mc:'Multiple Choice',
  test:'Tess ({n} Froore)', cards:'Kaate', testhint:'Dä Tess zeht zofällije Multiple Choice Froore us däm PT, usjewäät weed am Engk, bestande häs de ab 75 %. Wat falsch wor, landt widder en Kaste 0.',
- exam:'Tess', timer:'Uhr', qof:'Froch {i} vun {n}', correctN:'{n} richtije', flagged:'⚑ markeet', flag:'⚐ markeere', imgnote:'Zo dä Froch jehöt e Bildche: ', prev:'← Zoröck', next:'Wigger →', answered:'{a} vun {n} beantwoot',
+ exam:'Tess', timer:'Uhr', theme:'Ussinn', th_auto:'automatisch', th_light:'hell', th_dark:'düster', qof:'Froch {i} vun {n}', correctN:'{n} richtije', flagged:'⚑ markeet', flag:'⚐ markeere', imgnote:'Zo dä Froch jehöt e Bildche: ', prev:'← Zoröck', next:'Wigger →', answered:'{a} vun {n} beantwoot',
  openq:'{n} Froore sin noch op. Trotzdäm avjevve?', submitq:'Dä Tess jetz avjevve?', yes:'Jo, avjevve', backtest:'Zoröck zom Tess', submit:'Tess avjevve', cancel:'Loss et',
  result:'Erjebnis', pass:'Bestande', fail:'Nit bestande', right:'Richtich', ofq:'vun {n} Froore', dur:'Duur', passmark:'Bestande ab 75 %', newtest:'Neue Tess us {t}', backsub:'Zoröck zom Fach', review:'All Froore noch ens', q:'Froch {n}', ok:'richtich', wrong:'falsch', img:'Bildche: ', missed:' (richtich, ävver nit jewählt)',
  nothing:'Nix dran. All Kaate he sin en Arbeit un noch nit widder fällich.', whole:'Janze Fach', done:'Rund eröm', good:'Joot', hard:'Schwer', again:'Nochens', nextrun:'Nächste Rund', endrun:'Rund beende', cardof:'Kaat {i} vun {n}', box:'Kaste {b}', new:'neu', reveal:'Antwoot zeije', answer:'Antwoot', today:'hück widder', stays:'Kaste bliev', learnedS:'jelernt', inDays:'en {d} {u}', day:'Daach', days:'Dääch',
@@ -266,15 +267,20 @@ try { LANG = localStorage.getItem('atpl-lang') || (navigator.language.startsWith
 if (!I18N[LANG]) LANG = 'de';
 const T = (k, v={}) => (I18N[LANG][k] ?? I18N.de[k] ?? k).replace(/\{(\w+)\}/g, (_, n) => v[n]);
 function setLang(l) { LANG = l; try { localStorage.setItem('atpl-lang', l); } catch (e) {} document.documentElement.lang = l === 'ksh' ? 'de' : l; renderNav(); render(); }
+const HOST_THEME = document.documentElement.getAttribute('data-theme');
+let THEME = 'auto'; try { THEME = localStorage.getItem('atpl-theme') || 'auto'; } catch (e) {}
+function applyTheme() { const r = document.documentElement; if (THEME === 'auto') { if (HOST_THEME) r.setAttribute('data-theme', HOST_THEME); else r.removeAttribute('data-theme'); } else r.setAttribute('data-theme', THEME); const dark = getComputedStyle(r).colorScheme.includes('dark'); const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = dark ? '#18212b' : '#ffffff'; }
+function themeBtn() { const ic = {auto: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>', light: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>', dark: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="currentColor"/></svg>'}, nx = {auto:'light', light:'dark', dark:'auto'}; const lab = T('theme') + ': ' + T('th_' + THEME); const b = h('button', {class:'themebtn', title: lab, 'aria-label': lab, onclick: () => { THEME = nx[THEME]; try { localStorage.setItem('atpl-theme', THEME); } catch (e) {} applyTheme(); renderNav(); }}); b.innerHTML = ic[THEME]; return b; }
+applyTheme();
 function renderNav() {
   const nav = $('#nav'); nav.innerHTML = '';
   nav.append(h('button', {'data-view':'home'}, T('subjects')), h('button', {'data-view':'stats'}, T('stats')));
   const sel = h('select', {id:'lang', class:'langsel', 'aria-label':'Language', onchange: e => setLang(e.target.value)}, Object.entries(I18N).map(([k, v]) => h('option', {value:k, selected: k === LANG}, v.lang)));
-  nav.append(sel);
+  nav.append(themeBtn(), sel);
   $('#hdr-count').textContent = DATA ? DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ' + T('questions') : '';
 }
 
-const VERSION = '2026.11.25-1848';
+const VERSION = '2026.11.25-1852';
 $('#ver').textContent = 'v' + VERSION;
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
@@ -468,7 +474,7 @@ function renderHome() {
   const fest = festive();
   app.append(
     greeting(),
-    fest && h('div', {class:'fest'}, h('span', {}, fest.emo[0]), h('span', {}, fest.note)),
+    fest ? h('div', {class:'fest'}, h('span', {}, fest.emo[0]), h('span', {}, fest.note)) : '',
     h('div', {class:'row', style:'justify-content:space-between'},
       h('div', {}, h('h2', {}, T('subjects')), h('div', {class:'note'}, T('qfrom', {n: total.toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE'), t: DATA.subjects.reduce((n,s)=>n+s.tests.length,0)}))),
       h('div', {class:'sync', id:'sync'})),
