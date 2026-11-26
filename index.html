@@ -139,6 +139,51 @@ label.chk{display:flex;gap:8px;align-items:center;font-weight:500}
 .greet{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
 .greet .hello{font-family:var(--display);font-size:1.5rem;font-weight:700;line-height:1.15}
 .greet .quote{color:var(--muted);font-style:italic}
+.mascot{display:flex;align-items:center;gap:12px}
+.masc-btn{background:none;border:0;padding:0;flex:none;line-height:0;border-radius:12px}
+.masc-bubble{position:relative;flex:1;min-width:0;background:var(--surface2);border-radius:12px;padding:8px 12px 10px}
+.masc-bubble::before{content:"";position:absolute;left:-7px;top:50%;margin-top:-7px;border:7px solid transparent;border-left:0;border-right-color:var(--surface2)}
+.masc-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.masc-off,.masc-on{padding:2px 6px!important;font-size:.75rem}
+.masc-on{align-self:flex-start}
+.masc-say{font-weight:500;text-wrap:pretty}
+.mood-risk .masc-bubble,.mood-late .masc-bubble{background:var(--warn-soft)}
+.mood-lost .masc-bubble{background:var(--bad-soft)}
+.mood-risk .masc-bubble::before,.mood-late .masc-bubble::before{border-right-color:var(--warn-soft)}
+.mood-lost .masc-bubble::before{border-right-color:var(--bad-soft)}
+.mood-proud .masc-bubble{background:var(--good-soft)}
+.mood-proud .masc-bubble::before{border-right-color:var(--good-soft)}
+.masc .cloud{fill:#fff;stroke:#b9c4d0;stroke-width:2.5;stroke-linejoin:round}
+.masc.m-ok .cloud{fill:#f1f5f9}
+.masc.m-grumpy .cloud{fill:#aab4c0;stroke:#7d8996}
+.masc.m-storm .cloud{fill:#5f6b79;stroke:#414b57}
+.masc .m-eyes ellipse{fill:#1d2733;transform-box:fill-box;transform-origin:center;animation:m-blink 4.5s infinite}
+.masc .mouth,.masc .brow{fill:none;stroke:#1d2733;stroke-width:3;stroke-linecap:round}
+.masc.m-storm .m-eyes ellipse{fill:#fff}
+.masc.m-storm .mouth,.masc.m-storm .brow{stroke:#fff}
+.masc .cheek{fill:#f59aa0;opacity:.75}
+.masc .m-body{animation:m-bob 3.2s ease-in-out infinite}
+.masc.m-happy .m-body{animation:m-bounce 1.3s ease-in-out infinite}
+.masc.m-grumpy .m-body,.masc.m-storm .m-body{animation:m-sulk 2.6s ease-in-out infinite}
+.masc .m-sun circle{fill:#f6c343}
+.masc .m-sun path{stroke:#f6c343;stroke-width:3;stroke-linecap:round}
+.masc .m-sun{transform-origin:78px 22px;animation:m-spin 12s linear infinite}
+.masc .m-spark path{fill:#f6c343;transform-box:fill-box;transform-origin:center;animation:m-twinkle 1.8s ease-in-out infinite}
+.masc .m-rain path{stroke:#4a90d9;stroke-width:3;stroke-linecap:round;animation:m-rain .9s linear infinite}
+.masc .m-rain path:nth-child(2){animation-delay:.3s}
+.masc .m-rain path:nth-child(3){animation-delay:.6s}
+.masc .m-bolt{fill:#f6c343;stroke:#b98a12;stroke-width:1;animation:m-flash 2.8s infinite}
+.masc-btn.hop .masc{animation:m-hop .5s ease}
+@keyframes m-bob{50%{transform:translateY(-3px)}}
+@keyframes m-bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}60%{transform:translateY(-5px)}}
+@keyframes m-sulk{0%,100%{transform:translateX(0)}25%{transform:translateX(-1.5px)}75%{transform:translateX(1.5px)}}
+@keyframes m-blink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@keyframes m-spin{to{transform:rotate(360deg)}}
+@keyframes m-twinkle{50%{transform:scale(.4);opacity:.3}}
+@keyframes m-rain{0%{transform:translateY(-3px);opacity:0}30%{opacity:1}100%{transform:translateY(9px);opacity:0}}
+@keyframes m-flash{0%,62%,70%,100%{opacity:0}64%,68%{opacity:1}66%{opacity:.3}}
+@keyframes m-hop{30%{transform:translateY(-10px) rotate(-6deg)}60%{transform:translateY(0) rotate(4deg)}}
+@media (prefers-reduced-motion:reduce){.masc *,.masc{animation:none!important}.masc .m-bolt{opacity:1}}
 .name-in{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);min-width:0;width:160px}
 .goal{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .searchbox{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
@@ -280,7 +325,7 @@ function renderNav() {
   $('#hdr-count').textContent = DATA ? DATA.subjects.reduce((n, s) => n + s.all.length, 0).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') + ' ' + T('questions') : '';
 }
 
-const VERSION = '2026.11.25-1852';
+const VERSION = '2026.11.26-1208';
 $('#ver').textContent = 'v' + VERSION;
 const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const INTERVALS = [0, 1, 3, 7, 14, 30]; // Tage je Kasten
@@ -801,11 +846,73 @@ function greeting() {
   return h('div', {class:'greet'},
     h('div', {class:'hello'}, userName ? T('hello', {n: userName}) : T('helloNo'), ' ', h('button', {class:'btn-g', style:'padding:2px 6px;font-size:.75rem', onclick: () => { try { localStorage.removeItem('atpl-name-asked'); } catch (e) {} userName = ''; render(); }}, T('editName'))),
     h('div', {class:'quote'}, quote),
+    mascot(today, goal, st),
     h('div', {class:'goal'},
       h('div', {class:'meter', style:'flex:1;min-width:120px'}, h('b', {style:`width:${Math.min(100, today/goal*100)}%`})),
       h('span', {class:'stats'}, h('span', {}, h('strong', {}, today), ' / ', h('strong', {}, goal), today >= goal ? ' ✓ ' + T('goalDone') : ''), h('span', {}, h('strong', {}, st), ' ', st === 1 ? T('streak1').replace('1 ', '') : T('streak', {n: ''}).trim())),
       h('label', {class:'note'}, T('goalLbl'), ' ', goalSel)),
     searchBox());
+}
+/* ---------- Grummulus, die Streak Wolke ---------- */
+const MASC = {
+de: { off:'ausschalten', on:'Grummulus einschalten', tap:'Antippen für einen neuen Spruch',
+  proud:['{n} Tage in Folge. Ich bin so stolz, ich könnte abregnen.', 'Tagesziel geschafft. Heute bleibt der Himmel CAVOK.', 'So sieht ein künftiger Kapitän aus. Morgen wieder, ja?', 'Ich strahle. Das mache ich nicht für jeden.'],
+  going:['Noch {r} Fragen bis zum Tagesziel. Ich schaue dir zu. Ganz genau.', 'Guter Anfang. Jetzt aufhören wäre aber schon schade, oder?', '{r} fehlen noch. Ich sag ja nur.', 'Du bist dran. Ich warte hier. Ich habe Zeit, ich bin eine Wolke.'],
+  risk:['Deine Streak von {n} Tagen hängt am seidenen Faden. Und an dir.', 'Heute noch keine einzige Frage? Ich bin nicht sauer. Nur enttäuscht.', '{n} Tage Arbeit, und heute lässt du mich hängen?', 'Eine Frage. Mehr verlange ich nicht. Na gut, {g}.'],
+  late:['Es ist spät. Die Streak von {n} Tagen stirbt um Mitternacht. Kein Druck.', 'Der Tag ist fast rum und ich sehe hier null Fragen. Null.'],
+  lost:['{m} Tage ohne mich. Ich habe mitgezählt. Jeden einzelnen.', 'Die Streak ist weg. Ich habe sie gemocht.', 'Die anderen aus dem Kurs lernen gerade. Nur so als TAF.', 'Ich bin jetzt ein Cumulonimbus. Deinetwegen.', 'Der Prüfer fragt später auch nicht, ob du Lust hattest.'],
+  fresh:['Ich bin Grummulus. Lern jeden Tag, dann bleibe ich eine harmlose Schönwetterwolke.', 'Neu hier? Fang an, bevor ich mich zusammenbraue.'] },
+en: { off:'turn off', on:'Turn Grummulus on', tap:'Tap for another line',
+  proud:['{n} days in a row. I am so proud I could rain.', 'Daily goal done. Today the sky stays CAVOK.', 'That is what a future captain looks like. Same again tomorrow?', 'I am beaming. I do not do that for everyone.'],
+  going:['{r} more questions to your goal. I am watching. Closely.', 'Good start. Stopping now would be a shame though, right?', '{r} to go. Just saying.', 'Your turn. I can wait. I am a cloud.'],
+  risk:['Your {n} day streak is hanging by a thread. And by you.', 'Not a single question today? I am not angry. Just disappointed.', '{n} days of work, and today you leave me hanging?', 'One question. That is all I ask. Fine, {g}.'],
+  late:['It is late. Your {n} day streak dies at midnight. No pressure.', 'The day is nearly over and I count zero questions. Zero.'],
+  lost:['{m} days without me. I counted. Every single one.', 'The streak is gone. I liked that streak.', 'Your classmates are studying right now. Just a TAF.', 'I am a cumulonimbus now. Because of you.', 'The examiner will not ask whether you felt like it.'],
+  fresh:['I am Grummulus. Study every day and I stay a harmless fair weather cloud.', 'New here? Get started before I build up.'] },
+fr: { off:'désactiver', on:'Activer Grummulus', tap:'Touchez pour une autre phrase',
+  proud:['{n} jours de suite. Je suis si fier que je pourrais pleuvoir.', 'Objectif du jour atteint. Aujourd’hui le ciel reste CAVOK.', 'Voilà à quoi ressemble un futur commandant. On remet ça demain ?', 'Je rayonne. Je ne fais pas ça pour tout le monde.'],
+  going:['Encore {r} questions avant l’objectif. Je te regarde. De très près.', 'Bon début. Ce serait dommage d’arrêter maintenant, non ?', 'Il en manque {r}. Je dis ça, je dis rien.', 'À toi. Je peux attendre. Je suis un nuage.'],
+  risk:['Ta série de {n} jours ne tient qu’à un fil. Et à toi.', 'Pas une seule question aujourd’hui ? Je ne suis pas fâché. Juste déçu.', '{n} jours de travail, et aujourd’hui tu me laisses tomber ?', 'Une question. C’est tout ce que je demande. Bon, {g}.'],
+  late:['Il est tard. Ta série de {n} jours meurt à minuit. Sans pression.', 'La journée est presque finie et je compte zéro question. Zéro.'],
+  lost:['{m} jours sans moi. J’ai compté. Chacun d’eux.', 'La série est perdue. Je l’aimais bien.', 'Tes camarades révisent en ce moment. Simple TAF.', 'Je suis un cumulonimbus maintenant. À cause de toi.', 'L’examinateur ne demandera pas si tu avais envie.'],
+  fresh:['Je suis Grummulus. Révise chaque jour et je reste un gentil nuage de beau temps.', 'Nouveau ici ? Commence avant que je me développe.'] },
+ksh: { off:'usmaache', on:'Grummulus aanmaache', tap:'Dröck drop för ene neue Sproch',
+  proud:['{n} Daach hingerenander. Ich ben esu stolz, ich künnt rähne.', 'Daachszeel jeschaff. Hück bliev der Himmel CAVOK.', 'Esu süht ene Kapitän vun morje us. Morje widder, jo?', 'Ich strohle. Dat maach ich nit för jede Jeck.'],
+  going:['Noch {r} Froore bes zom Daachszeel. Ich luure dir zo. Janz jenau.', 'Jode Aanfang. Jetz ophüre wör ävver schad, oder?', '{r} fähle noch. Ich sage jo nur.', 'Do bes draan. Ich waade. Ich han Zick, ich ben en Wolk.'],
+  risk:['Ding Streak vun {n} Daach hängk am siggene Fäddem. Un an dir.', 'Hück noch kein einzije Froch? Ich ben nit kott. Nur enttäusch.', '{n} Daach Arbeid, un hück löss do mich hänge?', 'Ein Froch. Mih well ich nit. Na joot, {g}.'],
+  late:['Et es spät. Ding Streak vun {n} Daach stirv öm Meddernaach. Kein Drock.', 'Der Daach es baal eröm un ich sinn he null Froore. Null.'],
+  lost:['{m} Daach ohne mich. Ich han metjezallt. Jede einzelne.', 'De Streak es fott. Ich han se jän jehatt.', 'De andere us dem Kurs liere jrad. Nur esu als TAF.', 'Ich ben jetz ene Cumulonimbus. Wäje dir.', 'Der Pröfer frög späder och nit, ov do Loss hatts.'],
+  fresh:['Ich ben der Grummulus. Lier jede Daach, dann blieve ich en leev Schönwedderwolk.', 'Neu he? Fang aan, ih dat ich mich zosammebraue.'] }
+};
+let MASC_ON = true; try { MASC_ON = localStorage.getItem('atpl-mascot') !== 'off'; } catch (e) {}
+let mascPick = Math.floor(Math.random() * 1000);
+function mascSet(on) { MASC_ON = on; try { localStorage.setItem('atpl-mascot', on ? 'on' : 'off'); } catch (e) {} render(); }
+function mascMood(today, goal, st) {
+  if (today >= goal) return 'proud';
+  if (today > 0) return 'going';
+  if (st > 0) return new Date().getHours() >= 20 ? 'late' : 'risk';
+  return Object.keys(store.daily.d).some(k => store.daily.d[k]) ? 'lost' : 'fresh';
+}
+function mascMissed() { let t = Date.now() - DAY, m = 0; while (m < 365 && !store.daily.d[dayKey(t)]) { m++; t -= DAY; } return m; }
+function mascSvg(mood) {
+  const look = {proud: 'happy', going: 'ok', fresh: 'ok', risk: 'grumpy', late: 'grumpy', lost: 'storm'}[mood];
+  const mouth = {happy: 'M38 60 Q50 72 62 60', ok: 'M41 62 Q50 67 59 62', grumpy: 'M40 66 Q50 58 60 66', storm: 'M39 67 Q50 56 61 67'}[look];
+  const brows = look === 'grumpy' || look === 'storm' ? '<path class="brow" d="M33 41 L45 46 M67 41 L55 46"/>' : look === 'happy' ? '<path class="brow" d="M34 42 Q39 38 44 42 M56 42 Q61 38 66 42"/>' : '';
+  const extra = look === 'happy' ? '<g class="m-sun"><circle cx="78" cy="22" r="10"/><path d="M78 6v-5M78 43v-5M62 22h-5M99 22h-5M66.7 10.7l-3.5-3.5M92.8 36.8l-3.5-3.5M89.3 10.7l3.5-3.5M63.2 36.8l3.5-3.5"/></g><g class="m-spark"><path d="M14 20l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></g>'
+    : look === 'grumpy' ? '<g class="m-rain"><path d="M32 86v7M50 88v7M68 86v7"/></g>'
+    : look === 'storm' ? '<g class="m-rain"><path d="M26 86v7M40 89v7M74 86v7"/></g><path class="m-bolt" d="M56 82l-9 13h7l-4 11 12-15h-7l5-9z"/>' : '';
+  const cheeks = look === 'happy' ? '<circle class="cheek" cx="31" cy="56" r="4"/><circle class="cheek" cx="69" cy="56" r="4"/>' : '';
+  return `<svg class="masc m-${look}" viewBox="0 0 100 110" width="92" height="101" aria-hidden="true">${look === 'happy' ? extra : ''}<g class="m-body"><path class="cloud" d="M24 80a17 17 0 0 1-3-33.7A21 21 0 0 1 60 32a18 18 0 0 1 22 14.5A17.5 17.500 0 0 1 77 80z"/><g class="m-eyes"><ellipse cx="40" cy="50" rx="3.2" ry="4.2"/><ellipse cx="60" cy="50" rx="3.2" ry="4.2"/></g>${brows}${cheeks}<path class="mouth" d="${mouth}"/></g>${look === 'happy' ? '' : extra}</svg>`;
+}
+function mascot(today, goal, st) {
+  if (!MASC_ON) return h('button', {class:'btn-g masc-on', onclick: () => mascSet(true)}, '☁ ' + (MASC[LANG] || MASC.de).on);
+  const M = MASC[LANG] || MASC.de, mood = mascMood(today, goal, st), lines = M[mood];
+  const txt = () => lines[mascPick % lines.length].replace('{n}', st).replace('{r}', Math.max(0, goal - today)).replace('{g}', goal).replace('{m}', mascMissed());
+  const say = h('div', {class:'masc-say', 'aria-live':'polite'}, txt());
+  const fig = h('button', {class:'masc-btn', title: M.tap, 'aria-label': 'Grummulus. ' + M.tap, onclick: () => { mascPick++; say.textContent = txt(); fig.classList.remove('hop'); void fig.offsetWidth; fig.classList.add('hop'); }});
+  fig.innerHTML = mascSvg(mood);
+  return h('div', {class:'mascot mood-' + mood}, fig,
+    h('div', {class:'masc-bubble'}, h('div', {class:'masc-head'}, h('span', {class:'eyebrow'}, 'Grummulus'), h('button', {class:'btn-g masc-off', onclick: () => mascSet(false)}, M.off)), say));
 }
 let searchQ = '';
 function searchBox() {
